@@ -1,35 +1,20 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <ctype.h>
 #include "scanner.h"
 
-/* Using the ASCII codes, check whether provided char is a number 0-9.
+/* Reads characters from standard input, processes them, allocates space for new 
+    data and links them to token parameter.
     parameters:
-        - char s - the char you want to check
+        - TokenPtr token - allocated and initialized token
     return value:
-        - true if s is a number
-        - false if s is not a number
-*/
-bool is_number(char s) {
-    return ((s >= '0') && (s <= '9'));
-}
-
-/* Using the ASCII codes, check whether provided char is a letter A-Z, a-z.
-    parameters:
-        - char s - the char you want to check
-    return value:
-        - true if s is a letter
-        - false if s is not a letter
-*/
-bool is_letter(char s) {
-    return (((s >= 'A') && (s <= 'Z')) || ((s >= 'a') && (s <= 'z')));
-}
-
+        - void*/
 void get_next_token(TokenPtr token) {
     int symbol;
-    int pos = 0;
     int state = 0;
     bool OK = false;
     bool end = false;
+    int pos = 0;
     char* str = malloc(sizeof(char) * ALLOC_BLOCK);
     int str_lim = ALLOC_BLOCK;
 
@@ -46,12 +31,19 @@ void get_next_token(TokenPtr token) {
                     state = 2;
                 } else if (symbol == '_') {
                     state = 3;
+                } else if (is_space(symbol)) {
+                    continue;
+                } else if (is_operator(symbol)) {
+                    switch (symbol) {
+                        case ''
+                    }
                 } else {
                     end = true;
                 }
                 break;
 
             case 1:
+                // reading an integer
                 if (is_number(symbol)) {
                     OK = true;
                 } else {
@@ -59,6 +51,7 @@ void get_next_token(TokenPtr token) {
                 }
                 break;
             case 2:
+                // reading an identificator
                 if (is_number(symbol) || is_letter(symbol) || (symbol == '_')) {
                     OK = true;
                 } else {
@@ -66,6 +59,7 @@ void get_next_token(TokenPtr token) {
                 }
                 break;
             case 3:
+                // read '_', expecting letters/numbers, becomes an identificator
                 if (is_number(symbol) || is_letter(symbol)) {
                     OK = true;
                     state = 2;
@@ -110,6 +104,13 @@ int main() {
     TokenPtr token = (TokenPtr) malloc(sizeof(struct Token));
     init_token(token);
 
+    get_next_token(token);
+    printf("type: %s, data: %s\n", token->type, token->data);
+
+
+    
+    get_next_token(token);
+    printf("type: %s, data: %s\n", token->type, token->data);
     get_next_token(token);
     printf("type: %s, data: %s\n", token->type, token->data);
 }
