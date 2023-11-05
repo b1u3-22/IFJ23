@@ -1,6 +1,5 @@
 #include <stdbool.h>
-#include "global_structs.h"
-
+#include "token.h"
 
 void get_next_token(TokenPtr token);
 
