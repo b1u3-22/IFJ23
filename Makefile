@@ -10,8 +10,11 @@ run: all
 clean:
 	rm -rf ./*.o
 
-scanner: scanner.o
+scanner: scanner.o token.o
 	$(CC) $(LDFLAGS) -o $@ $^ 
 
-scanner.o: scanner.c scanner.h global_structs.h
+scanner.o: scanner.c scanner.h token.h
 	$(CC) $(CFLAGS) -c -o $@ scanner.c
+
+token.o: token.h token.c
+	$(CC) $(CFLAGS) -c -o $@ token.c
