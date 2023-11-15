@@ -54,6 +54,7 @@ bool token_stack_push(TokenStackPtr stack, TokenPtr token) {
     // add new token to data and correct top pointer
     stack->data[stack->data_pos] = token;
     stack->top = stack->data[stack->data_pos];
+    stack->empty = false;
     return true;
 }
 
