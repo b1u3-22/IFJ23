@@ -9,12 +9,13 @@ TokenPtr token_init(){
     return token;
 }
 
+
 bool token_add_data(TokenPtr token, char c){
     if (token->data_len == token->data_allocd){ // no more space in data, we need to allocate more memory
-        char* tmp_data = (char*) realloc(token->data, token->data_allocd + ALLOC_BLOCK); // allocate more memory
+        char* tmp_data = (char*) realloc(token->data, token->data_allocd + TOKEN_ALLOC_BLOCK); // allocate more memory
         if (!tmp_data) return false; // if realloc failed return false
         token->data = tmp_data; // if it succeded set data to new data with more memory
-        token->data_allocd += ALLOC_BLOCK; // correct allocated data size
+        token->data_allocd += TOKEN_ALLOC_BLOCK; // correct allocated data size
     }
     token->data[token->data_len++] = c; // add char to end of data
     return true;
