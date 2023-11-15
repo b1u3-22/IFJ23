@@ -1,3 +1,12 @@
+##### IGNORING EXECUTABLES #####
+# Ignore all
+*
+# Unignore all with extensions
+!*.*
+# Unignore all dirs
+!*/
+################################
+
 # Prerequisites
 *.d
 
@@ -53,4 +62,5 @@ dkms.conf
 
 .vscode/settings.json
 
-scanner
+##### IGNORE TEST FILE #####
+test.c
