@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include <string.h>
 
-#define ALLOC_BLOCK 16
+#define TOKEN_ALLOC_BLOCK 16
 
 typedef struct Token {
     char *data;
@@ -12,7 +12,7 @@ typedef struct Token {
 } *TokenPtr;
 
 /** Initialize token
- * @returns true if succeded, false otherwise
+ * @returns TokenPtr if succeded, NULL otherwise
 */
 TokenPtr token_init();
 
