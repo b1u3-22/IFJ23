@@ -22,3 +22,5 @@ token.o: token.h token.c
 token_stack.o: token_stack.h token_stack.c token.h
 	$(CC) $(CFLAGS) -c -o $@ token_stack.c
 
+symtable.o: symtable.h symtable.c
+	$(CC) $(CFLAGS) -c -o $@ symtable.c
