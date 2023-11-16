@@ -10,8 +10,9 @@ int symtable_get_hash(char *id) {
 
 SymTableItemPtr symtable_item_init() {
     SymTableItemPtr item = calloc(1, sizeof(struct SymTableItem));
-    if (!item) return NULL;
+    if (!item) return NULL; // Alocation and check
 
+    // Set properties
     item->id = NULL;
     item->type = NULL;
     item->next = NULL;
@@ -27,20 +28,15 @@ SymTablePtr symtable_init() {
 
 bool symtable_add_item(SymTablePtr symtable, SymTableItemPtr item) {
     int hash = symtable_get_hash(item->id);
-    if (!symtable[hash]) {
-        symtable[hash] = item;
-        return true;
-    }
-
-    SymTableItemPtr previous = symtable[hash];
+    SymTableItemPtr previous = symtable[hash]
     symtable[hash] = item;
     item->next = previous;
     return true;
 }
 
 SymTableItemPtr symtable_get_item(SymTablePtr symtable, char *id) {
-    SymTableItemPtr item = symtable[symtable_get_hash(id)];
-    while (item && strcmp(item->id, id)) item = item->next;
+    SymTableItemPtr item = symtable[symtable_get_hash(id)]; // Get correct "row"
+    while (item && strcmp(item->id, id)) item = item->next; // Find item with the same id
     return item;
 }
 
@@ -54,8 +50,10 @@ void symtable_dispose(SymTablePtr symtable) {
     SymTableItemPtr current;
     SymTableItemPtr next;
 
+    // For every column
     for (int column = 0; column < SYMBTABLE_SIZE; column++) {
         current = symtable[column];
+        // Delete every item in that row
         while (current) {
             next = current->next;
             symtable_item_dispose(current);
