@@ -1,5 +1,9 @@
 #include <stdbool.h>
+#include <ctype.h>
+#ifndef _TOKEN
+#define _TOKEN
 #include "token.h"
+#endif
 
 typedef enum {
     START,

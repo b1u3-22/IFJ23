@@ -53,7 +53,7 @@ bool token_stack_push(TokenStackPtr stack, TokenPtr token, bool rule) {
     }
 
     // add new token to data and correct top pointer
-    TokenStackItemPtr new_item = malloc(sizeof(struct TokenStackItem))
+    TokenStackItemPtr new_item = malloc(sizeof(struct TokenStackItem));
     if (!new_item) return false;
 
     new_item->token = token;
@@ -70,6 +70,7 @@ bool token_stack_push_new(TokenStackPtr stack, int type, bool rule) {
     if (!new_token) return false;
     new_token->type = type;
     token_stack_push(stack, new_token, rule);
+    return true;
 }
 
 void token_stack_dispose(TokenStackPtr stack) {

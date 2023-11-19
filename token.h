@@ -31,7 +31,7 @@ typedef enum {
     ARROW,
     NIL,
     NEWLINE,
-    EOF,
+    END,
     ERROR
 } token_types;
 
@@ -39,7 +39,7 @@ typedef struct Token {
     char *data;
     int data_len;
     int data_allocd;
-    token_types type;
+    int type;
 } *TokenPtr;
 
 /** Initialize token

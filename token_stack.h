@@ -1,6 +1,10 @@
 #include <stdlib.h>
 #include <stdbool.h>
+
+#ifndef _TOKEN
+#define _TOKEN
 #include "token.h"
+#endif
 
 #define STACK_ALLOC_BLOCK 8
 
