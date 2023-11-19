@@ -4,7 +4,6 @@ TokenPtr token_init(){
     TokenPtr token = (TokenPtr) malloc(sizeof(struct Token));
     if (!token) return NULL;
     token->data = NULL;
-    token->type = "";
     token->data_len = 0;
     token->data_allocd = 0;
     return token;
@@ -23,6 +22,12 @@ bool token_add_data(TokenPtr token, char c){
 }
 
 void token_dispose(TokenPtr token) {
-    if (token->data) free(token->data);
     free(token);
+}
+
+void token_clear(TokenPtr token) {
+    token->data = NULL;
+    token->data_allocd = 0;
+    token->data_len = 0;
+    token->type = END;
 }

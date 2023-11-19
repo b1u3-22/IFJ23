@@ -1,15 +1,24 @@
 #include <stdlib.h>
 #include <stdbool.h>
+
+#ifndef _TOKEN
+#define _TOKEN
 #include "token.h"
+#endif
 
 #define STACK_ALLOC_BLOCK 8
+
+typedef struct TokenStackItem {
+    bool rule;
+    TokenPtr token;
+} *TokenStackItemPtr;
 
 typedef struct TokenStack {
     int data_cap;
     int data_pos;
-    TokenPtr top;
+    TokenStackItemPtr top;
     bool empty;
-    TokenPtr *data;
+    TokenStackItemPtr *data;
 } *TokenStackPtr;
 
 /** Initialize token
@@ -28,7 +37,15 @@ bool token_stack_pop(TokenStackPtr stack);
  *  @param token TokenPtr that should be added to stack
  *  @returns true if succeded, false otherwise
 */
-bool token_stack_push(TokenStackPtr stack, TokenPtr token);
+bool token_stack_push(TokenStackPtr stack, TokenPtr token, bool rule);
+
+/** Creates new token and pushes it into Token Stack
+ *  @param stack TokenStackPtr to add Token to
+ *  @param type int type of the new token
+ *  @param rule bool if that stack item is rule or not
+ *  @returns true if succeded, false otherwise
+*/
+bool token_stack_push_new(TokenStackPtr stack, int type, bool rule);
 
 /** Dispose and free Token Stack
 */

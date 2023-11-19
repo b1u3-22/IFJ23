@@ -4,11 +4,42 @@
 
 #define TOKEN_ALLOC_BLOCK 16
 
+typedef enum {
+    ID,
+    VALUE,
+    TYPE,
+    WHILE,
+    IF,
+    ELSE,
+    FUNC,
+    RETURN,
+    LET,
+    VAR,
+    EQUALS,
+    D_DOT,
+    PLUS,
+    MINUS,
+    MULT,
+    DIV,
+    E_MARK,
+    QQ_MARK,
+    L_BRAC,
+    R_BRAC,
+    L_CBRAC,
+    R_CBRAC,
+    COMMA,
+    ARROW,
+    NIL,
+    NEWLINE,
+    END,
+    ERROR
+} token_types;
+
 typedef struct Token {
     char *data;
     int data_len;
     int data_allocd;
-    char *type;
+    int type;
 } *TokenPtr;
 
 /** Initialize token
@@ -25,3 +56,6 @@ bool token_add_data(TokenPtr token, char c);
 
 /** Delete token and free all memory */
 void token_dispose(TokenPtr token);
+
+/**Resets token to state right after inicialization*/
+void token_clear(TokenPtr token);

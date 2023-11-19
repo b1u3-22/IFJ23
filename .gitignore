@@ -62,5 +62,7 @@ dkms.conf
 
 .vscode/settings.json
 
+.vscode
+
 ##### IGNORE TEST FILE #####
 test.c
