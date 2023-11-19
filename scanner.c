@@ -3,6 +3,47 @@
 #include <ctype.h>
 #include "scanner.h"
 
+/* Using the ASCII codes, check whether provided char is a number 0-9.
+    parameters:
+        - char s - the char you want to check
+    return value:
+        - true if s is a number
+        - false if s is not a number
+*/
+static bool is_number(char s) {
+    return ((s >= '0') && (s <= '9'));
+}
+
+/* Using the ASCII codes, check whether provided char is a letter A-Z, a-z.
+    parameters:
+        - char s - the char you want to check
+    return value:
+        - true if s is a letter
+        - false if s is not a letter
+*/
+static bool is_letter(char s) {
+    return (((s >= 'A') && (s <= 'Z')) || ((s >= 'a') && (s <= 'z')));
+}
+
+/* Check whether provided char is a blank space (space, tab, etc.).
+    parameters:
+        - char s - the char you want to check
+    return value:
+        - true if s is a space
+        - false if s is not a space*/
+static bool is_space(char s) {
+    return isspace(s);
+}
+
+static bool is_operator(char s) {
+    int i = 0;
+    while (ALLOWED_OPERATORS_AND_SPECIAL_SYMBOLS[i]) {
+        if (s == ALLOWED_OPERATORS_AND_SPECIAL_SYMBOLS[i]) return true;
+        i++;
+    }
+    return false;
+}
+
 void parse_int(int c, scanner_states* state, bool* end) {
     if (c == '.') *state = INT_FLP;
     else if ((c == 'e') || (c == 'E')) *state = FLP_E;
