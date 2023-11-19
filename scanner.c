@@ -52,10 +52,10 @@ void parse_dash(int c, scanner_states* state, bool* true_end, bool* end) {
     if (c == '>') {
         *true_end = true;
         *state = ARR;
-    } else end = true;
+    } else *end = true;
 }
 
-void parse_qmark(int c, scanner_states* state, bool* true_end, bool* end) {
+void parse_qmark(int c, scanner_states* state, bool* true_end) {
     if (c == '?') {
         *true_end = true;
         *state = QQMARK;
@@ -74,9 +74,9 @@ void parse_str_b(int c, scanner_states* state, bool* true_end) {
 }
 
 token_types get_token_type(scanner_states* state, char c) {
-    if (*state == IDENTIFICATOR) return ID;
+    if (*state == IDENTIFICATOR)    return ID;
     else if ((*state == FLP) || (*state == FLPE) || (*state == STR) || (*state == INT)) return VALUE;
-    else if (*state == NL) return NEWLINE;
+    else if (*state == NL)          return NEWLINE;
     else if (*state == OP) {
         switch (c) {
             case '(': return L_BRAC;
@@ -86,11 +86,17 @@ token_types get_token_type(scanner_states* state, char c) {
             case '+': return PLUS;
             case '/': return DIV;
             case '!': return E_MARK;
+            case '=': return EQUALS;
+            case ':': return D_DOT;
+            case '*': return MULT;
+            case ',': return COMMA;
             default : return ERROR;
         }
-    } else if (*state == QMARK) return ERROR; // single question mark is not valid
-    else if (*state == QQMARK) return QQ_MARK;
-    else if (*state == ARR) return ARROW; 
+    } else if (*state == QMARK)     return ERROR; // single question mark is not valid
+    else if (*state == QQMARK)      return QQ_MARK;
+    else if (*state == ARR)         return ARROW; 
+    else if (*state == DASH)        return MINUS;
+    else if (*state == END_OF_FILE) return END;
     return ERROR;
 }
 
@@ -156,11 +162,12 @@ void get_next_token(TokenPtr token) {
                 parse_str_b(c, &state, &true_end);
                 break;
             case DASH:
-                parse_dash(&c, &state, &true_end, &end);
+                parse_dash(c, &state, &true_end, &end);
                 break;
             case QMARK:
-                parse_qmark(&c, &state, &true_end, &end);
+                parse_qmark(c, &state, &true_end);
                 break;
+            default: break;
         }
         if (end) {
             ungetc(c, stdin); // return back the last read char
@@ -172,12 +179,18 @@ void get_next_token(TokenPtr token) {
         }
     }
 
+    if (c == EOF) state = END_OF_FILE;
+
 
     token->type = get_token_type(&state, c);
 }
 
 int main() {
     // basic test usage
-    TokenPtr token = token_init();
-    get_next_token(token);
+    
+    for (int i = 0; i < 3; i++) {
+        TokenPtr token = token_init();
+        get_next_token(token);
+        printf("TYPE: %d, DATA: %s\n", token->type, token->data);
+    }
 }
