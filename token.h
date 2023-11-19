@@ -4,11 +4,35 @@
 
 #define ALLOC_BLOCK 16
 
+typedef enum {
+    ID,
+    TYPE,
+    VALUE,
+    IF,
+    WHILE,
+    L_BRAC,
+    R_BRAC,
+    L_CBRAC,
+    R_CBRAC,
+    NEWLINE,
+    VAR,
+    LET,
+    NIL,
+    PLUS,
+    MINUS,
+    DIV,
+    E_MARK,
+    Q_MARK,
+    QQ_MARK,
+    ERROR,
+    ARROW
+} token_types;
+
 typedef struct Token {
     char *data;
     int data_len;
     int data_allocd;
-    char *type;
+    token_types type;
 } *TokenPtr;
 
 /** Initialize token
