@@ -22,13 +22,14 @@ typedef enum {
     DASH,
     QMARK,
     QQMARK,
-    ARR
+    ARR,
+    END_OF_FILE
 } scanner_states;
 
 const char ALLOWED_BACKSLASH_CHARS[] = {'\"', 'u', 'n', 't', 'r', '\\', '\0'};  // WARNING: do not remove '\0',
                                                                                 // it's used to check the end of the array
 
-const char ALLOWED_OPERATORS_AND_SPECIAL_SYMBOLS[] = {'+', '*', '/', '(', ')', '{', '}', '!', '\0'}; // WARNING_ do nor remove '\0
+const char ALLOWED_OPERATORS_AND_SPECIAL_SYMBOLS[] = {'+', '*', '/', '(', ')', '{', '}', '!', ',', ':', '=', '\0'}; // WARNING_ do nor remove '\0
 
 void get_next_token(TokenPtr token);
 
