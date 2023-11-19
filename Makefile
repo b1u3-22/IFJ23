@@ -2,13 +2,16 @@ CC = gcc
 CFLAGS = -std=c11 -pedantic -Wall -Wextra
 LDFLAGS = -Wall -Wextra
 
-all: scanner
+all: scanner parser
 
 run: all
 	./scanner
 
 clean:
 	rm -rf ./*.o
+
+parser: parser.o token.o token_stack.o scanner.o
+	$(CC) $(LDFLAGS) -o $@ $^ 
 
 scanner: scanner.o token.o
 	$(CC) $(LDFLAGS) -o $@ $^ 
@@ -24,3 +27,6 @@ token_stack.o: token_stack.h token_stack.c token.h
 
 symtable.o: symtable.h symtable.c
 	$(CC) $(CFLAGS) -c -o $@ symtable.c
+
+parser.o: parser.h parser.c token_stack.h token.h scanner.h
+	$(CC) $(CFLAGS) -c -o $@ parser.c
