@@ -24,3 +24,10 @@ bool token_add_data(TokenPtr token, char c){
 void token_dispose(TokenPtr token) {
     free(token);
 }
+
+void token_clear(TokenPtr token) {
+    token->data = NULL;
+    token->data_allocd = 0;
+    token->data_len = 0;
+    token->type = END;
+}
