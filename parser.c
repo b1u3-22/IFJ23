@@ -13,9 +13,8 @@ int parse() {
     int rule_to_apply = 0;
     int return_code = 0;
     bool new_line = true;
-    bool error = false;
 
-    while (token->type != EOF) {
+    while (token->type != END) {
         if (token->type == NEWLINE) {
             new_line = true;
             continue;
@@ -35,7 +34,7 @@ int parse() {
                 error_skip(token_stack, token);
             }
             else {
-                apply_rule(token_stack, rule_to_apply);
+                apply_rule(rule_to_apply, token_stack);
             }
         }
 
@@ -96,7 +95,7 @@ void apply_rule(int rule, TokenStackPtr stack) {
     case 7:
     case 9:
         token_stack_push_new(stack, R_EXPR, true);
-        token_stack_push_new(stack, EQUAL, false);
+        token_stack_push_new(stack, EQUALS, false);
         break;
 
     case 10:
@@ -266,7 +265,7 @@ void apply_rule(int rule, TokenStackPtr stack) {
 
     case 40:
         token_stack_push_new(stack, R_EXPR, true);
-        token_stack_push_new(stack, EQUAL, false);
+        token_stack_push_new(stack, EQUALS, false);
         break;
 
     case 41:
