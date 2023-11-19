@@ -56,3 +56,6 @@ bool token_add_data(TokenPtr token, char c);
 
 /** Delete token and free all memory */
 void token_dispose(TokenPtr token);
+
+/**Resets token to state right after inicialization*/
+void token_clear(TokenPtr token);
