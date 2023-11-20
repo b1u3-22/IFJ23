@@ -32,7 +32,14 @@ typedef enum {
     NIL,
     NEWLINE,
     END,
-    ERROR
+    ERROR,
+    EXL_MARK,
+    EXL_EQ_MARK,
+    EQUALS_EQUALS,
+    LARGER_THAN,
+    LARGER_EQUALS,
+    SMALLER_THAN,
+    SMALLER_EQUALS
 } token_types;
 
 typedef struct Token {
