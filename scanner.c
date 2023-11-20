@@ -319,18 +319,25 @@ void get_next_token(TokenPtr token) {
         }
     }
 
-    if (c == EOF) state = END_OF_FILE;
+    if (c == EOF) {
+        if (state == START) {
+            token->type = END;
+            return;
+        } else {
+            ungetc(EOF, stdin);
+        }
+    }
 
     token_add_data(token, '\0');
     token->type = get_token_type(&state, c, token->data);
 }
 
-int main() {
-    // basic test usage
+// int main() {
+//     // basic test usage
     
-    for (int i = 0; i < 3; i++) {
-        TokenPtr token = token_init();
-        get_next_token(token);
-        printf("TYPE: %d, DATA: %s\n", token->type, token->data);
-    }
-}
+//     while (true) {
+//         TokenPtr token = token_init();
+//         get_next_token(token);
+//         printf("TYPE: %d, DATA: %s\n", token->type, token->data);
+//     }
+// }
