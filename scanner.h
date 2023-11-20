@@ -31,4 +31,7 @@ static const char ALLOWED_BACKSLASH_CHARS[] = {'\"', 'u', 'n', 't', 'r', '\\', '
 
 static const char ALLOWED_OPERATORS_AND_SPECIAL_SYMBOLS[] = {'+', '*', '/', '(', ')', '{', '}', '!', ',', ':', '=', '\0'}; // WARNING_ do nor remove '\0
 
+static const char KEYWORDS[9][7] = {"if", "else", "func", "return", "let", "var", "nil", "while", "\0"};
+static const char TYPES[7][8] = {"Int", "Int?", "String", "String?", "Double", "Double?", "\0"};
+
 void get_next_token(TokenPtr token);

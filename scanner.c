@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include "scanner.h"
+#include <stdio.h>
 
 /* Using the ASCII codes, check whether provided char is a number 0-9.
     parameters:
@@ -42,6 +43,29 @@ static bool is_operator(char s) {
         i++;
     }
     return false;
+}
+
+int is_keyword(char* s) {
+    int i = 0;
+    printf("Comparing: %s\n", s);
+    while (strcmp(KEYWORDS[i], "\0")) {
+        printf("S: %s\n", KEYWORDS[i]);
+        if (!strcmp(s, KEYWORDS[i])) {
+            printf("DIng DING\n");
+            return i;
+            }
+        i++;
+    }
+    return -1; 
+}
+
+int is_type(char* s) {
+    int i = 0;
+    while (strcmp(TYPES[i], "\0")) {
+        if (!strcmp(s, TYPES[i])) return i;
+        i++;
+    }
+    return -1;
 }
 
 void parse_int(int c, scanner_states* state, bool* end) {
@@ -114,8 +138,26 @@ void parse_str_b(int c, scanner_states* state, bool* true_end) {
     *true_end = true;
 }
 
-token_types get_token_type(scanner_states* state, char c) {
-    if (*state == IDENTIFICATOR)    return ID;
+token_types get_token_type(scanner_states* state, char c, char* data) {
+    if (*state == IDENTIFICATOR) {
+        int i = is_keyword(data);
+        if (i > -1) {
+            switch (i) {
+                case 0: return IF;
+                case 1: return ELSE;
+                case 2: return FUNC;
+                case 3: return RETURN;
+                case 4: return LET;
+                case 5: return VAR;
+                case 6: return NIL;
+                case 7: return WHILE;
+                default: return ERROR;
+            }
+        } 
+        i = is_type(data);
+        if (i > -1) return TYPE;
+        return ID;
+    }
     else if ((*state == FLP) || (*state == FLPE) || (*state == STR) || (*state == INT)) return VALUE;
     else if (*state == NL)          return NEWLINE;
     else if (*state == OP) {
@@ -223,7 +265,7 @@ void get_next_token(TokenPtr token) {
     if (c == EOF) state = END_OF_FILE;
 
 
-    token->type = get_token_type(&state, c);
+    token->type = get_token_type(&state, c, token->data);
 }
 
 int main() {
