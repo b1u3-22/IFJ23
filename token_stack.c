@@ -45,7 +45,7 @@ bool token_stack_push(TokenStackPtr stack, TokenPtr token, bool rule) {
 
         // else set old data to new ones and increase data_cap to reflect the change
         stack->data = new_data;
-        stack->data_cap += STACK_ALLOC_BLOCK;
+        stack->data_cap += TOKEN_ALLOC_BLOCK;
     }
 
     // add new token to data and correct top pointer
