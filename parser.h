@@ -1,11 +1,16 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include "scanner.h"
+#include "expression.h"
 #include "token_stack.h"
 
 #ifndef _TOKEN
 #define _TOKEN
 #include "token.h"
+#endif
+
+#ifndef _TOKEN
+#define _TOKEN
+#include "scanner.h"
 #endif
 
 #define LL_TABLE_COL 27
@@ -61,7 +66,7 @@ int parse();
  * @param rule int of the rule
  * @param stack TokenStackPtr
 */  
-void apply_rule(int rule, TokenStackPtr stack);
+void apply_rule(int rule, TokenStackPtr stack, TokenPtr token, TokenPtr previous_token);
 
 /** Skip to the next sequence of tokens.
  *  This is used when syntax error occures. 

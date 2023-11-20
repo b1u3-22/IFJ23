@@ -2,6 +2,7 @@
 
 int parse() {
     TokenPtr token = token_init();
+    TokenPtr expression_helper_token;
     if (!token) return 99; // If token initialization fails, return error code 99 
     TokenStackPtr token_stack = token_stack_init();
     if (!token_stack) return 99; // Token stack initialization failed, return code 99
@@ -41,13 +42,18 @@ int parse() {
 
         if (token_stack->top->rule) {
             rule_to_apply = ll_table[token_stack->top->token->type][token->type];
-            if (rule_to_apply == 0) {
-                return_code = 2;
-                error_skip(token_stack, token);
-            }
-            else {
-                printf("[%02d, %02d]: %02d\n", token_stack->top->token->type, token->type, rule_to_apply);
-                apply_rule(rule_to_apply, token_stack);
+            switch (rule_to_apply) {
+                case 0:
+                    return_code = 2;
+                    error_skip(token_stack, token);
+                    break;
+                case 20:
+                case 21:
+                case 22:
+                    expression_helper_token = token;
+                default:
+                    apply_rule(rule_to_apply, token_stack, token, expression_helper_token);
+                    break;
             }
         }
 
@@ -76,7 +82,7 @@ int parse() {
     return 0;
 }
 
-void apply_rule(int rule, TokenStackPtr stack) {
+void apply_rule(int rule, TokenStackPtr stack, TokenPtr token, TokenPtr previous_token) {
     token_stack_pop(stack);
 
     switch (rule)
@@ -228,8 +234,10 @@ void apply_rule(int rule, TokenStackPtr stack) {
 
     case 24:
     case 25:
-        // run PSA here
-        printf("Started precedent syntax analysis\n");
+        // PSA run from here
+        unget_token(token);
+        unget_token(previous_token);
+        parse_expression();
         break;
 
     case 29:
