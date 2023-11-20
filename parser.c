@@ -9,18 +9,30 @@ int parse() {
     if (!body_token) return 99;
     body_token->type = R_G_BODY;
     token_stack_push(token_stack, body_token, true);
-    //get_next_token(token);
+    get_next_token(token);
     int rule_to_apply = 0;
     int return_code = 0;
     bool new_line = true;
 
-    while (token->type != END) {
+    while (token->type != END || !(token_stack->empty)) {
+        //printf("Token type: %d, Token stack top type: %d\n", token->type, token_stack->top->token->type);
         if (token->type == NEWLINE) {
             new_line = true;
             continue;
         }
 
-        else if (token->type <= R_EOL) {
+        else if (token->type == L_CBRAC) {
+            new_line = true;
+        }
+
+        else if (token->type <= R_EOL && token->type > R_EOL_B) {
+            if (!new_line) {
+                return_code = 2;
+                error_skip(token_stack, token);
+            }
+        }
+
+        else if (token->type <= R_EOL && token->type <= R_EOL_B && token_stack->top->rule && (token_stack->top->token->type == R_BODY || token_stack->top->token->type == R_G_BODY)) {
             if (!new_line) {
                 return_code = 2;
                 error_skip(token_stack, token);
@@ -34,6 +46,7 @@ int parse() {
                 error_skip(token_stack, token);
             }
             else {
+                printf("[%02d, %02d]: %02d\n", token_stack->top->token->type, token->type, rule_to_apply);
                 apply_rule(rule_to_apply, token_stack);
             }
         }
@@ -41,7 +54,7 @@ int parse() {
         else if (token_stack->top->token->type == token->type) {
             token_stack_pop(token_stack);
             token_clear(token);
-            //get_next_token(token);
+            get_next_token(token);
         }
 
         // Token from scanner has different type than token on top of stack
@@ -50,6 +63,16 @@ int parse() {
             error_skip(token_stack, token);
         }
     }
+
+    int counter = 0;
+    printf("Remaining in stack:\n");
+    while (!(token_stack->empty)) {
+        printf("%02d: %02d\n", counter++, token_stack->top->token->type);
+        token_stack_pop(token_stack);
+    }
+
+    token_stack_dispose(token_stack);
+    token_dispose(token);
     return 0;
 }
 
@@ -206,6 +229,7 @@ void apply_rule(int rule, TokenStackPtr stack) {
     case 24:
     case 25:
         // run PSA here
+        printf("Started precedent syntax analysis\n");
         break;
 
     case 29:
@@ -276,6 +300,12 @@ void apply_rule(int rule, TokenStackPtr stack) {
 
     case 44:
         token_stack_push_new(stack, R_EXPR, true);
+        break;
+
+    case 47:
+        token_stack_push_new(stack, R_BRAC, false);
+        token_stack_push_new(stack, R_F_PAR_F, true);
+        token_stack_push_new(stack, L_BRAC, false);
 
     default:
         break;
@@ -283,5 +313,13 @@ void apply_rule(int rule, TokenStackPtr stack) {
 }
 
 TokenStackItemPtr error_skip(TokenStackPtr stack, TokenPtr token) {
-    return NULL;
+    printf("Error occured!\n");
+    exit(2);
+}
+
+
+int main(){
+    parse();
+
+    return 0;
 }

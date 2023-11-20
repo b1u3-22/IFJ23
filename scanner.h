@@ -35,3 +35,4 @@ static const char KEYWORDS[9][7] = {"if", "else", "func", "return", "let", "var"
 static const char TYPES[7][8] = {"Int", "Int?", "String", "String?", "Double", "Double?", "\0"};
 
 void get_next_token(TokenPtr token);
+void unget_token(TokenPtr token);
