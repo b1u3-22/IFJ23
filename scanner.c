@@ -4,6 +4,16 @@
 #include "scanner.h"
 #include <stdio.h>
 
+
+void unget_token(TokenPtr token) {
+    ungetc(' ', stdin);
+    
+    for (int i = token->data_len; i > -1; i--) {
+        if (token->data[i] == '\0') continue;
+        ungetc(token->data[i], stdin);
+    }
+}
+
 /* Using the ASCII codes, check whether provided char is a number 0-9.
     parameters:
         - char s - the char you want to check
@@ -135,6 +145,41 @@ void parse_str_b(int c, scanner_states* state, bool* true_end) {
     *true_end = true;
 }
 
+void parse_exl(int c, scanner_states* state, bool* true_end, bool* end) {
+    if (c == '=') {
+        *state = EXLEQ;
+        *true_end = true;
+    } else {
+        *end = true;
+    }
+}
+
+void parse_eq(int c, scanner_states* state, bool* true_end, bool* end) {
+    if (c == '=') {
+        *state = EQEQ;
+        *true_end = true;
+    } else {
+        *end = true;
+    }
+}
+
+void parse_less(int c, scanner_states* state, bool* true_end, bool* end) {
+    if (c == '=') {
+        *state = LESS_EQ;
+        *true_end = true;
+    } else {
+        *end = true;
+    }
+}
+
+void parse_larger(int c, scanner_states* state, bool* true_end, bool* end) {
+    if (c == '=') {
+        *state = LARGER_EQ;
+        *true_end = true;
+    } else {
+        *end = true;
+    }
+}
 token_types get_token_type(scanner_states* state, char c, char* data) {
     if (*state == IDENTIFICATOR) {
         int i = is_keyword(data);
@@ -155,8 +200,6 @@ token_types get_token_type(scanner_states* state, char c, char* data) {
         if (i > -1) return TYPE;
         return ID;
     }
-    else if ((*state == FLP) || (*state == FLPE) || (*state == STR) || (*state == INT)) return VALUE;
-    else if (*state == NL)          return NEWLINE;
     else if (*state == OP) {
         switch (c) {
             case '(': return L_BRAC;
@@ -165,18 +208,27 @@ token_types get_token_type(scanner_states* state, char c, char* data) {
             case '}': return R_CBRAC;
             case '+': return PLUS;
             case '/': return DIV;
-            case '!': return E_MARK;
-            case '=': return EQUALS;
             case ':': return D_DOT;
             case '*': return MULT;
             case ',': return COMMA;
             default : return ERROR;
         }
-    } else if (*state == QMARK)     return ERROR; // single question mark is not valid
+    } 
+    else if ((*state == FLP) || (*state == FLPE) || (*state == STR) || (*state == INT)) return VALUE;
+    else if (*state == NL)          return NEWLINE;
+    else if (*state == QMARK)       return ERROR; // single question mark is not valid
     else if (*state == QQMARK)      return QQ_MARK;
     else if (*state == ARR)         return ARROW; 
     else if (*state == DASH)        return MINUS;
     else if (*state == END_OF_FILE) return END;
+    else if (*state == EXL)         return EXL_MARK;
+    else if (*state == EXLEQ)       return EXL_EQ_MARK;
+    else if (*state == EQ)          return EQUALS;
+    else if (*state == EQEQ)        return EQUALS_EQUALS;
+    else if (*state == LARGER)      return LARGER_THAN;
+    else if (*state == LARGER_EQ)   return LARGER_EQUALS;
+    else if (*state == LESS)        return SMALLER_THAN;
+    else if (*state == LESS_EQ)     return SMALLER_EQUALS;
     return ERROR;
 }
 
@@ -200,15 +252,21 @@ void get_next_token(TokenPtr token) {
                 else if (is_letter(c))      state = IDENTIFICATOR;
                 else if (c == '_')          state = _IDENTIFICATOR;
                 else if (is_space(c))       continue;
+                else if (c == '-')          state = DASH;
+                else if (c == '?')          state = QMARK;
+                else if (c == '\"')         state = STR;
+                else if (c == '!')          state = EXL;
+                else if (c == '=')          state = EQ;
+                else if (c == '<')          state = LESS;
+                else if (c == '>')          state = LARGER;
                 else if (is_operator(c)) {
                     state = OP;
                     true_end = true;
-                } else if (c == '-')        state = DASH;
-                else if (c == '?')          state = QMARK;
+                } 
                 else if (c == '\n') {
                     state = NL;
                     true_end = true;
-                } else if (c == '\"')       state = STR;
+                } 
                 else                        true_end = true;
                 break;
             case IDENTIFICATOR: // IDEN
@@ -247,6 +305,18 @@ void get_next_token(TokenPtr token) {
             case QMARK:
                 parse_qmark(c, &state, &true_end);
                 break;
+            case EXL:
+                parse_exl(c, &state, &true_end, &end);
+                break;
+            case EQ:
+                parse_eq(c, &state, &true_end, &end);
+                break;
+            case LESS:
+                parse_less(c, &state, &true_end, &end);
+                break;
+            case LARGER:
+                parse_larger(c, &state, &true_end, &end);
+                break;
             default: break;
         }
         if (end) {
@@ -259,18 +329,40 @@ void get_next_token(TokenPtr token) {
         }
     }
 
-    if (c == EOF) state = END_OF_FILE;
-
     token_add_data(token, '\0');
+
+    if (c == EOF) {
+        if (state == START) {
+            token->type = END;
+            return;
+        } else {
+            ungetc(EOF, stdin);
+        }
+    }
     token->type = get_token_type(&state, c, token->data);
 }
 
-// int main() {
-//     // basic test usage
+int main() {
+    // basic test usage
     
-//     for (int i = 0; i < 3; i++) {
-//         TokenPtr token = token_init();
-//         get_next_token(token);
-//         printf("TYPE: %d, DATA: %s\n", token->type, token->data);
-//     }
-// }
+    TokenPtr token = token_init();
+    get_next_token(token);
+    printf("TYPE: %d, DATA: %s\n", token->type, token->data);
+    unget_token(token);
+    token_clear(token);
+    get_next_token(token);
+    printf("TYPE: %d, DATA: %s\n", token->type, token->data);
+    token_clear(token);
+    get_next_token(token);
+    printf("TYPE: %d, DATA: %s\n", token->type, token->data);
+    unget_token(token);
+    token_clear(token);
+    get_next_token(token);
+    printf("TYPE: %d, DATA: %s\n", token->type, token->data);
+    token_clear(token);
+    get_next_token(token);
+    printf("TYPE: %d, DATA: %s\n", token->type, token->data);
+    token_clear(token);
+    get_next_token(token);
+    printf("TYPE: %d, DATA: %s\n", token->type, token->data);
+} 
