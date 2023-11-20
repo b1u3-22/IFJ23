@@ -44,4 +44,5 @@ static const char KEYWORDS[9][7] = {"if", "else", "func", "return", "let", "var"
 static const char TYPES[7][8] = {"Int", "Int?", "String", "String?", "Double", "Double?", "\0"};
 
 void get_next_token(TokenPtr token);
+/* Takes token and shoves it back to stdin. Callign get_next_token creates identical token. */
 void unget_token(TokenPtr token);

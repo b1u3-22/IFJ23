@@ -4,6 +4,16 @@
 #include "scanner.h"
 #include <stdio.h>
 
+
+void unget_token(TokenPtr token) {
+    ungetc(' ', stdin);
+    
+    for (int i = token->data_len; i > -1; i--) {
+        if (token->data[i] == '\0') continue;
+        ungetc(token->data[i], stdin);
+    }
+}
+
 /* Using the ASCII codes, check whether provided char is a number 0-9.
     parameters:
         - char s - the char you want to check
@@ -319,6 +329,8 @@ void get_next_token(TokenPtr token) {
         }
     }
 
+    token_add_data(token, '\0');
+
     if (c == EOF) {
         if (state == START) {
             token->type = END;
@@ -327,17 +339,30 @@ void get_next_token(TokenPtr token) {
             ungetc(EOF, stdin);
         }
     }
-
-    token_add_data(token, '\0');
     token->type = get_token_type(&state, c, token->data);
 }
 
-// int main() {
-//     // basic test usage
+int main() {
+    // basic test usage
     
-//     while (true) {
-//         TokenPtr token = token_init();
-//         get_next_token(token);
-//         printf("TYPE: %d, DATA: %s\n", token->type, token->data);
-//     }
-// }
+    TokenPtr token = token_init();
+    get_next_token(token);
+    printf("TYPE: %d, DATA: %s\n", token->type, token->data);
+    unget_token(token);
+    token_clear(token);
+    get_next_token(token);
+    printf("TYPE: %d, DATA: %s\n", token->type, token->data);
+    token_clear(token);
+    get_next_token(token);
+    printf("TYPE: %d, DATA: %s\n", token->type, token->data);
+    unget_token(token);
+    token_clear(token);
+    get_next_token(token);
+    printf("TYPE: %d, DATA: %s\n", token->type, token->data);
+    token_clear(token);
+    get_next_token(token);
+    printf("TYPE: %d, DATA: %s\n", token->type, token->data);
+    token_clear(token);
+    get_next_token(token);
+    printf("TYPE: %d, DATA: %s\n", token->type, token->data);
+} 
