@@ -6,7 +6,7 @@
 #include "token.h"
 #endif
 
-#define STACK_ALLOC_BLOCK 8
+#define TOKEN_STACK_ALLOC_BLOCK 20
 
 typedef struct TokenStackItem {
     bool rule;

@@ -5,14 +5,14 @@ TokenStackPtr token_stack_init() {
     TokenStackPtr stack = calloc(1, sizeof(struct TokenStack)); 
     if (!stack) return NULL; // Allocate memory for stack and check it
 
-    stack->data = calloc(STACK_ALLOC_BLOCK, sizeof(TokenStackItemPtr)); // Allocate memory for stack data
+    stack->data = calloc(TOKEN_STACK_ALLOC_BLOCK, sizeof(TokenStackItemPtr)); // Allocate memory for stack data
     if (!stack->data) {
         free(stack); // fail stack if allocation fails
         return NULL;
     }
 
     // initialize values
-    stack->data_cap = STACK_ALLOC_BLOCK;
+    stack->data_cap = TOKEN_STACK_ALLOC_BLOCK;
     stack->data_pos = -1;
     stack->top = NULL;
     stack->empty = true;
@@ -23,25 +23,21 @@ TokenStackPtr token_stack_init() {
 bool token_stack_pop(TokenStackPtr stack) {
     if (stack->empty) return false;
 
-    // if stack isn't empty, set top pointer to last token 
-    if (--(stack->data_pos) >= 0) {
-        free(stack->data[stack->data_pos + 1]);
-        stack->top = stack->data[stack->data_pos];
-    }
+    free(stack->data[stack->data_pos]->token);
+    free(stack->data[stack->data_pos--]);
 
-    // if we poped the last item, remove top pointer and correct empty bool
+    if (stack->data_pos > -1) stack->top = stack->data[stack->data_pos];
     else {
         stack->top = NULL;
         stack->empty = true;
     }
-
     return true;
 }
 
 bool token_stack_push(TokenStackPtr stack, TokenPtr token, bool rule) {
     // if we hit the allocated capacity for stack data, increase memory by reallocation
     if (++(stack->data_pos) >= stack->data_cap){
-        TokenStackItemPtr *new_data = realloc(stack->data, stack->data_cap + STACK_ALLOC_BLOCK);
+        TokenStackItemPtr *new_data = realloc(stack->data, stack->data_cap + TOKEN_STACK_ALLOC_BLOCK);
         if (!new_data) {
             stack->data_pos--; // if reallocation fails, decrease data_pos to previous value
             return false;
