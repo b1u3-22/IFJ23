@@ -14,6 +14,7 @@ ExpressionStackPtr expression_stack_init() {
     stack->data_pos = -1;
     stack->top = NULL;
     stack->empty = true;
+    return stack;
 }
 
 bool expression_stack_push(ExpressionStackPtr stack, int type, bool expression) {
