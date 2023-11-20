@@ -47,11 +47,8 @@ static bool is_operator(char s) {
 
 int is_keyword(char* s) {
     int i = 0;
-    printf("Comparing: %s\n", s);
     while (strcmp(KEYWORDS[i], "\0")) {
-        printf("S: %s\n", KEYWORDS[i]);
         if (!strcmp(s, KEYWORDS[i])) {
-            printf("DIng DING\n");
             return i;
             }
         i++;
@@ -264,16 +261,16 @@ void get_next_token(TokenPtr token) {
 
     if (c == EOF) state = END_OF_FILE;
 
-
+    token_add_data(token, '\0');
     token->type = get_token_type(&state, c, token->data);
 }
 
-int main() {
-    // basic test usage
+// int main() {
+//     // basic test usage
     
-    for (int i = 0; i < 3; i++) {
-        TokenPtr token = token_init();
-        get_next_token(token);
-        printf("TYPE: %d, DATA: %s\n", token->type, token->data);
-    }
-}
+//     for (int i = 0; i < 3; i++) {
+//         TokenPtr token = token_init();
+//         get_next_token(token);
+//         printf("TYPE: %d, DATA: %s\n", token->type, token->data);
+//     }
+// }
