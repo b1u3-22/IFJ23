@@ -39,7 +39,8 @@ typedef enum {
     LARGER_THAN,
     LARGER_EQUALS,
     SMALLER_THAN,
-    SMALLER_EQUALS
+    SMALLER_EQUALS,
+    UNDERSCR
 } token_types;
 
 typedef struct Token {
