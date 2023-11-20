@@ -9,7 +9,7 @@ int parse() {
     if (!body_token) return 99;
     body_token->type = R_G_BODY;
     token_stack_push(token_stack, body_token, true);
-    //get_next_token(token);
+    get_next_token(token);
     int rule_to_apply = 0;
     int return_code = 0;
     bool new_line = true;
@@ -34,6 +34,7 @@ int parse() {
                 error_skip(token_stack, token);
             }
             else {
+                printf("Applied rule: %d\n", rule_to_apply);
                 apply_rule(rule_to_apply, token_stack);
             }
         }
@@ -41,7 +42,7 @@ int parse() {
         else if (token_stack->top->token->type == token->type) {
             token_stack_pop(token_stack);
             token_clear(token);
-            //get_next_token(token);
+            get_next_token(token);
         }
 
         // Token from scanner has different type than token on top of stack
@@ -206,6 +207,7 @@ void apply_rule(int rule, TokenStackPtr stack) {
     case 24:
     case 25:
         // run PSA here
+        printf("Started precedent syntax analysis\n");
         break;
 
     case 29:
@@ -283,5 +285,11 @@ void apply_rule(int rule, TokenStackPtr stack) {
 }
 
 TokenStackItemPtr error_skip(TokenStackPtr stack, TokenPtr token) {
-    return NULL;
+    printf("Error skip called!\n");
+}
+
+
+int main(){
+    parse();
+    return 0;
 }
