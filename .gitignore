@@ -64,5 +64,6 @@ dkms.conf
 
 .vscode
 
-##### IGNORE TEST FILE #####
+##### IGNORE TEST FILES #####
 test.c
+test.txt
