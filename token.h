@@ -21,8 +21,14 @@ typedef enum {
     MINUS,
     MULT,
     DIV,
-    E_MARK,
+    EXL_MARK,
     QQ_MARK,
+    EXL_EQ_MARK,
+    EQUALS_EQUALS,
+    LARGER_THAN,
+    LARGER_EQUALS,
+    SMALLER_THAN,
+    SMALLER_EQUALS,
     L_BRAC,
     R_BRAC,
     L_CBRAC,
@@ -32,14 +38,7 @@ typedef enum {
     NIL,
     NEWLINE,
     END,
-    ERROR,
-    EXL_MARK,
-    EXL_EQ_MARK,
-    EQUALS_EQUALS,
-    LARGER_THAN,
-    LARGER_EQUALS,
-    SMALLER_THAN,
-    SMALLER_EQUALS
+    ERROR
 } token_types;
 
 typedef struct Token {
