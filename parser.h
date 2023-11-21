@@ -35,7 +35,9 @@ enum Rules {
     R_F_PAR_N,
     R_F_PAR,
     R_STAT,
-    R_RET_DEF
+    R_RET_DEF,
+    R_F_DEF_ID,
+    R_F_RET_DEF
 };
 
 static const int ll_table[LL_TABLE_ROW][LL_TABLE_COL] = 

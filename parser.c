@@ -17,6 +17,8 @@ int parse() {
     bool new_line = true;
 
     while (token->type != END || !(rule_stack->empty)) {
+        printf("Token type: %02d, Type at top of stack: %02d\n", token->type, rule_stack->top->type);
+
         // ===================== Handling of newlines that some things require =====================
         if (token->type == NEWLINE) {
             new_line = true;
@@ -133,8 +135,7 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack) {
         rule_stack_push(stack, R_CBRAC, false);
         rule_stack_push(stack, R_BODY, true);
         rule_stack_push(stack, L_CBRAC, false);
-        rule_stack_push(stack, TYPE, false);
-        rule_stack_push(stack, ARROW, false);
+        rule_stack_push(stack, R_F_RET_DEF, true);
         rule_stack_push(stack, R_BRAC, false);
         rule_stack_push(stack, R_F_DEF_F, true);
         rule_stack_push(stack, L_BRAC, false);
@@ -147,8 +148,7 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack) {
         rule_stack_push(stack, TYPE, false);
         rule_stack_push(stack, R_VAR_ASG, true);
         rule_stack_push(stack, D_DOT, false);
-        rule_stack_push(stack, ID, false);
-        rule_stack_push(stack, ID, false);
+        rule_stack_push(stack, R_F_DEF_ID, true);
         break;
 
     case 14:
@@ -156,8 +156,7 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack) {
         rule_stack_push(stack, TYPE, false);
         rule_stack_push(stack, R_VAR_ASG, true);
         rule_stack_push(stack, D_DOT, false);
-        rule_stack_push(stack, ID, false);
-        rule_stack_push(stack, ID, false);
+        rule_stack_push(stack, R_F_DEF_ID, true);
         rule_stack_push(stack, COMMA, false);
         break;
 
@@ -315,6 +314,18 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack) {
         rule_stack_push(stack, R_BRAC, false);
         rule_stack_push(stack, R_F_PAR_F, true);
         rule_stack_push(stack, L_BRAC, false);
+
+    case 48:
+        rule_stack_push(stack, ID, false);
+        rule_stack_push(stack, ID, false);
+
+    case 49:
+        rule_stack_push(stack, ID, false);
+        rule_stack_push(stack, UNDERSCR, false);
+
+    case 50:
+        rule_stack_push(stack, TYPE, false);
+        rule_stack_push(stack, ARROW, false);
 
     default:
         break;
