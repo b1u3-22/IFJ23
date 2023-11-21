@@ -79,9 +79,6 @@ int get_translated_type(TokenPtr token) {
     case VALUE:
         return E_VALUE;
 
-    case EQUALS:
-        return E_EQL;
-
     case PLUS:
         return E_PLS;
 
@@ -102,6 +99,27 @@ int get_translated_type(TokenPtr token) {
 
     case R_BRAC:
         return E_RBRAC;
+    
+    case EQUALS_EQUALS:
+        return E_E;
+
+    case EXL_MARK:
+        return E_EXC;
+
+    case EXL_EQ_MARK:
+        return E_NE;
+
+    case LARGER_THAN:
+        return E_GR;
+
+    case LARGER_EQUALS:
+        return E_EGR;
+
+    case SMALLER_THAN:
+        return E_SM;
+
+    case SMALLER_EQUALS:
+        return E_ESM;
 
     default:
         return E_END;
