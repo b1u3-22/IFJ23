@@ -16,11 +16,10 @@ int parse() {
     int return_code = 0;
     bool new_line = true;
 
-    while (token->type != END || !(rule_stack->empty)) {
-        printf("Token type: %02d, Type at top of stack: %02d\n", token->type, rule_stack->top->type);
-
+    while (token->type != END && !(rule_stack->empty)) {
         // ===================== Handling of newlines that some things require =====================
         if (token->type == NEWLINE) {
+            token_stack_pop(token_stack); // Don't save newlines in token_stack
             new_line = true;
             continue;
         }
@@ -62,7 +61,7 @@ int parse() {
             return_code = 2;
             error_skip(rule_stack, token_stack);
         }
-    }
+    } // main while
 
     if (rule_stack->empty) {
         printf("Success! Nothing remaining in parser stack!\n");
@@ -72,8 +71,15 @@ int parse() {
     int counter = 0;
     printf("Remaining in stack:\n");
     while (!(rule_stack->empty)) {
-        printf("%02d: %02d\n", counter++, rule_stack->top->type);
+        printf("%02d: %02d - %d\n", counter++, rule_stack->top->type, rule_stack->top->rule);
         rule_stack_pop(rule_stack);
+    }
+
+    printf("Tokens in token stack:\n");
+    counter = 0;
+    while (!(token_stack->empty)) {
+        printf("%02d: %02d\n", counter++, token_stack->top->type);
+        token_stack_pop(token_stack);
     }
 
     rule_stack_dispose(rule_stack);
@@ -146,7 +152,6 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack) {
     case 12:
         rule_stack_push(stack, R_F_DEF_N, true);
         rule_stack_push(stack, TYPE, false);
-        rule_stack_push(stack, R_VAR_ASG, true);
         rule_stack_push(stack, D_DOT, false);
         rule_stack_push(stack, R_F_DEF_ID, true);
         break;
@@ -209,12 +214,6 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack) {
         rule_stack_push(stack, LET, false);
         break;
 
-    case 20:
-        rule_stack_push(stack, R_BRAC, false);
-        rule_stack_push(stack, R_EXPR, true);
-        rule_stack_push(stack, L_BRAC, false);
-        break;
-
     case 21:
         rule_stack_push(stack, R_EXPR_ID, true);
         rule_stack_push(stack, ID, false);
@@ -236,8 +235,15 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack) {
     case 25:
         // PSA run from here
         token_stack_unget(token_stack);
+
+    case 20:
+    case 52:
         token_stack_unget(token_stack);
+        //printf("===========EXPRESSION PARSER===========\n");
         printf("Result from expression parser: %d\n", parse_expression(END));
+        //printf("===========EXPRESSION PARSER===========\n");
+        //parse_expression(END);
+        rule_stack_pop(stack);
         break;
 
     case 29:
@@ -301,6 +307,10 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack) {
         break;
 
     case 41:
+        rule_stack_push(stack, R_RET_DEF, true);
+        rule_stack_push(stack, RETURN, false);
+        break;
+
     case 42:
         rule_stack_push(stack, R_RET_DEF, true);
         rule_stack_push(stack, RETURN, false);
@@ -314,18 +324,22 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack) {
         rule_stack_push(stack, R_BRAC, false);
         rule_stack_push(stack, R_F_PAR_F, true);
         rule_stack_push(stack, L_BRAC, false);
+        break;
 
     case 48:
         rule_stack_push(stack, ID, false);
         rule_stack_push(stack, ID, false);
+        break;
 
     case 49:
         rule_stack_push(stack, ID, false);
         rule_stack_push(stack, UNDERSCR, false);
+        break;
 
     case 50:
         rule_stack_push(stack, TYPE, false);
         rule_stack_push(stack, ARROW, false);
+        break;
 
     default:
         break;
@@ -334,6 +348,18 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack) {
 
 RuleStackItemPtr error_skip(RuleStackPtr stack, TokenStackPtr token_stack) {
     printf("Error occured!\n");
+    int counter = 0;
+    printf("Remaining in stack:\n");
+    while (!(stack->empty)) {
+        printf("%02d: %02d - %d\n", counter++, stack->top->type, stack->top->rule);
+        rule_stack_pop(stack);
+    }
+    printf("Tokens in token stack:\n");
+    counter = 0;
+    while (!(token_stack->empty)) {
+        printf("%02d: %02d\n", counter++, token_stack->top->type);
+        token_stack_pop(token_stack);
+    }
     exit(2);
 }
 
