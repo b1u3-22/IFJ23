@@ -36,6 +36,7 @@ typedef enum {
     COMMA,
     ARROW,
     NIL,
+    UNDERSCR,
     NEWLINE,
     END,
     ERROR
