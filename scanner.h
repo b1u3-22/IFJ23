@@ -31,7 +31,8 @@ typedef enum {
     EQ,
     EQEQ,
     EXL,
-    EXLEQ
+    EXLEQ,
+    UNDERSCORE
 
 } scanner_states;
 

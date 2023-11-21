@@ -87,7 +87,10 @@ void parse_id(char c, bool* end) {
 
 void parse__id(int c, scanner_states* state, bool* true_end) {
     if (is_number(c) || is_letter(c) || (c == '_')) *state = IDENTIFICATOR;
-    else *true_end = true; // _ cannot be IDEN, so error
+    else {
+        *true_end = true;
+        *state = UNDERSCORE;
+    }
 }
 
 void parse_int_flp(int c, scanner_states* state, bool* true_end) {
@@ -229,6 +232,7 @@ token_types get_token_type(scanner_states* state, char c, char* data) {
     else if (*state == LARGER_EQ)   return LARGER_EQUALS;
     else if (*state == LESS)        return SMALLER_THAN;
     else if (*state == LESS_EQ)     return SMALLER_EQUALS;
+    else if (*state == UNDERSCORE)  return UNDERSCR;
     return ERROR;
 }
 
@@ -345,24 +349,22 @@ void get_next_token(TokenPtr token) {
 // int main() {
 //     // basic test usage
     
-//     TokenPtr token = token_init();
-//     get_next_token(token);
-//     printf("TYPE: %d, DATA: %s\n", token->type, token->data);
-//     unget_token(token);
-//     token_clear(token);
-//     get_next_token(token);
-//     printf("TYPE: %d, DATA: %s\n", token->type, token->data);
-//     token_clear(token);
-//     get_next_token(token);
-//     printf("TYPE: %d, DATA: %s\n", token->type, token->data);
-//     unget_token(token);
-//     token_clear(token);
-//     get_next_token(token);
-//     printf("TYPE: %d, DATA: %s\n", token->type, token->data);
-//     token_clear(token);
-//     get_next_token(token);
-//     printf("TYPE: %d, DATA: %s\n", token->type, token->data);
-//     token_clear(token);
-//     get_next_token(token);
-//     printf("TYPE: %d, DATA: %s\n", token->type, token->data);
-// } 
+    TokenPtr token = token_init();
+    get_next_token(token);
+    printf("TYPE: %d, DATA: %s\n", token->type, token->data);
+    token_clear(token);
+    get_next_token(token);
+    printf("TYPE: %d, DATA: %s\n", token->type, token->data);
+    token_clear(token);
+    get_next_token(token);
+    printf("TYPE: %d, DATA: %s\n", token->type, token->data);
+    token_clear(token);
+    get_next_token(token);
+    printf("TYPE: %d, DATA: %s\n", token->type, token->data);
+    token_clear(token);
+    get_next_token(token);
+    printf("TYPE: %d, DATA: %s\n", token->type, token->data);
+    token_clear(token);
+    get_next_token(token);
+    printf("TYPE: %d, DATA: %s\n", token->type, token->data);
+} 
