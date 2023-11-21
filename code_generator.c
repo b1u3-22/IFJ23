@@ -4,27 +4,10 @@
 
 
 
-#define inst(...) \
-    do {const char *instruction[] = {__VA_ARGS__}; \
-        size_t inst_len = sizeof(instruction) / sizeof(const char *); \
-        for (int i = 0; i < (int)inst_len; i++) { \
-            fputs(instruction[i], stdout); \
-        } \
-        fputs("\n", stdout); \
-    } while (0)
-	    
-#define part(...) \
-    do {const char *inst_part[] = {__VA_ARGS__}; \
-        size_t part_len = sizeof(inst_part) / sizeof(const char *); \
-        for (int i = 0; i < (int)part_len; i++) { \
-            fputs(inst_part[i], stdout); \
-        } \
-    } while (0)
+
+#include "code_generator.h"
 
 
-int label;
-int label_new = 1;
-string func_return;
 
 void code_header() {
 
@@ -32,7 +15,7 @@ void code_header() {
     inst("");
     inst("DEFVAR GF@!tmp_var1");
     inst("DEFVAR GF@!tmp_var2");
-    inst("DEFVAR GF@!result");
+    //inst("DEFVAR GF@!result");
     inst("JUMP &main");
 
 	builtin_read();
@@ -45,147 +28,212 @@ void code_header() {
 	builtin_chr();
 
     inst("LABEL &main");
-    inst("CREATEFRAME");
 
 }
 
 void code_footer() {
 
-    inst("POPFRAME");
     inst("CLEARS");
     inst("EXIT int@0");
 
 }
 
-void expression(expr) {
+void exp_instruction(rule, lasttype) {
 
-    switch(expr) {
+    switch (rule) {
+        case PLUS_RULE:
+            inst("ADDS");
+            break;
+        case MINUS_RULE:
+            inst("SUBS");
+            break;
+        case MULT_RULE:
+            inst("MULS");
+            break;
+        case DIV_RULE:
+            inst("DIVS");
+            break;
+        case LESS_RULE:
+            inst("LTS");
+            break;
+        case GREAT_RULE:
+            inst("GTS");
+            break;
+        case LESSEQ_RULE:
+            inst("GTS");
+            inst("NOTS");
+            break;
+        case GREATEQ_RULE:
+            inst("LTS");
+            inst("NOTS");
+            break;
+        case EQUAL_RULE:
+            inst("EQS");
+            break;
+        case NOTEQ_RULE:
+            inst("EQS");
+            inst("NOTS");
+            break;
+        case CONCAT_RULE:
+            inst("POPS GF@!tmp_var2");
+            inst("POPS GF@!tmp_var1");
+            inst("CONCAT GF@!tmp_var1 GF@!tmp_var1 GF@!tmp_var2");
+            inst("PUSHS GF@!tmp_var1");
+            break;
+        default:
+            break;
+    }
 
-        // +
-        printf("ADD GF@%s\n", var.name);
+}
 
-        // -
-        printf("SUB GF@%s\n", var.name);
+void def_var(var) {
 
-        // *
-        printf("MUL GF@%s\n", var.name);
+    if (depth == 0)
+        inst("DEFVAR GF@", var.name);
+    else
+        inst("DEFVAR LF@", var.name);
 
-        printf("DIV GF@%s\n", var.name);
+}
 
-        // +
-        printf("IDIV GF@%s\n", var.name);
+void set_var(var, sym) { ???????
 
-        // <
-        printf("LT GF@%s\n", var.name);
+    if (depth == 0)
+        inst("MOVE GF@", var.name, " GF@", sym);
+    else
+        inst("MOVE LF@", var.name, " GF@", sym);
 
-        // >
-        printf("GT GF@%s\n", var.name);
+    if (sym.type == var) {
 
-        // <=
-        printf("LT GF@%s\n", var.name);
-        printf("EQ GF@%s\n", var.name);
-        printf("OR GF@%s\n", var.name);
+        if (depth == 0)
+            inst("MOVE GF@", var.name, " GF@", sym.name);
+        else
+            inst("MOVE LF@", var.name, " GF@", sym.name);
+        
+    } else {
 
-        // >=
-        printf("GT GF@%s\n", var.name);
-        printf("EQ GF@%s\n", var.name);
-        printf("OR GF@%s\n", var.name);
+        switch (sym.type) {
+            case INT:
+                inst("PUSHS int@", sym);
+                break;
+            case FLOAT:
+                inst("PUSHS float@", sym);
+                break;
+            case STRING:
+                inst("PUSHS string@", sym);
+                break;
+            case BOOL:
+                if (sym)
+                    inst("PUSHS bool@true");
+                else
+                    inst("PUSHS bool@false");
+                break;
+            default:
+                return 1;
 
-        // ==
-        printf("EQ GF@%s\n", var.name);
+        }
 
-        printf("FLOAT2INT GF@%s\n", var.name);
+    }
 
-        printf("INT2FLOAT GF@%s\n", var.name);
+    pushtype = sym.valuetype;
 
-        printf("ADD GF@%s\n", var.name);
+}
+
+void push_sym(sym) {
+
+    if (sym.type == var) { ??????
+
+        if (depth == 0)
+            inst("PUSHS GF@", sym.name);
+        else
+            inst("PUSHS LF@", sym.name);
+        
+    } else {
+
+        switch (sym.type) {
+            case INT:
+                inst("PUSHS int@", sym);
+                break;
+            case FLOAT:
+                inst("PUSHS float@", sym);
+                break;
+            case STRING:
+                inst("PUSHS string@", sym);
+                break;
+            case BOOL:
+                if (sym)
+                    inst("PUSHS bool@true");
+                else
+                    inst("PUSHS bool@false");
+                break;
+            default:
+                return 1;
+
+        }
 
     }
 
 }
 
-void let_var(var) {
+void if_check() {
 
-    if (var.frame == "global")
-        printf("DEFVAR GF@%s\n", var.name);
-    else
-        printf("DEFVAR LF@%s\n", var.name);
+    inst("POPS GF@!tmp_var1");
+    inst("JUMPIFEQ @_if", if_new, " bool@false GF@!tmp_var1");
 
-}
+    inst("CREATEFRAME");
+    inst("PUSHFRAME");
 
-void set(var, exp) {
-
-    if (var.frame == "global")
-        printf("MOVE GF@%s GF@%s\n", var.name, exp);
-    else
-        printf("MOVE LF@%s GF@%s\n", var.name, exp);
+    if_num = if_new++;
+    depth++;
 
 }
 
-void frame_if(cond) {
+void if_end() { // else_start
 
-    if (cond.type == "var")
-        printf("JUMPIFEQ @label%d nil@nil GF@%s\n", label_new, cond.name);
-    else
-        printf("JUMPIFEQ @label%d bool@false GF@%s\n", label_new, cond.exp);
+    inst("POPFRAME");
+    inst("JUMP @_else", if_num);
+    inst("LABEL @_if", if_num);
 
-    label = label_new;
-    label_new++;
-
-    printf("CREATEFRAME\n");
-    printf("PUSHFRAME\n");
-
-}
-
-void frame_else() {
-
-    printf("POPFRAME\n");
-    printf("JUMP @label%d\n", label_new);
-    printf("LABEL @label%d\n", label);
-
-    label = label_new;
-    label_new++;
-
-    printf("CREATEFRAME\n");
-    printf("PUSHFRAME\n");
+    inst("CREATEFRAME");
+    inst("PUSHFRAME");
 
 }
 
 void if_else_end() {
 
-    printf("POPFRAME\n");
-    printf("LABEL @label%d\n", label);
+    inst("POPFRAME");
+    inst("LABEL @_else", if_num--);
 
-    label -= 2;
+    depth--;
 
 }
 
-void frame_while(cond) {
+void while_start() {
 
-    printf("LABEL @label%d\n", label_new);
+    inst("LABEL @_while", while_new);
 
-    label_new++;
+    while_num = while_new++;
 
-    if (cond.type == "var")
-        printf("JUMPIFEQ @label%d nil@nil GF@%s\n", label_new, cond.name);
-    else
-        printf("JUMPIFEQ @label%d bool@false GF@%s\n", label_new, cond.exp);
+}
 
-    label = label_new;
-    label_new++;
+void while_check() {
 
-    printf("CREATEFRAME\n");
-    printf("PUSHFRAME\n");
+    inst("POPS GF@!tmp_var1");
+    inst("JUMPIFEQ @_whilend", while_num, " bool@false GF@!tmp_var1");
+
+    inst("CREATEFRAME");
+    inst("PUSHFRAME");
+
+    depth++;
 
 }
 
 void while_end() {
 
-    printf("POPFRAME\n");
-    printf("JUMP @label%d\n", label-1);
-    printf("LABEL @label%d\n", label);
+    inst("POPFRAME\n");
+    inst("JUMP @_while", while_num);
+    inst("LABEL @_whilend", while_num--);
 
-    label -= 2;
+    depth--;
 
 }
 
