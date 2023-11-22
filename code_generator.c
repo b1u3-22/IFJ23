@@ -38,39 +38,39 @@ void code_footer() {
 
 }
 
-void exp_instruction(rule, lasttype) {
+void exp_instruction(ExpressionTypes type) {
 
-    switch (rule) {
-        case PLUS_RULE:
+    switch (type) {
+        case E_PLS:
             inst("ADDS");
             break;
-        case MINUS_RULE:
+        case E_MIN:
             inst("SUBS");
             break;
-        case MULT_RULE:
+        case E_MUL:
             inst("MULS");
             break;
-        case DIV_RULE:
+        case E_DIV:
             inst("DIVS");
             break;
-        case LESS_RULE:
+        case E_SM:
             inst("LTS");
             break;
-        case GREAT_RULE:
+        case E_GR:
             inst("GTS");
             break;
-        case LESSEQ_RULE:
+        case E_ESM:
             inst("GTS");
             inst("NOTS");
             break;
-        case GREATEQ_RULE:
+        case E_EGR:
             inst("LTS");
             inst("NOTS");
             break;
-        case EQUAL_RULE:
+        case E_E:
             inst("EQS");
             break;
-        case NOTEQ_RULE:
+        case E_NE:
             inst("EQS");
             inst("NOTS");
             break;
@@ -80,97 +80,74 @@ void exp_instruction(rule, lasttype) {
             inst("CONCAT GF@!tmp_var1 GF@!tmp_var1 GF@!tmp_var2");
             inst("PUSHS GF@!tmp_var1");
             break;
+        case E_QQ:
+            inst("POPS GF@!tmp_var2");
+            inst("POPS GF@!tmp_var1");
+            inst("JUMPIFEQ @_qq", qq_num, " GF@!tmp_var1 nil@nil");
+            inst("PUSHS GF@!tmp_var1");
+            inst("JUMP @_qqelse", qq_num);
+            inst("LABEL @_qq", qq_num);
+            inst("PUSHS GF@!tmp_var2");
+            inst("LABEL @_qqelse", qq_num++);
+        case E_EXC:
+            inst("NOTS");
         default:
             break;
     }
 
 }
 
-void def_var(var) {
+void def_var(TokenPtr var) {
 
     if (depth == 0)
-        inst("DEFVAR GF@", var.name);
+        inst("DEFVAR GF@", var->name);
     else
-        inst("DEFVAR LF@", var.name);
+        inst("DEFVAR LF@", var->name);
 
 }
 
-void set_var(var, sym) { ???????
+void set_var(TokenPtr var, TokenPtr sym) {
 
-    if (depth == 0)
-        inst("MOVE GF@", var.name, " GF@", sym);
-    else
-        inst("MOVE LF@", var.name, " GF@", sym);
+    if (var->frame == GLOBAL)
+        part("MOVE GF@", var->name);
+    else //(sym->frame == LOCAL)
+        part("MOVE LF@", var->name);
 
-    if (sym.type == var) {
+    if (sym->type == VAR) {
 
-        if (depth == 0)
-            inst("MOVE GF@", var.name, " GF@", sym.name);
-        else
-            inst("MOVE LF@", var.name, " GF@", sym.name);
-        
-    } else {
+        if (sym->frame == GLOBAL)
+            part(" GF@", sym->name);
+        else //(sym->frame == LOCAL)
+            part(" LF@", sym->name);
 
-        switch (sym.type) {
-            case INT:
-                inst("PUSHS int@", sym);
-                break;
-            case FLOAT:
-                inst("PUSHS float@", sym);
-                break;
-            case STRING:
-                inst("PUSHS string@", sym);
-                break;
-            case BOOL:
-                if (sym)
-                    inst("PUSHS bool@true");
-                else
-                    inst("PUSHS bool@false");
-                break;
-            default:
-                return 1;
-
-        }
-
-    }
-
-    pushtype = sym.valuetype;
+    } else if (sym->type == INT)
+        part(" int@", sym->value);
+    else if (sym->type == FLOAT)
+        part(" float@", sym->value);
+    else if (sym->type == STRING)
+        part(" string@", sym->value);
+    else //(sym->type == BOOL)
+        part(" bool@", sym->value);
 
 }
 
-void push_sym(sym) {
+void push_sym(TokenPtr sym) {
 
-    if (sym.type == var) { ??????
+    if (sym->type == VAR) {
 
-        if (depth == 0)
-            inst("PUSHS GF@", sym.name);
-        else
-            inst("PUSHS LF@", sym.name);
-        
-    } else {
+        if (sym->frame == GLOBAL)
+            inst("PUSHS GF@", sym->name);
+        else //(sym->frame == LOCAL)
+            inst("PUSHS LF@", sym->name);
 
-        switch (sym.type) {
-            case INT:
-                inst("PUSHS int@", sym);
-                break;
-            case FLOAT:
-                inst("PUSHS float@", sym);
-                break;
-            case STRING:
-                inst("PUSHS string@", sym);
-                break;
-            case BOOL:
-                if (sym)
-                    inst("PUSHS bool@true");
-                else
-                    inst("PUSHS bool@false");
-                break;
-            default:
-                return 1;
-
-        }
-
-    }
+    } else if (sym->type == INT)
+        inst("PUSHS int@", sym->value);
+    else if (sym->type == FLOAT)
+        inst("PUSHS float@", sym->value);
+    else if (sym->type == STRING)
+        inst("PUSHS string@", sym->value);
+    else //(sym->type == BOOL)
+        inst("PUSHS bool@", sym->value);
 
 }
 
@@ -237,28 +214,28 @@ void while_end() {
 
 }
 
-void func_start(func) {
+void func_start(char* func) {
 
     num = 0;
-    inst("LABEL ", func.name);
+    inst("LABEL @&", func);
     inst("PUSHFRAME");
 
 }
 
-void func_param() {
+void func_param(TokenPtr param) {
 
-    inst("DEFVAR LF@", param);
-    inst("MOVE LF@", param, " LF@%%", num++);
-
-}
-
-void func_return() {
-
-    inst("MOVE LF@%%retval LF@", var);
+    inst("DEFVAR LF@", param->name);
+    inst("MOVE LF@", param->name, " LF@%%", num++);
 
 }
 
-void func_end(func) {
+void func_return(TokenPtr var) {
+
+    inst("MOVE LF@%%retval LF@", var->name);
+
+}
+
+void func_end() {
 
     inst("POPFRAME");
     inst("RETURN");
@@ -273,17 +250,34 @@ void func_call() {
         
 }
 
-void func_call_param() {
+void func_call_param(TokenPtr param) {
 
     inst("DEFVAR TF@%%", num);
-    inst("MOVE TF@%%", num++, param);
+
+    if (param->type == VAR) {
+
+        if (param->frame == GLOBAL)
+            inst("MOVE TF@%%", num, " GF@", param->name);
+        else //(param->frame == LOCAL)
+            inst("MOVE TF@%%", num, " LF@", param->name);
+
+    } else if (param->type == INT)
+        inst("MOVE TF@%%", num, " int@", param->value);
+    else if (param->type == FLOAT)
+        inst("MOVE TF@%%", num, " float@", param->value);
+    else if (param->type == STRING)
+        inst("MOVE TF@%%", num, " string@", param->value);
+    else //(param->type == BOOL)
+        inst("MOVE TF@%%", num, " bool@", param->value);
+
+    num++;
 
 }
 
-void func_call_end() {
+void func_call_end(char* func) {
 
-    inst("CALL &", func.name);
-    inst("MOVE LF@", var, " TF@%%retval");
+    inst("CALL @&", func);
+    inst("PUSHS TF@%%retval");
 
 }
 
