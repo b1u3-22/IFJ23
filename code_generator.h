@@ -42,30 +42,69 @@ static unsigned int while_num = 0;
 static unsigned int while_new = 1;
 
 
-// FUNCTIONS
+///// FUNCTIONS /////
 
+// beginning of file (header and definition of builtin function)
 void code_header();
+
+// ending of file
 void code_footer();
+
+// make operation on stack
 void exp_instruction(ExpressionTypes type);
+
+// define variable
 void def_var(TokenPtr var);
+
+// set value to variable
 void set_var(TokenPtr var, TokenPtr sym);
+
+// push symbol to stack for further computing
 void push_sym(TokenPtr sym);
+
+// check condition (value on top of stack) and start of if
+// condition has to be calculated before this function
 void if_check();
+
+// end of if and start of else
 void if_end();
+
+// end of else
 void if_else_end();
+
+// start of while (called before condition is calculated)
 void while_start();
+
+// check condition (value on top of stack) and start of while
+// condition has to be calculated before this function
 void while_check();
+
+// end of while
 void while_end();
+
+// start of function definition
 void func_start(char* func);
+
+// define single parameter of function
 void func_param(TokenPtr param);
+
+// function return value
 void func_return(TokenPtr var);
+
+// end of function
 void func_end(func);
+
+// start of function call
 void func_call();
+
+// set value to single parameter of function
 void func_call_param(TokenPtr param);
+
+// end of function call
 void func_call_end(char* func);
 
 
-// BUILTIN FUNCTIONS
+///// BUILTIN FUNCTIONS /////
 
 void builtin_read();
 void builtin_write();
