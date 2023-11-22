@@ -6,13 +6,13 @@
 #define SYMTABLE_ID_ALLOC_BLOCK 5
 
 enum Types {
-    S_NO_TYPE,
     S_INT,
     S_INTQ,
+    S_STRING,
+    S_STRINGQ,
     S_DOUBLE,
     S_DOUBLEQ,
-    S_STRING,
-    S_STRINGQ
+    S_NO_TYPE
 };
 
 typedef struct SymTableItem {
