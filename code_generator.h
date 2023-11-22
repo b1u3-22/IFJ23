@@ -34,6 +34,7 @@
 
 
 static unsigned int num;
+static unsigned int qq_num = 0;
 static unsigned int depth = 0;
 static unsigned int if_num = 0;
 static unsigned int if_new = 1;
@@ -45,23 +46,23 @@ static unsigned int while_new = 1;
 
 void code_header();
 void code_footer();
-void exp_instruction(rule, lasttype);
-void def_var(var);
-void set_var(var, sym);
-void push_sym(sym);
+void exp_instruction(ExpressionTypes type);
+void def_var(TokenPtr var);
+void set_var(TokenPtr var, TokenPtr sym);
+void push_sym(TokenPtr sym);
 void if_check();
 void if_end();
 void if_else_end();
 void while_start();
 void while_check();
 void while_end();
-void func_start(func);
-void func_param();
-void func_return();
+void func_start(char* func);
+void func_param(TokenPtr param);
+void func_return(TokenPtr var);
 void func_end(func);
 void func_call();
-void func_call_param();
-void func_call_end();
+void func_call_param(TokenPtr param);
+void func_call_end(char* func);
 
 
 // BUILTIN FUNCTIONS
