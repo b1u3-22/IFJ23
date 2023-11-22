@@ -17,6 +17,7 @@ int parse() {
     bool new_line = true;
 
     while (token->type != END && !(rule_stack->empty)) {
+        //printf("Token type: %02d\n", token->type);
         // ===================== Handling of newlines that some things require =====================
         if (token->type == NEWLINE) {
             token_stack_pop(token_stack); // Don't save newlines in token_stack
@@ -49,6 +50,7 @@ int parse() {
             rule_to_apply = ll_table[rule_stack->top->type][token->type];
             printf("[%02d, %02d]: %02d\n", rule_stack->top->type, token->type, rule_to_apply);
             apply_rule(rule_to_apply, rule_stack, token_stack);
+            if (rule_to_apply == 20) token = token_stack_get(token_stack); // quick fix for if and while conditions being expressions
         }
 
         else if (rule_stack->top->type == token->type) {
@@ -63,7 +65,7 @@ int parse() {
         }
     } // main while
 
-    if (rule_stack->empty) {
+    if (rule_stack->empty || (rule_stack->data_pos == 0 && rule_stack->top->type == R_G_BODY)) {
         printf("Success! Nothing remaining in parser stack!\n");
         return 0;
     }
@@ -235,7 +237,7 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack) {
     case 25:
         // PSA run from here
         token_stack_unget(token_stack);
-
+    
     case 20:
     case 52:
         token_stack_unget(token_stack);
