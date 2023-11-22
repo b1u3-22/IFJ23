@@ -10,7 +10,7 @@ run: all
 clean:
 	rm -rf ./*.o
 
-parser: parser.o token.o token_stack.o scanner.o
+parser: parser.o token.o rule_stack.o scanner.o expression.o expression_stack.o token_stack.o
 	$(CC) $(LDFLAGS) -o $@ $^ 
 
 scanner: scanner.o token.o
@@ -22,11 +22,20 @@ scanner.o: scanner.c scanner.h token.h
 token.o: token.h token.c
 	$(CC) $(CFLAGS) -c -o $@ token.c
 
-token_stack.o: token_stack.h token_stack.c token.h
-	$(CC) $(CFLAGS) -c -o $@ token_stack.c
+rule_stack.o: rule_stack.h rule_stack.c token.h
+	$(CC) $(CFLAGS) -c -o $@ rule_stack.c
 
 symtable.o: symtable.h symtable.c
 	$(CC) $(CFLAGS) -c -o $@ symtable.c
 
-parser.o: parser.h parser.c token_stack.h token.h scanner.h
+parser.o: parser.h parser.c rule_stack.h token.h scanner.h expression.h expression_stack.h token_stack.h
 	$(CC) $(CFLAGS) -c -o $@ parser.c
+
+expression.o: expression.h expression.c token.h scanner.h expression_stack.h
+	$(CC) $(CFLAGS) -c -o $@ expression.c
+
+expression_stack.o: expression_stack.h expression_stack.c
+	$(CC) $(CFLAGS) -c -o $@ expression_stack.c
+
+token_stack.o: token_stack.h token_stack.c scanner.h token.h
+	$(CC) $(CFLAGS) -c -o $@ token_stack.c
