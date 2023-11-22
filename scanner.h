@@ -4,6 +4,7 @@
 #define _TOKEN
 #include "token.h"
 #endif
+#include "symtable.h"
 
 typedef enum {
     START,
@@ -37,7 +38,8 @@ typedef enum {
     LINE_COMMENT,
     BLOCK_COMMENT,
     BLOCK_COMMENT_OUT,
-    BLOCK_COMMENT_IN
+    BLOCK_COMMENT_IN,
+    TYPEQ
 } scanner_states;
 
 static const char ALLOWED_BACKSLASH_CHARS[] = {'\"', 'u', 'n', 't', 'r', '\\', '\0'};  // WARNING: do not remove '\0',

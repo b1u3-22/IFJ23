@@ -16,6 +16,11 @@ SymTableItemPtr symtable_item_init() {
     item->id = NULL;
     item->type = NULL;
     item->next = NULL;
+    item->isFunction = NULL;
+    item->isVar = NULL;
+    item->value = NULL;
+    item->depth = NULL;
+    item->block = NULL;
 
     return item;
 }
@@ -28,7 +33,7 @@ SymTablePtr symtable_init() {
 
 bool symtable_add_item(SymTablePtr symtable, SymTableItemPtr item) {
     int hash = symtable_get_hash(item->id);
-    SymTableItemPtr previous = symtable[hash]
+    SymTableItemPtr previous = symtable[hash];
     symtable[hash] = item;
     item->next = previous;
     return true;
@@ -42,7 +47,7 @@ SymTableItemPtr symtable_get_item(SymTablePtr symtable, char *id) {
 
 void symtable_item_dispose(SymTableItemPtr item) {
     if (item->id) free(item->id);
-    if (item->type) free(item->type);
+    if (item->value) free(item->value);
     free(item);
 }
 

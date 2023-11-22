@@ -47,6 +47,7 @@ typedef struct Token {
     int data_len;
     int data_allocd;
     int type;
+    int value_type;
 } *TokenPtr;
 
 /** Initialize token
