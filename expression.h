@@ -65,7 +65,7 @@ static const int p_table[P_TABLE_SIZE][P_TABLE_SIZE] =
     {E_SFT, E_SFT, E_SFT, E_SFT, E_SFT, E_SFT, E_SFT, E_SFT, E_SFT, E_SFT, E_SFT, E_SFT, E_SFT, E_SFT, E_SFT, E_SFT, E_SCS},    // EN   16
 };
 
-int parse_expression();
-void expression_get_next_token(TokenStackPtr stack, int end_type, int *type);
+int parse_expression(int end_type, TokenStackPtr sa_stack);
+void expression_get_next_token(TokenStackPtr stack, int end_type, int *type, TokenStackPtr sa_stack);
 int get_translated_type(TokenPtr token);
 bool apply_expression_rule(ExpressionStackPtr stack);

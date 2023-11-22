@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "expression.h"
 #include "rule_stack.h"
+#include "semantics_analyzer.h"
 
 #ifndef _TOKEN
 #define _TOKEN
@@ -44,6 +45,18 @@ enum Rules {
     R_F_RET_DEF
 };
 
+enum Function {
+    F_P_PUSH_1,
+    F_P_PUSH_2,
+    F_P_PSA,
+    F_S_VAR_DEC,
+    F_S_VAR_DEF,
+    F_S_VAL_ASG,
+    F_S_FUN_ASG,
+    F_S_FUN_CAL,
+    F_S_FUN_DEF
+};
+
 static const int ll_table[LL_TABLE_ROW][LL_TABLE_COL] = 
 {  // 0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24  25  26  27  28  29  30  31  32  33
     {37,  0,  0, 16, 15,  0, 10, 41,  1,  2,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 45,  0,  0,  0,  0,  0, 45},   //  0
@@ -76,6 +89,8 @@ int parse();
  * @param stack TokenStackPtr
 */  
 void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack);
+
+void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, TokenStackPtr stack_1, TokenStackPtr stack_2);
 
 /** Skip to the next sequence of tokens.
  *  This is used when syntax error occures. 
