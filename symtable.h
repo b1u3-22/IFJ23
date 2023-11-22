@@ -5,10 +5,25 @@
 #define SYMBTABLE_SIZE 49999 // Has to be a prime number
 #define SYMTABLE_ID_ALLOC_BLOCK 5
 
+enum Types {
+    S_NO_TYPE,
+    S_INT,
+    S_INTQ,
+    S_DOUBLE,
+    S_DOUBLEQ,
+    S_STRING,
+    S_STRINGQ
+};
+
 typedef struct SymTableItem {
-        char *id;                   // ID has to be allocated for item
-        char *type;                 // Type too
-        struct SymTableItem *next;
+    char *id;                   // ID has to be allocated for item
+    int type;                   // Type too
+    bool isFunction;
+    bool isVar;
+    struct SymTableItem *next;
+    char *value;
+    int depth;
+    int block;
 } *SymTableItemPtr;
 
 typedef SymTableItemPtr *SymTablePtr;
