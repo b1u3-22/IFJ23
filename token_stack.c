@@ -7,6 +7,8 @@ TokenStackPtr token_stack_init() {
     new_stack->tokens_cap = 0;
     new_stack->tokens_pos = -1;
     new_stack->tokens = NULL;
+    new_stack->empty = true;
+    return new_stack;
 }
 
 TokenPtr token_stack_create_token(TokenStackPtr stack) {
@@ -37,7 +39,23 @@ bool token_stack_push(TokenStackPtr stack, TokenPtr token) {
 bool token_stack_pop(TokenStackPtr stack) {
     if (stack->empty) return false;
 
+    //token_dispose(stack->tokens[stack->tokens_pos--]);
+    stack->tokens_pos--;
+    if (stack->tokens_pos == -1) {
+        stack->empty = true;
+        stack->top = NULL;
+    }
+    else {
+        stack->top = stack->tokens[stack->tokens_pos];
+    }
+    return true;
+}
+
+void token_stack_pop_free(TokenStackPtr stack) {
+    if (stack->empty) return false;
+
     token_dispose(stack->tokens[stack->tokens_pos--]);
+    stack->tokens_pos--;
     if (stack->tokens_pos == -1) {
         stack->empty = true;
         stack->top = NULL;
@@ -50,7 +68,7 @@ bool token_stack_pop(TokenStackPtr stack) {
 
 void token_stack_dispose(TokenStackPtr stack) {
     while (!(stack->empty)) {
-        token_stack_pop(stack);
+        token_stack_pop_free(stack);
     }
     free(stack);
 }
