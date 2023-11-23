@@ -52,7 +52,7 @@ bool token_stack_pop(TokenStackPtr stack) {
 }
 
 void token_stack_pop_free(TokenStackPtr stack) {
-    if (stack->empty) return false;
+    if (stack->empty) return;
 
     token_dispose(stack->tokens[stack->tokens_pos--]);
     stack->tokens_pos--;
@@ -63,7 +63,6 @@ void token_stack_pop_free(TokenStackPtr stack) {
     else {
         stack->top = stack->tokens[stack->tokens_pos];
     }
-    return true;
 }
 
 void token_stack_dispose(TokenStackPtr stack) {
