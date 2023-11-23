@@ -16,8 +16,8 @@ enum Types {
 };
 
 typedef struct SymTableItem {
-    char *id;                   // ID has to be allocated for item
-    int type;                   // Type too
+    char *id;                   // identifier
+    int type;                   // data type
     bool isFunction;
     bool isVar;
     bool isDefined;
@@ -25,6 +25,7 @@ typedef struct SymTableItem {
     char *value;
     int depth;
     int block;
+    ParamStackPtr paramStack;
 } *SymTableItemPtr;
 
 typedef SymTableItemPtr *SymTablePtr;
