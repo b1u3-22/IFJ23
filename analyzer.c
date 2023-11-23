@@ -14,7 +14,7 @@ AnalyzerPtr analyzer_init(SymTablePtr symtable) {
 int check_declaration(AnalyzerPtr analyzer, TokenStackPtr token_stack) {
     //check for redeclaration
     SymTableItemPtr itemToCompare = symtable_get_item(analyzer->symtable, token_stack->tokens[1]->data);
-    if (!itemToCompare) {
+    if (itemToCompare) {
         if (itemToCompare->depth == analyzer->depth && itemToCompare->block == analyzer->block[analyzer->depth]) return 3;
     }
     
@@ -50,15 +50,13 @@ int check_declaration(AnalyzerPtr analyzer, TokenStackPtr token_stack) {
 
     symtable_add_item(analyzer->symtable, newItem);
 
-    while (!(token_stack->empty)) token_stack_pop(token_stack);
-
     return 0;
 }
 
 int check_definition(AnalyzerPtr analyzer, TokenStackPtr token_stack_left, TokenStackPtr token_stack_right) {
     //check for redeclaration
     SymTableItemPtr itemToCompare = symtable_get_item(analyzer->symtable, token_stack_left->tokens[1]->data);
-    if (!itemToCompare) {
+    if (itemToCompare) {
         if (itemToCompare->depth == analyzer->depth && itemToCompare->block == analyzer->block[analyzer->depth]) return 3;
     }
 
@@ -160,6 +158,33 @@ int check_function_call(AnalyzerPtr analyzer, TokenStackPtr token_stack_left, To
 }
 
 int check_function_definition(AnalyzerPtr analyzer, TokenStackPtr token_stack_id, TokenStackPtr token_stack_param) {
+    //check if redefining function
+    //here should be something like symtable_get_function_item
+    SymTableItemPtr functionId = symtable_get_item(analyzer->symtable, token_stack_id->tokens[0]->data)
+    if (functionId) return 3;
+    
+    //everything is okay, create new item
+    SymTableItemPtr newItem = symtable_item_init();
+    newItem->id = token_stack_id->tokens[0]->data;
+    newItem->depth = analyzer->depth;
+    newItem->block = analyzer->block[analyzer->depth];
+    newItem->isDefined = true;
+    newItem->isFunction = true;
+    newItem->isVar = NULL;
+    newItem->value = NULL;
+    
+    //newItem->paramStack
+    while (!(token_stack_param->empty)) {
+        
+    }
+
+    //newItem->type
+    if (token_stack_id->top->type == TYPE) {
+        newItem->type = token_stack_id->top->value_type;
+    } else {
+        newItem->type = NULL; //void function
+    }
+
     return 0;
 }
 

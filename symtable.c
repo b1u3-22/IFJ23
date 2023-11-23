@@ -14,14 +14,12 @@ SymTableItemPtr symtable_item_init() {
 
     // Set properties
     item->id = NULL;
-    item->type = NULL;
     item->next = NULL;
     item->isFunction = NULL;
     item->isVar = NULL;
     item->isDefined = NULL;
     item->value = NULL;
-    item->depth = NULL;
-    item->block = NULL;
+    item->paramStack = NULL;
 
     return item;
 }
