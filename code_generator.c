@@ -18,6 +18,9 @@ void code_header() {
     //inst("DEFVAR GF@!result");
     inst("JUMP @&&main");
 
+    auxil_divdecider();
+    auxil_qqdecider();
+	
     builtin_read();
     builtin_write();
     builtin_int2float();
