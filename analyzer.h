@@ -43,3 +43,5 @@ void decrease_depth(AnalyzerPtr analyzer);
 int check_is_not_defined(AnalyzerPtr analyzer, TokenStackPtr token_stack);
 
 int check_error_7_8(AnalyzerPtr analyzer, int data_type, TokenStackPtr token_stack);
+
+SymTableItemPtr get_nearest_item(AnalyzerPtr analyzer, char* id);
