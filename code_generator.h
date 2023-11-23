@@ -36,8 +36,6 @@
 
 
 static unsigned int num;
-static unsigned int qq_num = 0;
-static unsigned int depth = 0;
 static unsigned int if_num = 0;
 static unsigned int if_new = 1;
 static unsigned int while_num = 0;
@@ -104,6 +102,12 @@ void func_call_param(SymTableItemPtr param);
 
 // end of function call
 void func_call_end(char* func);
+
+
+///// AUXILIARY FUNCTIONS /////
+
+void auxil_divdecider();
+void auxil_qqdecider();
 
 
 ///// BUILTIN FUNCTIONS /////
