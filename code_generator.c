@@ -15,9 +15,10 @@ void code_header() {
     inst("");
     inst("DEFVAR GF@!tmp_var1");
     inst("DEFVAR GF@!tmp_var2");
-    //inst("DEFVAR GF@!result");
+    inst("DEFVAR GF@!tmp_var3");
     inst("JUMP @&&main");
 
+    auxil_opdecider()
     auxil_divdecider();
     auxil_qqdecider();
 	
@@ -45,12 +46,15 @@ void exp_instruction(int type) {
 
     switch (type) {
         case E_PLS:
-            inst("ADDS");
+            inst("CALL @&&opdecider");
+	    inst("ADDS");
             break;
         case E_MIN:
+	    inst("CALL @&&opdecider");
             inst("SUBS");
             break;
         case E_MUL:
+	    inst("CALL @&&opdecider");
             inst("MULS");
             break;
         case E_DIV:
@@ -268,14 +272,41 @@ void func_call_end(char* func) {
 
 // AUXILIARY FUNCTIONS
 
+void auxil_opdecider() {
+
+    inst("LABEL @&&opdecider");
+    inst("POPS GF@!tmp_var1");
+    inst("POPS GF@!tmp_var2");
+    inst("TYPE GF@!tmp_var3 GF@!tmp_var2");
+    inst("PUSHS GF@!tmp_var2");
+    inst("JUMPIFEQ @&&op GF@!tmp_var3 string@int");
+	
+    inst("TYPE GF@!tmp_var3 GF@!tmp_var1");
+    inst("JUMPIFEQ @&&opend GF@!tmp_var2 string@float");
+
+    inst("INT2FLOAT GF@!tmp_var1 GF@!tmp_var1");
+    inst("JUMP @&&opend");
+	
+    inst("LABEL @&&op");
+    inst("TYPE GF@!tmp_var3 GF@!tmp_var1");
+    inst("JUMPIFEQ @&&opend GF@!tmp_var3 string@int");
+	
+    inst("INT2FLOATS");
+	
+    inst("LABEL @&&opend");
+    inst("PUSHS GF@!tmp_var1");
+    inst("RETURN");
+
+}
+
 void auxil_divdecider() {
 
     inst("LABEL @&&divdecider");
     inst("POPS GF@!tmp_var1");
     inst("TYPE GF@!tmp_var2 GF@!tmp_var1");
     inst("PUSHS GF@!tmp_var1");
-	
     inst("JUMPIFEQ @&&dd GF@!tmp_var2 string@int");
+	
     inst("DIVS");
     inst("JUMP @&&ddend");
 	
@@ -292,8 +323,8 @@ void auxil_qqdecider() {
     inst("LABEL @&&qqdecider");
     inst("POPS GF@!tmp_var2");
     inst("POPS GF@!tmp_var1");
-	
     inst("JUMPIFEQ @&&qq GF@!tmp_var1 nil@nil");
+	
     inst("PUSHS GF@!tmp_var1");
     inst("JUMP @&&qqend");
 	
