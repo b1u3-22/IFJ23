@@ -103,6 +103,7 @@ void func_call_end(char* func);
 
 ///// AUXILIARY FUNCTIONS /////
 
+void auxil_opdecider();
 void auxil_divdecider();
 void auxil_qqdecider();
 
