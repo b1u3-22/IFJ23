@@ -85,7 +85,7 @@ void expression_get_next_token(TokenStackPtr stack, int end_type, int *type, Tok
     }
     else {
         token_stack_unget(stack);
-        *type = get_translated_type(stack->top->type);
+        *type = get_translated_type(stack->top);
     }
 }
 
