@@ -102,14 +102,14 @@ void def_var(SymTableItemPtr var) {
 
 }
 
-void set_var(SymTableItemPtr var, SymTableItemPtr sym) {
+void set_var(SymTableItemPtr var) {
 
     if (var->depth == 0)
-        part("MOVE GF@", var->id);
+        inst("POP GF@", var->id);
     else //(sym->frame == LOCAL)
-        part("MOVE LF@", var->id);
+        inst("POP LF@", var->id);
 
-    if (sym->isVar == true) {
+    /*if (sym->isVar == true) {
 
         if (sym->depth == 0)
             inst(" GF@", sym->id);
@@ -122,7 +122,7 @@ void set_var(SymTableItemPtr var, SymTableItemPtr sym) {
         inst(" float@", sym->value);
     else // (sym->type == S_STRING)
         inst(" string@", sym->value);
-    /*else //(sym->type == BOOL)
+    else //(sym->type == BOOL)
         inst(" bool@", sym->value);*/
 
 }
@@ -213,14 +213,8 @@ void func_start(char* func) {
 
 void func_param(SymTableItemPtr param) {
 
-    inst("DEFVAR LF@", param->name);
-    inst("MOVE LF@", param->name, " LF@%%", num++);
-
-}
-
-void func_return(SymTableItemPtr var) {
-
-    inst("MOVE LF@%%retval LF@", var->name);
+    inst("DEFVAR LF@", param->id);
+    inst("MOVE LF@", param->id, " LF@%%", num++);
 
 }
 
@@ -235,7 +229,6 @@ void func_call() {
 
     num = 0;
     inst("CREATEFRAME");
-    inst("DEFVAR TF@%%retval");
         
 }
 
@@ -266,7 +259,6 @@ void func_call_param(SymTableItemPtr param) {
 void func_call_end(char* func) {
 
     inst("CALL @&", func);
-    inst("PUSHS TF@%%retval");
 
 }
 
