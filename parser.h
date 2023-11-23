@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "expression.h"
 #include "rule_stack.h"
+#include "analyzer.h"
 
 #ifndef _TOKEN
 #define _TOKEN
@@ -16,6 +17,11 @@
 #ifndef _TOKEN_STACK
 #define _TOKEN_STACK
 #include "token_stack.h"
+#endif
+
+#ifndef _SYMTABLE
+#define _SYMTABLE
+#include "symtable.h"
 #endif
 
 #define LL_TABLE_COL 34
@@ -42,6 +48,20 @@ enum Rules {
     R_RET_DEF,
     R_F_DEF_ID,
     R_F_RET_DEF
+};
+
+enum Function {
+    F_P_PUSH_1,     // Push to Stack 1 for semantic analyzer
+    F_P_PUSH_2,     // Push to Stack 2 for semantic analyzer
+    F_P_PSA,        // Start expression parser
+    F_S_INC_DEP,    // Increase depth in semantic analyzer
+    F_S_DEC_DEP,    // Decrease depth in semantic analyzer
+    F_S_VAR_DEC,    // Check variable declaration with analyzer
+    F_S_VAR_DEF,    // Check variable definition with analyzer
+    F_S_VAL_ASG,    // Check value assigment with analyzer      e.g. a = 5 + b
+    F_S_FUN_ASG,    // Check function assigment with analyzer   e.g. a = b(5, a : c)   
+    F_S_FUN_CAL,    // Check function call
+    F_S_FUN_DEF     // Check function definition
 };
 
 static const int ll_table[LL_TABLE_ROW][LL_TABLE_COL] = 
@@ -76,6 +96,8 @@ int parse();
  * @param stack TokenStackPtr
 */  
 void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack);
+
+void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, TokenStackPtr stack_1, TokenStackPtr stack_2, AnalyzerPtr analyzer);
 
 /** Skip to the next sequence of tokens.
  *  This is used when syntax error occures. 
