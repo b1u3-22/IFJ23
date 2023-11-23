@@ -1,8 +1,11 @@
 #include "parser.h"
 
 int parse() {
-    // AnalyzerPtr analyzer = init_analyzer();
-    // if (!analyzer) return 99;
+    SymTablePtr symtable = symtable_init();
+    if (!symtable) return 99;
+
+    AnalyzerPtr analyzer = init_analyzer(symtable);
+    if (!analyzer) return 99;
 
     TokenStackPtr token_stack = token_stack_init();
     if (!token_stack) return 99; // If token initialization fails, return error code 99 
@@ -57,7 +60,7 @@ int parse() {
 
         // ==================================== End of newline handling ====================================
         if (rule_stack->top->function) {
-           apply_function(rule_stack->top->type, rule_stack, token, sa_1, sa_2);
+           apply_function(rule_stack->top->type, rule_stack, token, sa_1, sa_2, analyzer);
         }
 
         else if (rule_stack->top->rule) { // Search for rule in LL table if we have rule at top of our rule_stack
@@ -166,6 +169,7 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack) {
 
     case 5:
         rule_stack_push(stack, F_S_VAR_DEC, false, true);
+        break;
 
     case 6:
         rule_stack_push(stack, R_VAR_ASG, true, false);
@@ -176,6 +180,7 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack) {
 
     case 8:
         rule_stack_push(stack, F_S_VAR_DEC, false, true);
+        break;
 
     case 7:
     case 9:
@@ -187,11 +192,13 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack) {
     case 10:
         rule_stack_push(stack, R_G_BODY, true, false);
         rule_stack_push(stack, R_CBRAC, false, false);
+        rule_stack_push(stack, F_S_DEC_DEP, false, true);
         rule_stack_push(stack, R_BODY, true, false);
+        rule_stack_push(stack, F_S_INC_DEP, false, true);
         rule_stack_push(stack, L_CBRAC, false, false);
         rule_stack_push(stack, R_F_RET_DEF, true, false);
         rule_stack_push(stack, R_BRAC, false, false);
-        rule_stack_push(stack, F_S_FUN_DEF, false, true);
+        rule_stack_push(stack, F_S_FUN_DEF, false, true); 
         rule_stack_push(stack, R_F_DEF_F, true, false);
         rule_stack_push(stack, L_BRAC, false, false);
         rule_stack_push(stack, ID, false, false);
@@ -218,11 +225,15 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack) {
     case 15:
         rule_stack_push(stack, R_G_BODY, true, false);
         rule_stack_push(stack, R_CBRAC, false, false);
+        rule_stack_push(stack, F_S_DEC_DEP, false, true);
         rule_stack_push(stack, R_BODY, true, false);
+        rule_stack_push(stack, F_S_INC_DEP, false, true);
         rule_stack_push(stack, L_CBRAC, false, false);
         rule_stack_push(stack, ELSE, false, false);
         rule_stack_push(stack, R_CBRAC, false, false);
+        rule_stack_push(stack, F_S_DEC_DEP, false, true);
         rule_stack_push(stack, R_BODY, true, false);
+        rule_stack_push(stack, F_S_INC_DEP, false, true);
         rule_stack_push(stack, L_CBRAC, false, false);
         rule_stack_push(stack, R_CON_DEF, true, false);
         rule_stack_push(stack, IF, false, false);
@@ -231,7 +242,9 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack) {
     case 16:
         rule_stack_push(stack, R_G_BODY, true, false);
         rule_stack_push(stack, R_CBRAC, false, false);
+        rule_stack_push(stack, F_S_DEC_DEP, false, true);
         rule_stack_push(stack, R_BODY, true, false);
+        rule_stack_push(stack, F_S_INC_DEP, false, true);
         rule_stack_push(stack, L_CBRAC, false, false);
         rule_stack_push(stack, R_CON_DEF, true, false);
         rule_stack_push(stack, WHILE, false, false);
@@ -240,11 +253,15 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack) {
     case 17:
         rule_stack_push(stack, R_BODY, true, false);
         rule_stack_push(stack, R_CBRAC, false, false);
+        rule_stack_push(stack, F_S_DEC_DEP, false, true);
         rule_stack_push(stack, R_BODY, true, false);
+        rule_stack_push(stack, F_S_INC_DEP, false, true);
         rule_stack_push(stack, L_CBRAC, false, false);
         rule_stack_push(stack, ELSE, false, false);
         rule_stack_push(stack, R_CBRAC, false, false);
+        rule_stack_push(stack, F_S_DEC_DEP, false, true);
         rule_stack_push(stack, R_BODY, true, false);
+        rule_stack_push(stack, F_S_INC_DEP, false, true);
         rule_stack_push(stack, L_CBRAC, false, false);
         rule_stack_push(stack, R_CON_DEF, true, false);
         rule_stack_push(stack, IF, false, false);
@@ -253,7 +270,9 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack) {
     case 18:
         rule_stack_push(stack, R_BODY, true, false);
         rule_stack_push(stack, R_CBRAC, false, false);
+        rule_stack_push(stack, F_S_DEC_DEP, false, true);
         rule_stack_push(stack, R_BODY, true, false);
+        rule_stack_push(stack, F_S_INC_DEP, false, true);
         rule_stack_push(stack, L_CBRAC, false, false);
         rule_stack_push(stack, R_CON_DEF, true, false);
         rule_stack_push(stack, WHILE, false, false);
@@ -286,7 +305,6 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack) {
 
     case 24:
     case 25:
-        // PSA run from here
         token_stack_unget(token_stack);
     
     case 20:
@@ -337,12 +355,14 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack) {
         rule_stack_push(stack, R_G_BODY, true, false);
         rule_stack_push(stack, R_STAT, true, false);
         rule_stack_push(stack, ID, false, false);
+        rule_stack_push(stack, F_P_PUSH_1, false, true);
         break;
 
     case 38:
         rule_stack_push(stack, R_BODY, true, false);
         rule_stack_push(stack, R_STAT, true, false);
         rule_stack_push(stack, ID, false, false);
+        rule_stack_push(stack, F_P_PUSH_1, false, true);
         break;
 
     case 39:
@@ -399,7 +419,7 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack) {
     }
 }
 
-void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, TokenStackPtr stack_1, TokenStackPtr stack_2) {
+void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, TokenStackPtr stack_1, TokenStackPtr stack_2, AnalyzerPtr analyzer) {
     rule_stack_pop(rule_stack);
 
     switch (function) {
@@ -412,23 +432,29 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
         case F_P_PUSH_2:
             token_stack_push(stack_2, token);
             break;
+        case F_S_INC_DEP:
+            increase_depth(analyzer);
+            break;
+        case F_S_DEC_DEP:
+            decrease_depth(analyzer);
+            break;
         case F_S_VAR_DEC:
-            check_declaration(stack_1);
+            check_declaration(analyzer, stack_1);
             break; 
         case F_S_VAR_DEF:
-            check_definition(stack_1, stack_2);
+            check_definition(analyzer, stack_1, stack_2);
             break;
         case F_S_VAL_ASG:
-            check_value_assingment(stack_1, stack_2);
+            check_value_assingment(analyzer, stack_1, stack_2);
             break;
         case F_S_FUN_ASG:
-            check_function_assingment(stack_1, stack_2);
+            check_function_assingment(analyzer, stack_1, stack_2);
             break;
         case F_S_FUN_CAL:
-            check_function_call(stack_1, stack_2);
+            check_function_call(analyzer, stack_1, stack_2);
             break;
         case F_S_FUN_DEF:
-            check_function_definition(stack_1);
+            check_function_definition(analyzer, stack_1);
             break;
         default:
             break;
