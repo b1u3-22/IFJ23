@@ -31,8 +31,6 @@ int parse() {
 
     while (!(rule_stack->empty)) {
         if (token->type == ERROR) exit(1); // Lexical error occured
-
-        //printf("Token data: %s\n", token->data); 
         // ===================== Handling of newlines that some things require =====================
         if (token->type == NEWLINE) {
             token_stack_pop(token_stack); // Don't save newlines in token_stack
@@ -59,14 +57,13 @@ int parse() {
 
         // ==================================== End of newline handling ====================================
         if (rule_stack->top->function) {
-           apply_function(rule_stack->top->type, rule_stack, token, sa_1, sa_2, analyzer);
+           apply_function(rule_stack->top->type, rule_stack, token, token_stack, sa_1, sa_2, analyzer);
         }
 
         else if (rule_stack->top->rule) { // Search for rule in LL table if we have rule at top of our rule_stack
             rule_to_apply = ll_table[rule_stack->top->type][token->type];
             printf("[%02d, %02d]: %02d\n", rule_stack->top->type, token->type, rule_to_apply);
             apply_rule(rule_to_apply, rule_stack, token_stack);
-            if (rule_to_apply == 20) token = token_stack_get(token_stack); // quick fix for if and while conditions being expressions
         }
 
         else if (rule_stack->top->type == token->type) {
@@ -327,11 +324,12 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack) {
     case 24:
     case 25:
         errors += token_stack_unget(token_stack);
-    
-    case 20:
+
+    case 20:    
     case 52:
         errors += token_stack_unget(token_stack);
         errors += rule_stack_pop(stack);
+        errors += rule_stack_push(stack, F_P_GET_T, false, true);
         errors += rule_stack_push(stack, F_P_PSA, false, true);
         break;
 
@@ -446,11 +444,14 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack) {
     if (errors > 0) exit(99);
 }
 
-void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, TokenStackPtr stack_1, TokenStackPtr stack_2, AnalyzerPtr analyzer) {
+void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, TokenStackPtr token_stack, TokenStackPtr stack_1, TokenStackPtr stack_2, AnalyzerPtr analyzer) {
     rule_stack_pop(rule_stack);
     int return_code = 0;
 
     switch (function) {
+        case F_P_GET_T: 
+            token = token_stack_get(token_stack);
+            break;
         case F_P_PSA:
             if (return_code = parse_expression(END, stack_2)) exit(return_code);
             break;
@@ -485,10 +486,10 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
             if (return_code = check_function_definition(analyzer, stack_1, stack_2)) exit(return_code);
             break;
         case F_G_DEF_VAR:
-            def_var(get_nearest_item(analyzer, stack_1->tokens[1]->data));
+            //def_var(get_nearest_item(analyzer, stack_1->tokens[1]->data));
             break;  
         case F_G_SET_VAR:
-            set_var(get_nearest_item(analyzer, stack_1->tokens[1]->data));
+            //set_var(get_nearest_item(analyzer, stack_1->tokens[1]->data));
             break;  
         case F_G_PUSH:
             break;     

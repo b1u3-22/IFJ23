@@ -529,8 +529,21 @@ void get_next_token(TokenPtr token) {
 }
 
 // int main() {
+//     // while (true) {
+//     //     TokenPtr token = token_init();
+//     //     get_next_token(token);
+//     //     if (token->type == END) break;
+//     //     printf("TYPE: %d, DATA: %s\n", token->type, token->data);
+
+//     // }
+
 //     TokenPtr token = token_init();
 //     get_next_token(token);
-//     printf("TYPE: %d, DATA: %s, SPECIAL TYPE: %d\n", token->type, token->data, token->value_type);
-
+//     unget_token(token);
+//     token_clear(token);
+//     get_next_token(token);
+//     token_clear(token);
+//     get_next_token(token);
+//     printf("TYPE: %d, DATA: %s\n", token->type, token->data);
+    
 // } 

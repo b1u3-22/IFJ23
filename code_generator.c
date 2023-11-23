@@ -18,7 +18,7 @@ void code_header() {
     inst("DEFVAR GF@!tmp_var3");
     inst("JUMP @&&main");
 
-    auxil_opdecider()
+    auxil_opdecider();
     auxil_divdecider();
     auxil_qqdecider();
 	
@@ -398,7 +398,7 @@ void builtin_float2int() {
 
 }
 
-void builtin_len() {
+void builtin_length() {
 
     inst("LABEL @&&length");
     inst("STRLEN GF@!tmp_var1 TF@%%0");

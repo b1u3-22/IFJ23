@@ -56,6 +56,7 @@ enum Rules {
 };
 
 enum Function {
+    F_P_GET_T,      // Get new token
     F_P_PUSH_1,     // Push to Stack 1 for analyzer and generator
     F_P_PUSH_2,     // Push to Stack 2 for analyzer and generator
     F_P_CLEAR_1,    // Clear Stack 1
@@ -118,7 +119,7 @@ int parse();
 */  
 void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack);
 
-void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, TokenStackPtr stack_1, TokenStackPtr stack_2, AnalyzerPtr analyzer);
+void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, TokenStackPtr token_stack, TokenStackPtr stack_1, TokenStackPtr stack_2, AnalyzerPtr analyzer);
 
 /** Skip to the next sequence of tokens.
  *  This is used when syntax error occures. 

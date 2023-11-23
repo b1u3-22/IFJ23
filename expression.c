@@ -26,9 +26,7 @@ int parse_expression(int end_type, TokenStackPtr sa_stack) {
         }
         action = p_table[stack_type_helper->type][token_type];
 
-        //if (token_stack->top->type <= VALUE) token_stack_push(sa_stack, token_stack->top);
-
-        //printf("[%02d, %02d]: %d\n", stack_type_helper->type, token_type, action);
+        printf("[%02d, %02d]: %d\n", stack_type_helper->type, token_type, action);
         switch (action) {
             case E_ERR:
                 return 2;
@@ -66,27 +64,12 @@ int parse_expression(int end_type, TokenStackPtr sa_stack) {
 
 void expression_get_next_token(TokenStackPtr stack, int end_type, int *type, TokenStackPtr sa_stack) {
     TokenPtr token = token_stack_get(stack);
+    printf("Token data: %s, Token type: %02d\n", token->data, token->type);
     while (token->type == NEWLINE) {
         token_stack_pop(stack);
         token = token_stack_get(stack); // skip newline characters
     }
-
-    if (token->type != end_type) {
-        if (token->type == ID || token->type == VALUE) token_stack_push(sa_stack, token);
-        *type = get_translated_type(token);
-        return;
-    }
-
-    token = token_stack_get(stack); // Get token after that
-    if (get_translated_type(token) == E_END) {
-        token_stack_unget(stack);
-        if (token->type != END) token_stack_unget(stack);
-        *type = E_END;
-    }
-    else {
-        token_stack_unget(stack);
-        *type = get_translated_type(stack->top);
-    }
+    *type = get_translated_type(token);
 }
 
 int get_translated_type(TokenPtr token) {
@@ -150,7 +133,7 @@ bool apply_expression_rule(ExpressionStackPtr stack) {
         case E_ID:
         case E_VALUE: // Rule E -> ID
             expression_stack_pop(stack);
-            expression_stack_push(stack, E_END, !(stack->top->type == E_LBRAC));
+            //expression_stack_push(stack, E_END, !(stack->top->type == E_LBRAC));
             return true;
         case E_RBRAC: // Rule E -> (E)
             if (
