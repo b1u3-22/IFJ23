@@ -4,12 +4,12 @@
 #define PARAM_STACK_ALLOC_BLOCK 20
 
 typedef struct ParamStackItem {
+    char* id;
+    char* name;
     int type;
-    bool rule;
-    bool function;
 } *ParamStackItemPtr;
 
-typedef struct RuleStack {
+typedef struct ParamStack {
     int data_cap;
     int data_pos;
     bool empty;
@@ -17,7 +17,7 @@ typedef struct RuleStack {
     ParamStackItemPtr *data;
 } *ParamStackPtr;
 
-/** Initialize token
+/** Initialize param
     @returns ParamStackPtr if succeded NULL otherwise
 */
 ParamStackPtr param_stack_init();
@@ -33,8 +33,12 @@ bool param_stack_pop(ParamStackPtr stack);
  *  @param token TokenPtr that should be added to stack
  *  @returns false if succeeded, true otherwise
 */
-bool param_stack_push(ParamStackPtr stack, int type, bool Param, bool function);
+bool param_stack_push(ParamStackPtr stack, ParamStackItemPtr item);
 
 /** Dispose and free Token Stack
 */
 void param_stack_dispose(ParamStackPtr stack);
+
+ParamStackItemPtr param_stack_item_init();
+
+void param_stack_item_dispose(ParamStackItemPtr item);

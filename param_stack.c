@@ -28,7 +28,7 @@ bool param_stack_pop(ParamStackPtr stack) {
     return true;
 }
 
-bool param_stack_push(ParamStackPtr stack, int type, bool Param, bool function) {
+bool param_stack_push(ParamStackPtr stack, ParamStackItemPtr new_item) {
     // if we hit the allocated capacity for stack data, increase memory by reallocation
     if ((stack->data_pos + 1) >= stack->data_cap){
         ParamStackItemPtr *new_data = realloc(stack->data, (stack->data_cap + PARAM_STACK_ALLOC_BLOCK) * sizeof(ParamStackItemPtr));
@@ -40,12 +40,6 @@ bool param_stack_push(ParamStackPtr stack, int type, bool Param, bool function) 
     }
 
     // add new token to data and correct top pointer
-    ParamStackItemPtr new_item = (ParamStackItemPtr) malloc(sizeof(struct ParamStackItem));
-    if (!new_item) return true;
-    
-    new_item->type = type;
-    new_item->Param = Param;
-    new_item->function = function;
     stack->data[++(stack->data_pos)] = new_item;
     stack->top = new_item;
 
@@ -57,4 +51,19 @@ void param_stack_dispose(ParamStackPtr stack) {
     while (!(stack->empty)) param_stack_pop(stack);
     free(stack->data);
     free(stack);
+}
+
+ParamStackItemPtr param_stack_item_init() {
+    ParamStackItemPtr item = calloc(1, sizeof(struct ParamStackItem));
+    if (!item) return NULL; // Alocation and check
+
+    // Set properties
+    item->id = NULL;
+    item->name = NULL;
+}
+
+void param_stack_item_dispose(ParamStackItemPtr item) {
+    if (item->id) free(item->id);
+    if (item->name) free(item->name);
+    free(item);
 }

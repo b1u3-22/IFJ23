@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <stdlib.h>
+#include "param_stack.h"
 
 #define SYMBTABLE_SIZE 49999 // Has to be a prime number
 #define SYMTABLE_ID_ALLOC_BLOCK 5
@@ -58,6 +59,12 @@ bool symtable_add_item(SymTablePtr symtable, SymTableItemPtr item);
  *  @returns SymTableItemPtr if item is found, NULL otherwise
 */
 SymTableItemPtr symtable_get_item(SymTablePtr symtable, char *id);
+
+/**
+ * Gets item from symtable by id with same depth and block or with lower depth
+ * @returns SymTatbleItemPtr if item is found, NULL otherwise
+*/
+SymTableItemPtr symtable_get_item_lower_depth_same_block(SymTablePtr symtable, char *id, int depth, int block);
 
 /** Correctly disposes item and it's properties
  *  @param item SymTableItemPtr that should be disposed  
