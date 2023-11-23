@@ -10,7 +10,7 @@ run: all
 clean:
 	rm -rf ./*.o
 
-parser: parser.o token.o rule_stack.o scanner.o expression.o expression_stack.o token_stack.o analyzer.o symtable.o
+parser: parser.o token.o rule_stack.o scanner.o expression.o expression_stack.o token_stack.o analyzer.o symtable.o param_stack.o code_generator.o
 	$(CC) $(LDFLAGS) -o $@ $^ 
 
 scanner: scanner.o token.o
@@ -28,7 +28,7 @@ rule_stack.o: rule_stack.h rule_stack.c token.h
 symtable.o: symtable.h symtable.c
 	$(CC) $(CFLAGS) -c -o $@ symtable.c
 
-parser.o: parser.h parser.c rule_stack.h token.h scanner.h expression.h expression_stack.h token_stack.h analyzer.h symtable.h
+parser.o: parser.h parser.c rule_stack.h token.h scanner.h expression.h expression_stack.h token_stack.h analyzer.h symtable.h param_stack.h code_generator.h
 	$(CC) $(CFLAGS) -c -o $@ parser.c
 
 expression.o: expression.h expression.c token.h scanner.h expression_stack.h
@@ -40,5 +40,11 @@ expression_stack.o: expression_stack.h expression_stack.c
 token_stack.o: token_stack.h token_stack.c scanner.h token.h
 	$(CC) $(CFLAGS) -c -o $@ token_stack.c
 
-analyzer.o: analyzer.h analyzer.c token.h token_stack.h symtable.h
+analyzer.o: analyzer.h analyzer.c token.h token_stack.h symtable.h param_stack.h
 	$(CC) $(CFLAGS) -c -o $@ analyzer.c
+
+param_stack.o: param_stack.h param_stack.c
+	$(CC) $(CFLAGS) -c -o $@ param_stack.c
+
+code_generator.o: code_generator.h code_generator.c expression.h
+	$(CC) $(CFLAGS) -c -o $@ code_generator.c

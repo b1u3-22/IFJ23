@@ -32,7 +32,7 @@ int parse() {
     while (!(rule_stack->empty)) {
         if (token->type == ERROR) exit(1); // Lexical error occured
 
-        printf("Token data: %s\n", token->data); 
+        //printf("Token data: %s\n", token->data); 
         // ===================== Handling of newlines that some things require =====================
         if (token->type == NEWLINE) {
             token_stack_pop(token_stack); // Don't save newlines in token_stack
@@ -167,6 +167,9 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack) {
         break;
 
     case 5:
+        errors += rule_stack_push(stack, F_P_CLEAR_2, false, true);
+        errors += rule_stack_push(stack, F_P_CLEAR_1, false, true);
+        errors += rule_stack_push(stack, F_G_DEF_VAR, false, true);
         errors += rule_stack_push(stack, F_S_VAR_DEC, false, true);
         break;
 
@@ -178,11 +181,18 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack) {
         break;
 
     case 8:
+        errors += rule_stack_push(stack, F_P_CLEAR_2, false, true);
+        errors += rule_stack_push(stack, F_P_CLEAR_1, false, true);
+        errors += rule_stack_push(stack, F_G_DEF_VAR, false, true);
         errors += rule_stack_push(stack, F_S_VAR_DEC, false, true);
         break;
 
     case 7:
     case 9:
+        errors += rule_stack_push(stack, F_P_CLEAR_2, false, true);
+        errors += rule_stack_push(stack, F_P_CLEAR_1, false, true);
+        errors += rule_stack_push(stack, F_G_SET_VAR, false, true);
+        errors += rule_stack_push(stack, F_G_DEF_VAR, false, true);
         errors += rule_stack_push(stack, F_S_VAR_DEF, false, true);
         errors += rule_stack_push(stack, R_EXPR, true, false);
         errors += rule_stack_push(stack, EQUALS, false, false);
@@ -197,6 +207,7 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack) {
         errors += rule_stack_push(stack, L_CBRAC, false, false);
         errors += rule_stack_push(stack, R_F_RET_DEF, true, false);
         errors += rule_stack_push(stack, R_BRAC, false, false);
+        errors += rule_stack_push(stack, F_G_FUN_S, false, true);
         errors += rule_stack_push(stack, F_S_FUN_DEF, false, true); 
         errors += rule_stack_push(stack, R_F_DEF_F, true, false);
         errors += rule_stack_push(stack, L_BRAC, false, false);
@@ -208,6 +219,7 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack) {
     case 12:
         errors += rule_stack_push(stack, R_F_DEF_N, true, false);
         errors += rule_stack_push(stack, TYPE, false, false);
+        errors += rule_stack_push(stack, F_P_PUSH_2, false, true);
         errors += rule_stack_push(stack, D_DOT, false, false);
         errors += rule_stack_push(stack, R_F_DEF_ID, true, false);
         break;
@@ -223,56 +235,66 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack) {
 
     case 15:
         errors += rule_stack_push(stack, R_G_BODY, true, false);
+        errors += rule_stack_push(stack, F_G_IF_E, false, true);
         errors += rule_stack_push(stack, R_CBRAC, false, false);
         errors += rule_stack_push(stack, F_S_DEC_DEP, false, true);
         errors += rule_stack_push(stack, R_BODY, true, false);
         errors += rule_stack_push(stack, F_S_INC_DEP, false, true);
         errors += rule_stack_push(stack, L_CBRAC, false, false);
         errors += rule_stack_push(stack, ELSE, false, false);
+        errors += rule_stack_push(stack, F_G_IF_EL, false, true);
         errors += rule_stack_push(stack, R_CBRAC, false, false);
         errors += rule_stack_push(stack, F_S_DEC_DEP, false, true);
         errors += rule_stack_push(stack, R_BODY, true, false);
         errors += rule_stack_push(stack, F_S_INC_DEP, false, true);
         errors += rule_stack_push(stack, L_CBRAC, false, false);
+        errors += rule_stack_push(stack, F_G_IF_S, false, true);
         errors += rule_stack_push(stack, R_CON_DEF, true, false);
         errors += rule_stack_push(stack, IF, false, false);
         break;
 
     case 16:
         errors += rule_stack_push(stack, R_G_BODY, true, false);
+        errors += rule_stack_push(stack, F_G_W_E, false, true);
         errors += rule_stack_push(stack, R_CBRAC, false, false);
         errors += rule_stack_push(stack, F_S_DEC_DEP, false, true);
         errors += rule_stack_push(stack, R_BODY, true, false);
         errors += rule_stack_push(stack, F_S_INC_DEP, false, true);
         errors += rule_stack_push(stack, L_CBRAC, false, false);
+        errors += rule_stack_push(stack, F_G_W_S, false, true);
         errors += rule_stack_push(stack, R_CON_DEF, true, false);
         errors += rule_stack_push(stack, WHILE, false, false);
         break;
 
     case 17:
         errors += rule_stack_push(stack, R_BODY, true, false);
+        errors += rule_stack_push(stack, F_G_IF_E, false, true);
         errors += rule_stack_push(stack, R_CBRAC, false, false);
         errors += rule_stack_push(stack, F_S_DEC_DEP, false, true);
         errors += rule_stack_push(stack, R_BODY, true, false);
         errors += rule_stack_push(stack, F_S_INC_DEP, false, true);
         errors += rule_stack_push(stack, L_CBRAC, false, false);
         errors += rule_stack_push(stack, ELSE, false, false);
+        errors += rule_stack_push(stack, F_G_IF_EL, false, true);
         errors += rule_stack_push(stack, R_CBRAC, false, false);
         errors += rule_stack_push(stack, F_S_DEC_DEP, false, true);
         errors += rule_stack_push(stack, R_BODY, true, false);
         errors += rule_stack_push(stack, F_S_INC_DEP, false, true);
         errors += rule_stack_push(stack, L_CBRAC, false, false);
+        errors += rule_stack_push(stack, F_G_IF_S, false, true);
         errors += rule_stack_push(stack, R_CON_DEF, true, false);
         errors += rule_stack_push(stack, IF, false, false);
         break;
 
     case 18:
         errors += rule_stack_push(stack, R_BODY, true, false);
+        errors += rule_stack_push(stack, F_G_W_E, false, true);
         errors += rule_stack_push(stack, R_CBRAC, false, false);
         errors += rule_stack_push(stack, F_S_DEC_DEP, false, true);
         errors += rule_stack_push(stack, R_BODY, true, false);
         errors += rule_stack_push(stack, F_S_INC_DEP, false, true);
         errors += rule_stack_push(stack, L_CBRAC, false, false);
+        errors += rule_stack_push(stack, F_G_W_S, false, true);
         errors += rule_stack_push(stack, R_CON_DEF, true, false);
         errors += rule_stack_push(stack, WHILE, false, false);
         break;
@@ -399,12 +421,16 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack) {
 
     case 48:
         errors += rule_stack_push(stack, ID, false, false);
+        errors += rule_stack_push(stack, F_P_PUSH_2, false, true);
         errors += rule_stack_push(stack, ID, false, false);
+        errors += rule_stack_push(stack, F_P_PUSH_2, false, true);
         break;
 
     case 49:
         errors += rule_stack_push(stack, ID, false, false);
+        errors += rule_stack_push(stack, F_P_PUSH_2, false, true);
         errors += rule_stack_push(stack, UNDERSCR, false, false);
+        errors += rule_stack_push(stack, F_P_PUSH_2, false, true);
         break;
 
     case 50:
@@ -417,7 +443,7 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack) {
         break;
     }
 
-    if (errors > 0) exit(2);
+    if (errors > 0) exit(99);
 }
 
 void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, TokenStackPtr stack_1, TokenStackPtr stack_2, AnalyzerPtr analyzer) {
@@ -458,6 +484,36 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
         case F_S_FUN_DEF:
             if (return_code = check_function_definition(analyzer, stack_1, stack_2)) exit(return_code);
             break;
+        case F_G_DEF_VAR:
+            def_var(get_nearest_item(analyzer, stack_1->tokens[1]->data));
+            break;  
+        case F_G_SET_VAR:
+            set_var(get_nearest_item(analyzer, stack_1->tokens[1]->data));
+            break;  
+        case F_G_PUSH:
+            break;     
+        case F_G_IF_S:
+            break;     
+        case F_G_IF_EL:
+            break;    
+        case F_G_IF_E:
+            break;     
+        case F_G_W_S:
+            break;     
+        case F_G_W_E:
+            break;      
+        case F_G_FUN_S:
+            break;    
+        case F_G_FUN_P:
+            break;    
+        case F_G_FUN_R:
+            break;    
+        case F_G_FUN_C:
+            break;    
+        case F_G_FUN_C_P:
+            break;  
+        case F_G_FUN_E:
+            break;  
         default:
             break;
     }

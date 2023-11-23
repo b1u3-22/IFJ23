@@ -1,6 +1,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#ifndef _PARAM_STACK
+#define _PARAM_STACK
+#include "param_stack.h"
+#endif
+
 #ifndef _TOKEN_STACK
 #define _TOKEN_STACK
 #include "token_stack.h"

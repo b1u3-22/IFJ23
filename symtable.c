@@ -48,7 +48,7 @@ SymTableItemPtr symtable_get_item_lower_depth_same_block(SymTablePtr symtable, c
     SymTableItemPtr item = symtable[symtable_get_hash(id)]; // Get correct "row"
     while (item && strcmp(item->id, id)) item = item->next; // Find item with the same id
     
-    while (!item) {
+    while (item) {
         if (item->depth == depth && item->block == block)   return item;
         else if (item->depth < depth)   return item;
         else item = item->next;

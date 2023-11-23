@@ -1,7 +1,11 @@
 #include <stdbool.h>
 #include <string.h>
 #include <stdlib.h>
+
+#ifndef _PARAM_STACK
+#define _PARAM_STACK
 #include "param_stack.h"
+#endif
 
 #define SYMBTABLE_SIZE 49999 // Has to be a prime number
 #define SYMTABLE_ID_ALLOC_BLOCK 5

@@ -6,6 +6,7 @@
 
 #ifndef CODE_GENERATOR_H
 #define CODE_GENERATOR_H
+#endif
 
 
 #include <stdio.h>
@@ -13,6 +14,16 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
+
+#ifndef _EXPRESSION
+#define _EXPRESSION
+#include "expression.h"
+#endif
+
+#ifndef _SYMTABLE
+#define _SYMTABLE
+#include "symtable.h"
+#endif
 
 
 #define inst(...) \
@@ -34,8 +45,6 @@
 
 
 static unsigned int num;
-static unsigned int qq_num = 0;
-static unsigned int depth = 0;
 static unsigned int if_num = 0;
 static unsigned int if_new = 1;
 static unsigned int while_num = 0;
@@ -51,16 +60,16 @@ void code_header();
 void code_footer();
 
 // make operation on stack
-void exp_instruction(ExpressionTypes type);
+void exp_instruction(int type);
 
 // define variable
-void def_var(TokenPtr var);
+void def_var(SymTableItemPtr var);
 
 // set value to variable
-void set_var(TokenPtr var, TokenPtr sym);
+void set_var(SymTableItemPtr var);
 
 // push symbol to stack for further computing
-void push_sym(TokenPtr sym);
+void push_sym(SymTableItemPtr sym);
 
 // check condition (value on top of stack) and start of if
 // condition has to be calculated before this function
@@ -86,22 +95,28 @@ void while_end();
 void func_start(char* func);
 
 // define single parameter of function
-void func_param(TokenPtr param);
+void func_param(SymTableItemPtr param);
 
 // function return value
-void func_return(TokenPtr var);
+void func_return(SymTableItemPtr var);
 
 // end of function
-void func_end(func);
+void func_end();
 
 // start of function call
 void func_call();
 
 // set value to single parameter of function
-void func_call_param(TokenPtr param);
+void func_call_param(SymTableItemPtr param);
 
 // end of function call
 void func_call_end(char* func);
+
+
+///// AUXILIARY FUNCTIONS /////
+
+void auxil_divdecider();
+void auxil_qqdecider();
 
 
 ///// BUILTIN FUNCTIONS /////
