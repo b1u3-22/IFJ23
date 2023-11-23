@@ -515,7 +515,7 @@ void get_next_token(TokenPtr token) {
         }
     }
 
-    token_add_data(token, '\0');
+    // token_add_data(token, '\0');
 
     if (c == EOF) {
         if (state == START) {
