@@ -356,7 +356,7 @@ void builtin_float2int() {
 
 }
 
-void builtin_length() {
+void builtin_len() {
 
     inst("LABEL @&&length");
     inst("STRLEN TF@%%retval TF@%%0");
