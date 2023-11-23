@@ -4,7 +4,7 @@ int parse() {
     SymTablePtr symtable = symtable_init();
     if (!symtable) exit(99);
 
-    AnalyzerPtr analyzer = init_analyzer(symtable);
+    AnalyzerPtr analyzer = analyzer_init(symtable);
     if (!analyzer) exit(99);
 
     TokenStackPtr token_stack = token_stack_init();
@@ -30,9 +30,9 @@ int parse() {
     bool new_line = true;
 
     while (!(rule_stack->empty)) {
-        if (token->type == ERROR) exit(2); // Lexical error occured
+        if (token->type == ERROR) exit(1); // Lexical error occured
 
-        //printf("Token type: %02d\n", token->type);
+        printf("Token data: %s\n", token->data); 
         // ===================== Handling of newlines that some things require =====================
         if (token->type == NEWLINE) {
             token_stack_pop(token_stack); // Don't save newlines in token_stack
@@ -456,7 +456,7 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
             if (return_code = check_function_call(analyzer, stack_1, stack_2)) exit(return_code);
             break;
         case F_S_FUN_DEF:
-            if (return_code = check_function_definition(analyzer, stack_1)) exit(return_code);
+            if (return_code = check_function_definition(analyzer, stack_1, stack_2)) exit(return_code);
             break;
         default:
             break;
