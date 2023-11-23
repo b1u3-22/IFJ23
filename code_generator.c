@@ -163,26 +163,6 @@ void confirm_sym() {
 
 }
 
-void push_sym_prob(SymTableItemPtr sym) {
-
-    if (sym->isVar == true) {
-
-        if (sym->depth == 0)
-            inst("PUSHS GF@", sym->id);
-        else
-            inst("PUSHS LF@", sym->id);
-
-    } else if (sym->type == S_INT)
-        inst("PUSHS int@", sym->value);
-    else if (sym->type == S_DOUBLE)
-        inst("PUSHS float@", sym->value);
-    else // (sym->type == S_STRING)
-        inst("PUSHS string@", sym->value);
-    /*else //(sym->type == BOOL)
-        inst("PUSHS bool@", sym->value);*/
-
-}
-
 void if_check() {
 
     inst("POPS GF@!tmp_var1");
