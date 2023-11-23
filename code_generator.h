@@ -15,6 +15,7 @@
 #include <string.h>
 
 #include "symtable.h"
+#include "expression.h"
 
 
 #define inst(...) \
