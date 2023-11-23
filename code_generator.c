@@ -38,7 +38,7 @@ void code_footer() {
 
 }
 
-void exp_instruction(ExpressionTypes type) {
+void exp_instruction(int type) {
 
     switch (type) {
         case E_PLS:
@@ -97,7 +97,7 @@ void exp_instruction(ExpressionTypes type) {
 
 }
 
-void def_var(TokenPtr var) {
+void def_var(SymTableItemPtr var) {
 
     if (depth == 0)
         inst("DEFVAR GF@", var->name);
@@ -106,7 +106,7 @@ void def_var(TokenPtr var) {
 
 }
 
-void set_var(TokenPtr var, TokenPtr sym) {
+void set_var(SymTableItemPtr var, SymTableItemPtr sym) {
 
     if (var->frame == GLOBAL)
         part("MOVE GF@", var->name);
@@ -131,7 +131,7 @@ void set_var(TokenPtr var, TokenPtr sym) {
 
 }
 
-void push_sym(TokenPtr sym) {
+void push_sym(SymTableItemPtr sym) {
 
     if (sym->type == VAR) {
 
@@ -222,14 +222,14 @@ void func_start(char* func) {
 
 }
 
-void func_param(TokenPtr param) {
+void func_param(SymTableItemPtr param) {
 
     inst("DEFVAR LF@", param->name);
     inst("MOVE LF@", param->name, " LF@%%", num++);
 
 }
 
-void func_return(TokenPtr var) {
+void func_return(SymTableItemPtr var) {
 
     inst("MOVE LF@%%retval LF@", var->name);
 
@@ -250,7 +250,7 @@ void func_call() {
         
 }
 
-void func_call_param(TokenPtr param) {
+void func_call_param(SymTableItemPtr param) {
 
     inst("DEFVAR TF@%%", num);
 
