@@ -148,11 +148,14 @@ int check_function_assingment(AnalyzerPtr analyzer, TokenStackPtr token_stack_le
 int check_function_call(AnalyzerPtr analyzer, TokenStackPtr token_stack_id, TokenStackPtr token_stack_param) {
     SymTableItemPtr functionId = symtable_get_item(analyzer->symtable, token_stack_id->top->data);
     if (functionId == NULL) {
-        //ulozim do zasobniku
+        //push token to stack for later check
         return 0;
     }
 
-    
+    //check parameters
+    for(int i = 0; i < token_stack_param->tokens_pos+1; i++) {
+        
+    }
 
     return 0;
 }
@@ -226,11 +229,35 @@ int check_error_7_8(AnalyzerPtr analyzer, int data_type, TokenStackPtr token_sta
         if (token_stack->tokens[i]->type == ID) {
 
             SymTableItemPtr item = symtable_get_item_lower_depth_same_block(analyzer->symtable, token_stack->tokens[i]->data, analyzer->depth, analyzer->block[analyzer->depth]);
-            if (item->type != data_type) {
+            if (data_type == S_INTQ && (item->type != S_INT && item->type != S_INTQ)) {
+                return 1;
+            }
+
+            else if (data_type == S_DOUBLEQ && (item->type != S_DOUBLE && item->type != S_DOUBLEQ)) {
+                return 1;
+            }
+
+            else if (data_type == S_STRINGQ && (item->type != S_STRING && item->type != S_STRINGQ)) {
+                return 1;
+            }
+            
+            else if (item->type != data_type) {
                 return 1;
             }
 
         } else {
+            if (data_type == S_INTQ && token_stack->tokens[i]->value_type != S_INT) {
+                return 1;
+            }
+
+            else if (data_type == S_DOUBLEQ && token_stack->tokens[i]->value_type != S_DOUBLE) {
+                return 1;
+            }
+
+            else if (data_type == S_STRINGQ && token_stack->tokens[i]->value_type != S_STRING) {
+                return 1;
+            }
+
             if (token_stack->tokens[i]->value_type != data_type) {
                 return 1;
             }
