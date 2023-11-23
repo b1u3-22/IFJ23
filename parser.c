@@ -30,6 +30,8 @@ int parse() {
     bool new_line = true;
 
     while (!(rule_stack->empty)) {
+        if (token->type == ERROR) exit(2); // Lexical error occured
+
         //printf("Token type: %02d\n", token->type);
         // ===================== Handling of newlines that some things require =====================
         if (token->type == NEWLINE) {
@@ -74,7 +76,7 @@ int parse() {
 
         // Token from scanner has different type than token on top of stack
         else {
-            exit(22);
+            exit(2);
         }
     } // main while
 
