@@ -41,6 +41,8 @@ static unsigned int if_new = 1;
 static unsigned int while_num = 0;
 static unsigned int while_new = 1;
 
+static SymTableItemPtr temp_sym;
+
 
 ///// FUNCTIONS /////
 
@@ -61,6 +63,12 @@ void set_var(SymTableItemPtr var);
 
 // push symbol to stack for further computing or as final value of whole expression
 void push_sym(SymTableItemPtr sym);
+
+// save symbol temporarily
+void save_sym(SymTableItemPtr sym);
+
+// confirm last saved symbol to be single and push him to stack
+void confirm_sym();
 
 // check condition (value on top of stack) and start of if
 // condition has to be calculated before this function
