@@ -18,6 +18,7 @@ SymTableItemPtr symtable_item_init() {
     item->next = NULL;
     item->isFunction = NULL;
     item->isVar = NULL;
+    item->isDefined = NULL;
     item->value = NULL;
     item->depth = NULL;
     item->block = NULL;
