@@ -20,6 +20,7 @@ typedef struct SymTableItem {
     int type;                   // Type too
     bool isFunction;
     bool isVar;
+    bool isDefined;
     struct SymTableItem *next;
     char *value;
     int depth;
