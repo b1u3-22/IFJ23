@@ -147,6 +147,18 @@ void push_sym(SymTableItemPtr sym) {
 
 }
 
+void if_let_check(SymTableItemPtr sym) {
+
+    inst("POPS GF@!tmp_var1");
+    inst("JUMPIFEQ @_if", if_new, " nil@nil GF@!tmp_var1");
+
+    inst("CREATEFRAME");
+    inst("PUSHFRAME");
+
+    if_num = if_new++;
+
+}
+
 void if_check() {
 
     inst("POPS GF@!tmp_var1");
@@ -314,21 +326,21 @@ void builtin_read() {
 
     inst("LABEL @&&readstr");
     inst("READ TF@%%retval string");
-    inst("JUMPIFEQ @&&readerr TF@%%retval nil@nil");
+    //inst("JUMPIFEQ @&&readerr TF@%%retval nil@nil");
     inst("RETURN");
 
     inst("LABEL @&&readint");
     inst("READ TF@%%retval int");
-    inst("JUMPIFEQ @&&readerr TF@%%retval nil@nil");
+    //inst("JUMPIFEQ @&&readerr TF@%%retval nil@nil");
     inst("RETURN");
 
     inst("LABEL @&&readfloat");
     inst("READ TF@%%retval float");
-    inst("JUMPIFEQ @&&readerr TF@%%retval nil@nil");
+    //inst("JUMPIFEQ @&&readerr TF@%%retval nil@nil");
     inst("RETURN");
 
-    inst("LABEL @&&readerr");
-    inst("EXIT int@1");
+    //inst("LABEL @&&readerr");
+    //inst("EXIT int@1");
 
 }
 
