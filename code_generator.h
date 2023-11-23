@@ -6,6 +6,7 @@
 
 #ifndef CODE_GENERATOR_H
 #define CODE_GENERATOR_H
+#endif
 
 
 #include <stdio.h>
@@ -14,7 +15,15 @@
 #include <ctype.h>
 #include <string.h>
 
+#ifndef _EXPRESSION
+#define _EXPRESSION
+#include "expression.h"
+#endif
+
+#ifndef _SYMTABLE
+#define _SYMTABLE
 #include "symtable.h"
+#endif
 
 
 #define inst(...) \
@@ -57,7 +66,7 @@ void exp_instruction(int type);
 void def_var(SymTableItemPtr var);
 
 // set value to variable
-void set_var(SymTableItemPtr var, SymTableItemPtr sym);
+void set_var(SymTableItemPtr var);
 
 // push symbol to stack for further computing
 void push_sym(SymTableItemPtr sym);

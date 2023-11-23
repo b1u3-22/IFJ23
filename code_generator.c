@@ -25,8 +25,8 @@ void code_header() {
     builtin_write();
     builtin_int2float();
     builtin_float2int();
-    builtin_len();
-    builtin_substr();
+    builtin_length();
+    builtin_substring();
     builtin_ord();
     builtin_chr();
 
@@ -77,7 +77,7 @@ void exp_instruction(int type) {
             inst("EQS");
             inst("NOTS");
             break;
-        case CONCAT_RULE:
+        case E_CONCAT:
             inst("POPS GF@!tmp_var2");
             inst("POPS GF@!tmp_var1");
             inst("CONCAT GF@!tmp_var1 GF@!tmp_var1 GF@!tmp_var2");
