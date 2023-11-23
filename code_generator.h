@@ -56,10 +56,10 @@ void exp_instruction(int type);
 // define variable
 void def_var(SymTableItemPtr var);
 
-// set value to variable
-void set_var(SymTableItemPtr var, SymTableItemPtr sym);
+// pop value to variable
+void set_var(SymTableItemPtr var);
 
-// push symbol to stack for further computing
+// push symbol to stack for further computing or as final value of whole expression
 void push_sym(SymTableItemPtr sym);
 
 // check condition (value on top of stack) and start of if
@@ -87,9 +87,6 @@ void func_start(char* func);
 
 // define single parameter of function
 void func_param(SymTableItemPtr param);
-
-// function return value
-void func_return(SymTableItemPtr var);
 
 // end of function
 void func_end();
