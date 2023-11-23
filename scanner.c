@@ -368,7 +368,7 @@ void get_next_token(TokenPtr token) {
                 parse_flpe(c, &end);
                 break;
             case STR: // got double quotation mark
-                parse_str(c, &state, &end);
+                parse_str(c, &state, &true_end);
                 break;
             case STR_B: // got backslash
                 parse_str_b(c, &state, &true_end);
