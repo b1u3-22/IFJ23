@@ -5,6 +5,12 @@
 #include "token.h"
 #endif
 
+#ifndef _SYMTABLE
+#define _SYMTABLE
+#include "symtable.h"
+#endif
+
+
 typedef enum {
     START,
     INT,
@@ -32,14 +38,19 @@ typedef enum {
     EQEQ,
     EXL,
     EXLEQ,
-    UNDERSCORE
-
+    UNDERSCORE,
+    SLASH,
+    LINE_COMMENT,
+    BLOCK_COMMENT,
+    BLOCK_COMMENT_OUT,
+    BLOCK_COMMENT_IN,
+    TYPEQ
 } scanner_states;
 
 static const char ALLOWED_BACKSLASH_CHARS[] = {'\"', 'u', 'n', 't', 'r', '\\', '\0'};  // WARNING: do not remove '\0',
                                                                                 // it's used to check the end of the array
 
-static const char ALLOWED_OPERATORS_AND_SPECIAL_SYMBOLS[] = {'+', '*', '/', '(', ')', '{', '}', ',', ':', '\0'}; // WARNING_ do nor remove '\0
+static const char ALLOWED_OPERATORS_AND_SPECIAL_SYMBOLS[] = {'+', '*', '(', ')', '{', '}', ',', ':', '\0'}; // WARNING_ do nor remove '\0
 
 static const char KEYWORDS[9][7] = {"if", "else", "func", "return", "let", "var", "nil", "while", "\0"};
 static const char TYPES[7][8] = {"Int", "Int?", "String", "String?", "Double", "Double?", "\0"};

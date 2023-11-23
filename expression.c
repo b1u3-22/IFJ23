@@ -1,72 +1,91 @@
 #include "expression.h"
 
-int parse_expression(int end_type) {
+int parse_expression(int end_type, TokenStackPtr sa_stack) {
     ExpressionStackPtr stack = expression_stack_init();
     if (!stack) return 99;
 
     expression_stack_push(stack, E_END, false);
     
-    TokenPtr token = token_init();
-    if (!token) {
+    TokenStackPtr token_stack = token_stack_init();
+    if (!token_stack) {
         expression_stack_dispose(stack);
         return 99;
     }
-
     
     int action = E_ERR;
     bool rule_applied;
     int token_type;
     ExpressionStackItemPtr stack_type_helper;
 
-    expression_get_next_token(token, end_type, &token_type);
+    expression_get_next_token(token_stack, end_type, &token_type, sa_stack);
 
     do {
         stack_type_helper = stack->top;
         while (stack_type_helper->expression) {
             stack_type_helper = stack_type_helper->previous; // Find the nearest non-expression stack item
         }
-        action = p_table[token_type][stack_type_helper->type];
+        action = p_table[stack_type_helper->type][token_type];
+
+        //if (token_stack->top->type <= VALUE) token_stack_push(sa_stack, token_stack->top);
+
+        //printf("[%02d, %02d]: %d\n", stack_type_helper->type, token_type, action);
         switch (action) {
             case E_ERR:
                 return 2;
             case E_SFT:
                 expression_stack_push(stack, token_type, false);
+                // Only get next token if we haven't hit the last one
+                if (token_type != E_END) expression_get_next_token(token_stack, end_type, &token_type, sa_stack);
                 break;
             case E_EQL:
                 expression_stack_push(stack, token_type, false);
+                rule_applied = apply_expression_rule(stack);
+                if (!rule_applied) {
+                    return 2; // Syntax error occured
+                }
+                if (token_type != E_END) expression_get_next_token(token_stack, end_type, &token_type, sa_stack);
+                break;
             case E_RED:
                 rule_applied = apply_expression_rule(stack);
                 if (!rule_applied) {
                     return 2; // Syntax error occured
                 }
-                // Only get next token if we haven't hit the last one
-                if (token_type != E_END) expression_get_next_token(token, end_type, &token_type);
                 break;
             case E_SCS:
-                // End PSA succesfully
+                return 0;
                 break; 
         }
+        // for (int i = 0; i <= stack->data_pos; i++) {
+        //     printf("%d ", stack->data[i]->type);
+        // }
+        // printf("\n");
 
-    } while (!(stack->top->type == E_END && !stack->top->expression)); // If we hit the bottom element...
+    } while (true); // If we hit the bottom element...
     return 0;
 }
 
-void expression_get_next_token(TokenPtr token, int end_type, int *type) {
-    token_clear(token);
-    get_next_token(token);
-    while (token->type == NEWLINE) get_next_token(token); // skip newline characters
+void expression_get_next_token(TokenStackPtr stack, int end_type, int *type, TokenStackPtr sa_stack) {
+    TokenPtr token = token_stack_get(stack);
+    while (token->type == NEWLINE) {
+        token_stack_pop(stack);
+        token = token_stack_get(stack); // skip newline characters
+    }
+
     if (token->type != end_type) {
+        if (token->type == ID || token->type == VALUE) token_stack_push(sa_stack, token);
         *type = get_translated_type(token);
         return;
     }
 
-    TokenPtr next_token = malloc(sizeof(struct Token));
-    get_next_token(next_token);
-    if (get_translated_type(next_token) == E_END) { // Next token type cannot be inside an expression
-        unget_token(next_token);
-        free(next_token);
-        unget_token(token);
+    token = token_stack_get(stack); // Get token after that
+    if (get_translated_type(token) == E_END) {
+        token_stack_unget(stack);
+        if (token->type != END) token_stack_unget(stack);
         *type = E_END;
+    }
+    else {
+        token_stack_unget(stack);
+        *type = get_translated_type(stack->top);
     }
 }
 
@@ -131,8 +150,8 @@ bool apply_expression_rule(ExpressionStackPtr stack) {
         case E_ID:
         case E_VALUE: // Rule E -> ID
             expression_stack_pop(stack);
-            expression_stack_push(stack, E_END, true);
-            break;
+            expression_stack_push(stack, E_END, !(stack->top->type == E_LBRAC));
+            return true;
         case E_RBRAC: // Rule E -> (E)
             if (
                 stack->top->previous && 
@@ -173,8 +192,8 @@ bool apply_expression_rule(ExpressionStackPtr stack) {
                     expression_stack_pop(stack);
                     expression_stack_pop(stack);
                     break;
-                expression_stack_push(stack, E_END, true);
             }
+            expression_stack_push(stack, E_END, true);
 
             break;
         default: // Any other type, such as operators can't be the first

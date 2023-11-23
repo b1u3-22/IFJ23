@@ -81,8 +81,11 @@ void parse_int(int c, scanner_states* state, bool* end) {
     else if (!is_number(c)) *end = true;
 }
 
-void parse_id(char c, bool* end) {
-    if (!is_number(c) && !is_letter(c) && (c != '_')) *end = true;
+void parse_id(char c, scanner_states* state, bool* true_end, bool* end) {
+    if (c == '?') {
+        *state = TYPEQ;
+        *true_end = true;
+    } else if (!is_number(c) && !is_letter(c) && (c != '_')) *end = true;
 }
 
 void parse__id(int c, scanner_states* state, bool* true_end) {
@@ -183,7 +186,51 @@ void parse_larger(int c, scanner_states* state, bool* true_end, bool* end) {
         *end = true;
     }
 }
-token_types get_token_type(scanner_states* state, char c, char* data) {
+
+void parse_slash(int c, scanner_states* state, bool* end, int* cb) {
+    if (c == '/') *state = LINE_COMMENT;
+    else if (c == '*') {
+        *state = BLOCK_COMMENT;
+        *cb = *cb + 1;
+    }
+    else {
+        *end = true;
+    }
+}
+
+void parse_line_comment(int c, scanner_states* state, TokenPtr token) {
+    if (c == '\n') {
+        *state = START;
+        token_clear(token);
+    }
+}
+
+void parse_block_comment(int c, scanner_states* state) {
+    if (c == '*') *state = BLOCK_COMMENT_OUT;
+    else if (c == '/') * state = BLOCK_COMMENT_IN;
+}
+
+void parse_block_comment_in(int c, scanner_states* state, int* cb) {
+    if (c == '*') {
+        *cb = *cb + 1;
+    }
+    *state = BLOCK_COMMENT;
+} 
+
+void parse_block_comment_out(int c, scanner_states* state, TokenPtr token, int* cb) {
+    if (c == '/') {
+        *cb = *cb - 1;
+        if (*cb == 0) {
+            token_clear(token);
+            *state = START;
+        }
+    } else {
+        *state = BLOCK_COMMENT;
+    }
+
+}
+
+token_types get_token_type(scanner_states* state, char c, char* data, TokenPtr token) {
     if (*state == IDENTIFICATOR) {
         int i = is_keyword(data);
         if (i > -1) {
@@ -200,9 +247,12 @@ token_types get_token_type(scanner_states* state, char c, char* data) {
             }
         } 
         i = is_type(data);
-        if (i > -1) return TYPE;
+        if ((i > -1) && (i < 6)) {
+            token->value_type = i;
+            return TYPE;
+        }
         return ID;
-    }
+    } 
     else if (*state == OP) {
         switch (c) {
             case '(': return L_BRAC;
@@ -210,14 +260,30 @@ token_types get_token_type(scanner_states* state, char c, char* data) {
             case '{': return L_CBRAC;
             case '}': return R_CBRAC;
             case '+': return PLUS;
-            case '/': return DIV;
             case ':': return D_DOT;
             case '*': return MULT;
             case ',': return COMMA;
             default : return ERROR;
         }
     } 
-    else if ((*state == FLP) || (*state == FLPE) || (*state == STR) || (*state == INT)) return VALUE;
+    else if ((*state == FLP) || (*state == FLPE) || (*state == STR) || (*state == INT)) {
+        if ((*state == FLP) || (*state == FLPE)) {
+            token->value_type = S_DOUBLE;
+        } else if (*state == STR) {
+            token->value_type = S_STRING;
+        } else if (*state == INT) {
+            token->value_type = S_INT;
+        }
+        return VALUE;
+    } else if (*state == TYPEQ) {
+        int i = is_type(data);
+        if ((i == 1) || (i == 3) || (i == 5)) {
+            token->value_type = i;
+        } else {
+            ungetc(c, stdin);
+        }
+        return TYPE;
+    }
     else if (*state == NL)          return NEWLINE;
     else if (*state == QMARK)       return ERROR; // single question mark is not valid
     else if (*state == QQMARK)      return QQ_MARK;
@@ -233,6 +299,7 @@ token_types get_token_type(scanner_states* state, char c, char* data) {
     else if (*state == LESS)        return SMALLER_THAN;
     else if (*state == LESS_EQ)     return SMALLER_EQUALS;
     else if (*state == UNDERSCORE)  return UNDERSCR;
+    else if (*state == SLASH)       return DIV;
     return ERROR;
 }
 
@@ -245,6 +312,8 @@ void get_next_token(TokenPtr token) {
     bool end = false; // signals that we read a whole token and accidentaly read another char which we need to put back
     bool true_end = false; // we read the whole token and there is no need to put anything back
     int c; // read char from stdin
+    int cb = 0; // number of comment blocksˇ
+    token->value_type = S_NO_TYPE;
 
     while (true) {        
         c = getchar(); 
@@ -263,6 +332,7 @@ void get_next_token(TokenPtr token) {
                 else if (c == '=')          state = EQ;
                 else if (c == '<')          state = LESS;
                 else if (c == '>')          state = LARGER;
+                else if (c == '/')          state = SLASH;
                 else if (is_operator(c)) {
                     state = OP;
                     true_end = true;
@@ -274,7 +344,7 @@ void get_next_token(TokenPtr token) {
                 else                        true_end = true;
                 break;
             case IDENTIFICATOR: // IDEN
-                parse_id(c, &end);
+                parse_id(c, &state, &true_end, &end);
                 break;
             case _IDENTIFICATOR: // read '_', expecting letters/numbers/_, becomes IDEN
                 parse__id(c, &state, &true_end);
@@ -321,6 +391,21 @@ void get_next_token(TokenPtr token) {
             case LARGER:
                 parse_larger(c, &state, &true_end, &end);
                 break;
+            case SLASH:
+                parse_slash(c, &state, &end, &cb);
+                break;
+            case LINE_COMMENT:
+                parse_line_comment(c, &state, token);
+                continue;
+            case BLOCK_COMMENT:
+                parse_block_comment(c, &state);
+                continue;
+            case BLOCK_COMMENT_OUT:
+                parse_block_comment_out(c, &state, token, &cb);
+                continue;
+            case BLOCK_COMMENT_IN:
+                parse_block_comment_in(c, &state, &cb);
+                continue;
             default: break;
         }
         if (end) {
@@ -343,28 +428,12 @@ void get_next_token(TokenPtr token) {
             ungetc(EOF, stdin);
         }
     }
-    token->type = get_token_type(&state, c, token->data);
+    token->type = get_token_type(&state, c, token->data, token);
 }
 
-// // int main() {
-// //     // basic test usage
-    
+// int main() {
 //     TokenPtr token = token_init();
 //     get_next_token(token);
-//     printf("TYPE: %d, DATA: %s\n", token->type, token->data);
-//     token_clear(token);
-//     get_next_token(token);
-//     printf("TYPE: %d, DATA: %s\n", token->type, token->data);
-//     token_clear(token);
-//     get_next_token(token);
-//     printf("TYPE: %d, DATA: %s\n", token->type, token->data);
-//     token_clear(token);
-//     get_next_token(token);
-//     printf("TYPE: %d, DATA: %s\n", token->type, token->data);
-//     token_clear(token);
-//     get_next_token(token);
-//     printf("TYPE: %d, DATA: %s\n", token->type, token->data);
-//     token_clear(token);
-//     get_next_token(token);
-//     printf("TYPE: %d, DATA: %s\n", token->type, token->data);
+//     printf("TYPE: %d, DATA: %s, SPECIAL TYPE: %d\n", token->type, token->data, token->value_type);
+
 // } 

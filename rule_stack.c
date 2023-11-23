@@ -28,7 +28,7 @@ bool rule_stack_pop(RuleStackPtr stack) {
     return true;
 }
 
-bool rule_stack_push(RuleStackPtr stack, int type, bool rule) {
+bool rule_stack_push(RuleStackPtr stack, int type, bool rule, bool function) {
     // if we hit the allocated capacity for stack data, increase memory by reallocation
     if ((stack->data_pos + 1) >= stack->data_cap){
         RuleStackItemPtr *new_data = realloc(stack->data, (stack->data_cap + RULE_STACK_ALLOC_BLOCK) * sizeof(RuleStackItemPtr));
@@ -45,6 +45,7 @@ bool rule_stack_push(RuleStackPtr stack, int type, bool rule) {
     
     new_item->type = type;
     new_item->rule = rule;
+    new_item->function = function;
     stack->data[++(stack->data_pos)] = new_item;
     stack->top = new_item;
 
