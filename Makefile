@@ -5,12 +5,12 @@ LDFLAGS = -Wall -Wextra
 all: parser
 
 run: all
-	./parser
+	 ./parser
 
 clean:
 	rm -rf ./*.o
 
-parser: parser.o token.o rule_stack.o scanner.o expression.o expression_stack.o token_stack.o analyzer.o
+parser: parser.o token.o rule_stack.o scanner.o expression.o expression_stack.o token_stack.o analyzer.o symtable.o
 	$(CC) $(LDFLAGS) -o $@ $^ 
 
 scanner: scanner.o token.o
@@ -28,7 +28,7 @@ rule_stack.o: rule_stack.h rule_stack.c token.h
 symtable.o: symtable.h symtable.c
 	$(CC) $(CFLAGS) -c -o $@ symtable.c
 
-parser.o: parser.h parser.c rule_stack.h token.h scanner.h expression.h expression_stack.h token_stack.h analyzer.h
+parser.o: parser.h parser.c rule_stack.h token.h scanner.h expression.h expression_stack.h token_stack.h analyzer.h symtable.h
 	$(CC) $(CFLAGS) -c -o $@ parser.c
 
 expression.o: expression.h expression.c token.h scanner.h expression_stack.h

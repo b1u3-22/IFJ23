@@ -1,8 +1,8 @@
-#include "rule_stack.h"
+#include "Param_stack.h"
 
 
-RuleStackPtr rule_stack_init() {
-    RuleStackPtr stack = (RuleStackPtr) malloc(sizeof(struct RuleStack)); 
+ParamStackPtr param_stack_init() {
+    ParamStackPtr stack = (ParamStackPtr) malloc(sizeof(struct ParamStack)); 
     if (!stack) return NULL; // Allocate memory for stack and check it
 
     // initialize values
@@ -15,7 +15,7 @@ RuleStackPtr rule_stack_init() {
     return stack;
 }
 
-bool rule_stack_pop(RuleStackPtr stack) {
+bool param_stack_pop(ParamStackPtr stack) {
     if (stack->empty) return false;
 
     free(stack->data[stack->data_pos--]);
@@ -28,23 +28,23 @@ bool rule_stack_pop(RuleStackPtr stack) {
     return true;
 }
 
-bool rule_stack_push(RuleStackPtr stack, int type, bool rule, bool function) {
+bool param_stack_push(ParamStackPtr stack, int type, bool Param, bool function) {
     // if we hit the allocated capacity for stack data, increase memory by reallocation
     if ((stack->data_pos + 1) >= stack->data_cap){
-        RuleStackItemPtr *new_data = realloc(stack->data, (stack->data_cap + RULE_STACK_ALLOC_BLOCK) * sizeof(RuleStackItemPtr));
+        ParamStackItemPtr *new_data = realloc(stack->data, (stack->data_cap + PARAM_STACK_ALLOC_BLOCK) * sizeof(ParamStackItemPtr));
         if (!new_data) return true;
 
         // else set old data to new ones and increase data_cap to reflect the change
         stack->data = new_data;
-        stack->data_cap += RULE_STACK_ALLOC_BLOCK;
+        stack->data_cap += PARAM_STACK_ALLOC_BLOCK;
     }
 
     // add new token to data and correct top pointer
-    RuleStackItemPtr new_item = (RuleStackItemPtr) malloc(sizeof(struct RuleStackItem));
+    ParamStackItemPtr new_item = (ParamStackItemPtr) malloc(sizeof(struct ParamStackItem));
     if (!new_item) return true;
     
     new_item->type = type;
-    new_item->rule = rule;
+    new_item->Param = Param;
     new_item->function = function;
     stack->data[++(stack->data_pos)] = new_item;
     stack->top = new_item;
@@ -53,8 +53,8 @@ bool rule_stack_push(RuleStackPtr stack, int type, bool rule, bool function) {
     return false;
 }
 
-void rule_stack_dispose(RuleStackPtr stack) {
-    while (!(stack->empty)) rule_stack_pop(stack);
+void param_stack_dispose(ParamStackPtr stack) {
+    while (!(stack->empty)) param_stack_pop(stack);
     free(stack->data);
     free(stack);
 }
