@@ -113,6 +113,7 @@ void builtin_read();
 void builtin_write();
 void builtin_int2float();
 void builtin_float2int();
-void builtin_substring();
+void builtin_len();
+void builtin_substr();
 void builtin_ord();
 void builtin_chr();
