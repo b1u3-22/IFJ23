@@ -6,6 +6,7 @@
 typedef struct RuleStackItem {
     int type;
     bool rule;
+    bool function;
 } *RuleStackItemPtr;
 
 typedef struct RuleStack {
@@ -32,7 +33,7 @@ bool rule_stack_pop(RuleStackPtr stack);
  *  @param token TokenPtr that should be added to stack
  *  @returns true if succeded, false otherwise
 */
-bool rule_stack_push(RuleStackPtr stack, int type, bool rule);
+bool rule_stack_push(RuleStackPtr stack, int type, bool rule, bool function);
 
 /** Dispose and free Token Stack
 */

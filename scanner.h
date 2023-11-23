@@ -5,6 +5,12 @@
 #include "token.h"
 #endif
 
+#ifndef _SYMTABLE
+#define _SYMTABLE
+#include "symtable.h"
+#endif
+
+
 typedef enum {
     START,
     INT,
@@ -37,7 +43,8 @@ typedef enum {
     LINE_COMMENT,
     BLOCK_COMMENT,
     BLOCK_COMMENT_OUT,
-    BLOCK_COMMENT_IN
+    BLOCK_COMMENT_IN,
+    TYPEQ
 } scanner_states;
 
 static const char ALLOWED_BACKSLASH_CHARS[] = {'\"', 'u', 'n', 't', 'r', '\\', '\0'};  // WARNING: do not remove '\0',
