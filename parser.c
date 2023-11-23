@@ -2,32 +2,31 @@
 
 int parse() {
     SymTablePtr symtable = symtable_init();
-    if (!symtable) return 99;
+    if (!symtable) exit(99);
 
     AnalyzerPtr analyzer = init_analyzer(symtable);
-    if (!analyzer) return 99;
+    if (!analyzer) exit(99);
 
     TokenStackPtr token_stack = token_stack_init();
-    if (!token_stack) return 99; // If token initialization fails, return error code 99 
+    if (!token_stack) exit(99); // If token initialization fails, return error code 99 
 
     // ===================== Token stacks for semantic analyzer =====================
 
     TokenStackPtr sa_1 = token_stack_init();
     TokenStackPtr sa_2 = token_stack_init();
-    if (!sa_1 || !sa_2) return 99;
+    if (!sa_1 || !sa_2) exit(99);
 
     // ===================== Token stacks for semantic analyzer =====================
 
     RuleStackPtr rule_stack = rule_stack_init();
-    if (!rule_stack) return 99; // Token stack initialization failed, return code 99
+    if (!rule_stack) exit(99); // Token stack initialization failed, return code 99
     
     rule_stack_push(rule_stack, R_G_BODY, true, false); // Push global body rule into rule stack
 
     TokenPtr token = token_stack_get(token_stack);
-    if (!token) return 99; // Something failed when creating and getting new token
+    if (!token) exit(99); // Something failed when creating and getting new token
 
     int rule_to_apply = 0;
-    int return_code = 0;
     bool new_line = true;
 
     while (!(rule_stack->empty)) {
@@ -46,15 +45,13 @@ int parse() {
 
         // Handling for tokens that always require a newline
         else if (token->type <= R_EOL && token->type > R_EOL_B && !new_line) {
-            return_code = 2;
-            error_skip(rule_stack, token_stack);
+            exit(2);
         }
 
         // Handling for tokens that require newline when current rule is body or global body
         else if (token->type <= R_EOL && token->type <= R_EOL_B && rule_stack->top->rule && (rule_stack->top->type == R_BODY || rule_stack->top->type == R_G_BODY)) {
             if (!new_line) {
-                return_code = 2;
-                error_skip(rule_stack, token_stack);
+                exit(2);
             }
         }
 
@@ -77,8 +74,7 @@ int parse() {
 
         // Token from scanner has different type than token on top of stack
         else {
-            return_code = 2;
-            error_skip(rule_stack, token_stack);
+            exit(22);
         }
     } // main while
 
@@ -421,16 +417,17 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack) {
 
 void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, TokenStackPtr stack_1, TokenStackPtr stack_2, AnalyzerPtr analyzer) {
     rule_stack_pop(rule_stack);
+    int return_code = 0;
 
     switch (function) {
         case F_P_PSA:
-            parse_expression(END, stack_2);
+            if (return_code = parse_expression(END, stack_2)) exit(return_code);
             break;
         case F_P_PUSH_1:
-            token_stack_push(stack_1, token);
+            if (return_code = token_stack_push(stack_1, token)) exit(return_code);
             break;
         case F_P_PUSH_2:
-            token_stack_push(stack_2, token);
+            if (return_code = token_stack_push(stack_2, token)) exit(return_code);
             break;
         case F_S_INC_DEP:
             increase_depth(analyzer);
@@ -439,22 +436,22 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
             decrease_depth(analyzer);
             break;
         case F_S_VAR_DEC:
-            check_declaration(analyzer, stack_1);
+            if (return_code = check_declaration(analyzer, stack_1)) exit(return_code);
             break; 
         case F_S_VAR_DEF:
-            check_definition(analyzer, stack_1, stack_2);
+            if (return_code = check_definition(analyzer, stack_1, stack_2)) exit(return_code);
             break;
         case F_S_VAL_ASG:
-            check_value_assingment(analyzer, stack_1, stack_2);
+            if (return_code = check_value_assingment(analyzer, stack_1, stack_2)) exit(return_code);
             break;
         case F_S_FUN_ASG:
-            check_function_assingment(analyzer, stack_1, stack_2);
+            if (return_code = check_function_assingment(analyzer, stack_1, stack_2)) exit(return_code);
             break;
         case F_S_FUN_CAL:
-            check_function_call(analyzer, stack_1, stack_2);
+            if (return_code = check_function_call(analyzer, stack_1, stack_2)) exit(return_code);
             break;
         case F_S_FUN_DEF:
-            check_function_definition(analyzer, stack_1);
+            if (return_code = check_function_definition(analyzer, stack_1)) exit(return_code);
             break;
         default:
             break;
