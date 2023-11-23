@@ -122,299 +122,302 @@ int parse() {
 
 void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack) {
     rule_stack_pop(stack);
+    int errors = 0;
 
     switch (rule)
     {
     case 0:
-        error_skip(stack, token_stack);
+        exit(2);
         break;
 
     case 1:
-        rule_stack_push(stack, R_G_BODY, true, false);
-        rule_stack_push(stack, R_VAR_DEF, true, false);
-        rule_stack_push(stack, ID, false, false);
-        rule_stack_push(stack, F_P_PUSH_1, false, true);
-        rule_stack_push(stack, LET, false, false);
-        rule_stack_push(stack, F_P_PUSH_1, false, true);
+        errors += rule_stack_push(stack, R_G_BODY, true, false);
+        errors += rule_stack_push(stack, R_VAR_DEF, true, false);
+        errors += rule_stack_push(stack, ID, false, false);
+        errors += rule_stack_push(stack, F_P_PUSH_1, false, true);
+        errors += rule_stack_push(stack, LET, false, false);
+        errors += rule_stack_push(stack, F_P_PUSH_1, false, true);
         break;
 
     case 2:
-        rule_stack_push(stack, R_G_BODY, true, false);
-        rule_stack_push(stack, R_VAR_DEF, true, false);
-        rule_stack_push(stack, ID, false, false);
-        rule_stack_push(stack, F_P_PUSH_1, false, true);
-        rule_stack_push(stack, VAR, false, false);
-        rule_stack_push(stack, F_P_PUSH_1, false, true);
+        errors += rule_stack_push(stack, R_G_BODY, true, false);
+        errors += rule_stack_push(stack, R_VAR_DEF, true, false);
+        errors += rule_stack_push(stack, ID, false, false);
+        errors += rule_stack_push(stack, F_P_PUSH_1, false, true);
+        errors += rule_stack_push(stack, VAR, false, false);
+        errors += rule_stack_push(stack, F_P_PUSH_1, false, true);
         break;
 
     case 3:
-        rule_stack_push(stack, R_BODY, true, false);
-        rule_stack_push(stack, R_VAR_DEF, true, false);
-        rule_stack_push(stack, ID, false, false);
-        rule_stack_push(stack, F_P_PUSH_1, false, true);
-        rule_stack_push(stack, LET, false, false);
-        rule_stack_push(stack, F_P_PUSH_1, false, true);
+        errors += rule_stack_push(stack, R_BODY, true, false);
+        errors += rule_stack_push(stack, R_VAR_DEF, true, false);
+        errors += rule_stack_push(stack, ID, false, false);
+        errors += rule_stack_push(stack, F_P_PUSH_1, false, true);
+        errors += rule_stack_push(stack, LET, false, false);
+        errors += rule_stack_push(stack, F_P_PUSH_1, false, true);
         break;
 
     case 4:
-        rule_stack_push(stack, R_BODY, true, false);
-        rule_stack_push(stack, R_VAR_DEF, true, false);
-        rule_stack_push(stack, ID, false, false);
-        rule_stack_push(stack, F_P_PUSH_1, false, true);
-        rule_stack_push(stack, VAR, false, false);
-        rule_stack_push(stack, F_P_PUSH_1, false, true);
+        errors += rule_stack_push(stack, R_BODY, true, false);
+        errors += rule_stack_push(stack, R_VAR_DEF, true, false);
+        errors += rule_stack_push(stack, ID, false, false);
+        errors += rule_stack_push(stack, F_P_PUSH_1, false, true);
+        errors += rule_stack_push(stack, VAR, false, false);
+        errors += rule_stack_push(stack, F_P_PUSH_1, false, true);
         break;
 
     case 5:
-        rule_stack_push(stack, F_S_VAR_DEC, false, true);
+        errors += rule_stack_push(stack, F_S_VAR_DEC, false, true);
         break;
 
     case 6:
-        rule_stack_push(stack, R_VAR_ASG, true, false);
-        rule_stack_push(stack, TYPE, false, false);
-        rule_stack_push(stack, F_P_PUSH_1, false, true);
-        rule_stack_push(stack, D_DOT, false, false);
+        errors += rule_stack_push(stack, R_VAR_ASG, true, false);
+        errors += rule_stack_push(stack, TYPE, false, false);
+        errors += rule_stack_push(stack, F_P_PUSH_1, false, true);
+        errors += rule_stack_push(stack, D_DOT, false, false);
         break;
 
     case 8:
-        rule_stack_push(stack, F_S_VAR_DEC, false, true);
+        errors += rule_stack_push(stack, F_S_VAR_DEC, false, true);
         break;
 
     case 7:
     case 9:
-        rule_stack_push(stack, F_S_VAR_DEF, false, true);
-        rule_stack_push(stack, R_EXPR, true, false);
-        rule_stack_push(stack, EQUALS, false, false);
+        errors += rule_stack_push(stack, F_S_VAR_DEF, false, true);
+        errors += rule_stack_push(stack, R_EXPR, true, false);
+        errors += rule_stack_push(stack, EQUALS, false, false);
         break;
 
     case 10:
-        rule_stack_push(stack, R_G_BODY, true, false);
-        rule_stack_push(stack, R_CBRAC, false, false);
-        rule_stack_push(stack, F_S_DEC_DEP, false, true);
-        rule_stack_push(stack, R_BODY, true, false);
-        rule_stack_push(stack, F_S_INC_DEP, false, true);
-        rule_stack_push(stack, L_CBRAC, false, false);
-        rule_stack_push(stack, R_F_RET_DEF, true, false);
-        rule_stack_push(stack, R_BRAC, false, false);
-        rule_stack_push(stack, F_S_FUN_DEF, false, true); 
-        rule_stack_push(stack, R_F_DEF_F, true, false);
-        rule_stack_push(stack, L_BRAC, false, false);
-        rule_stack_push(stack, ID, false, false);
-        rule_stack_push(stack, F_P_PUSH_1, false, true);
-        rule_stack_push(stack, FUNC, false, false);
+        errors += rule_stack_push(stack, R_G_BODY, true, false);
+        errors += rule_stack_push(stack, R_CBRAC, false, false);
+        errors += rule_stack_push(stack, F_S_DEC_DEP, false, true);
+        errors += rule_stack_push(stack, R_BODY, true, false);
+        errors += rule_stack_push(stack, F_S_INC_DEP, false, true);
+        errors += rule_stack_push(stack, L_CBRAC, false, false);
+        errors += rule_stack_push(stack, R_F_RET_DEF, true, false);
+        errors += rule_stack_push(stack, R_BRAC, false, false);
+        errors += rule_stack_push(stack, F_S_FUN_DEF, false, true); 
+        errors += rule_stack_push(stack, R_F_DEF_F, true, false);
+        errors += rule_stack_push(stack, L_BRAC, false, false);
+        errors += rule_stack_push(stack, ID, false, false);
+        errors += rule_stack_push(stack, F_P_PUSH_1, false, true);
+        errors += rule_stack_push(stack, FUNC, false, false);
         break;
 
     case 12:
-        rule_stack_push(stack, R_F_DEF_N, true, false);
-        rule_stack_push(stack, TYPE, false, false);
-        rule_stack_push(stack, D_DOT, false, false);
-        rule_stack_push(stack, R_F_DEF_ID, true, false);
+        errors += rule_stack_push(stack, R_F_DEF_N, true, false);
+        errors += rule_stack_push(stack, TYPE, false, false);
+        errors += rule_stack_push(stack, D_DOT, false, false);
+        errors += rule_stack_push(stack, R_F_DEF_ID, true, false);
         break;
 
     case 14:
-        rule_stack_push(stack, R_F_DEF_N, true, false);
-        rule_stack_push(stack, TYPE, false, false);
-        rule_stack_push(stack, R_VAR_ASG, true, false);
-        rule_stack_push(stack, D_DOT, false, false);
-        rule_stack_push(stack, R_F_DEF_ID, true, false);
-        rule_stack_push(stack, COMMA, false, false);
+        errors += rule_stack_push(stack, R_F_DEF_N, true, false);
+        errors += rule_stack_push(stack, TYPE, false, false);
+        errors += rule_stack_push(stack, R_VAR_ASG, true, false);
+        errors += rule_stack_push(stack, D_DOT, false, false);
+        errors += rule_stack_push(stack, R_F_DEF_ID, true, false);
+        errors += rule_stack_push(stack, COMMA, false, false);
         break;
 
     case 15:
-        rule_stack_push(stack, R_G_BODY, true, false);
-        rule_stack_push(stack, R_CBRAC, false, false);
-        rule_stack_push(stack, F_S_DEC_DEP, false, true);
-        rule_stack_push(stack, R_BODY, true, false);
-        rule_stack_push(stack, F_S_INC_DEP, false, true);
-        rule_stack_push(stack, L_CBRAC, false, false);
-        rule_stack_push(stack, ELSE, false, false);
-        rule_stack_push(stack, R_CBRAC, false, false);
-        rule_stack_push(stack, F_S_DEC_DEP, false, true);
-        rule_stack_push(stack, R_BODY, true, false);
-        rule_stack_push(stack, F_S_INC_DEP, false, true);
-        rule_stack_push(stack, L_CBRAC, false, false);
-        rule_stack_push(stack, R_CON_DEF, true, false);
-        rule_stack_push(stack, IF, false, false);
+        errors += rule_stack_push(stack, R_G_BODY, true, false);
+        errors += rule_stack_push(stack, R_CBRAC, false, false);
+        errors += rule_stack_push(stack, F_S_DEC_DEP, false, true);
+        errors += rule_stack_push(stack, R_BODY, true, false);
+        errors += rule_stack_push(stack, F_S_INC_DEP, false, true);
+        errors += rule_stack_push(stack, L_CBRAC, false, false);
+        errors += rule_stack_push(stack, ELSE, false, false);
+        errors += rule_stack_push(stack, R_CBRAC, false, false);
+        errors += rule_stack_push(stack, F_S_DEC_DEP, false, true);
+        errors += rule_stack_push(stack, R_BODY, true, false);
+        errors += rule_stack_push(stack, F_S_INC_DEP, false, true);
+        errors += rule_stack_push(stack, L_CBRAC, false, false);
+        errors += rule_stack_push(stack, R_CON_DEF, true, false);
+        errors += rule_stack_push(stack, IF, false, false);
         break;
 
     case 16:
-        rule_stack_push(stack, R_G_BODY, true, false);
-        rule_stack_push(stack, R_CBRAC, false, false);
-        rule_stack_push(stack, F_S_DEC_DEP, false, true);
-        rule_stack_push(stack, R_BODY, true, false);
-        rule_stack_push(stack, F_S_INC_DEP, false, true);
-        rule_stack_push(stack, L_CBRAC, false, false);
-        rule_stack_push(stack, R_CON_DEF, true, false);
-        rule_stack_push(stack, WHILE, false, false);
+        errors += rule_stack_push(stack, R_G_BODY, true, false);
+        errors += rule_stack_push(stack, R_CBRAC, false, false);
+        errors += rule_stack_push(stack, F_S_DEC_DEP, false, true);
+        errors += rule_stack_push(stack, R_BODY, true, false);
+        errors += rule_stack_push(stack, F_S_INC_DEP, false, true);
+        errors += rule_stack_push(stack, L_CBRAC, false, false);
+        errors += rule_stack_push(stack, R_CON_DEF, true, false);
+        errors += rule_stack_push(stack, WHILE, false, false);
         break;
 
     case 17:
-        rule_stack_push(stack, R_BODY, true, false);
-        rule_stack_push(stack, R_CBRAC, false, false);
-        rule_stack_push(stack, F_S_DEC_DEP, false, true);
-        rule_stack_push(stack, R_BODY, true, false);
-        rule_stack_push(stack, F_S_INC_DEP, false, true);
-        rule_stack_push(stack, L_CBRAC, false, false);
-        rule_stack_push(stack, ELSE, false, false);
-        rule_stack_push(stack, R_CBRAC, false, false);
-        rule_stack_push(stack, F_S_DEC_DEP, false, true);
-        rule_stack_push(stack, R_BODY, true, false);
-        rule_stack_push(stack, F_S_INC_DEP, false, true);
-        rule_stack_push(stack, L_CBRAC, false, false);
-        rule_stack_push(stack, R_CON_DEF, true, false);
-        rule_stack_push(stack, IF, false, false);
+        errors += rule_stack_push(stack, R_BODY, true, false);
+        errors += rule_stack_push(stack, R_CBRAC, false, false);
+        errors += rule_stack_push(stack, F_S_DEC_DEP, false, true);
+        errors += rule_stack_push(stack, R_BODY, true, false);
+        errors += rule_stack_push(stack, F_S_INC_DEP, false, true);
+        errors += rule_stack_push(stack, L_CBRAC, false, false);
+        errors += rule_stack_push(stack, ELSE, false, false);
+        errors += rule_stack_push(stack, R_CBRAC, false, false);
+        errors += rule_stack_push(stack, F_S_DEC_DEP, false, true);
+        errors += rule_stack_push(stack, R_BODY, true, false);
+        errors += rule_stack_push(stack, F_S_INC_DEP, false, true);
+        errors += rule_stack_push(stack, L_CBRAC, false, false);
+        errors += rule_stack_push(stack, R_CON_DEF, true, false);
+        errors += rule_stack_push(stack, IF, false, false);
         break;
 
     case 18:
-        rule_stack_push(stack, R_BODY, true, false);
-        rule_stack_push(stack, R_CBRAC, false, false);
-        rule_stack_push(stack, F_S_DEC_DEP, false, true);
-        rule_stack_push(stack, R_BODY, true, false);
-        rule_stack_push(stack, F_S_INC_DEP, false, true);
-        rule_stack_push(stack, L_CBRAC, false, false);
-        rule_stack_push(stack, R_CON_DEF, true, false);
-        rule_stack_push(stack, WHILE, false, false);
+        errors += rule_stack_push(stack, R_BODY, true, false);
+        errors += rule_stack_push(stack, R_CBRAC, false, false);
+        errors += rule_stack_push(stack, F_S_DEC_DEP, false, true);
+        errors += rule_stack_push(stack, R_BODY, true, false);
+        errors += rule_stack_push(stack, F_S_INC_DEP, false, true);
+        errors += rule_stack_push(stack, L_CBRAC, false, false);
+        errors += rule_stack_push(stack, R_CON_DEF, true, false);
+        errors += rule_stack_push(stack, WHILE, false, false);
         break;
 
     case 19:
-        rule_stack_push(stack, ID, false, false);
-        rule_stack_push(stack, LET, false, false);
+        errors += rule_stack_push(stack, ID, false, false);
+        errors += rule_stack_push(stack, LET, false, false);
         break;
 
     case 21:
-        rule_stack_push(stack, R_EXPR_ID, true, false);
-        rule_stack_push(stack, ID, false, false);
-        rule_stack_push(stack, F_P_PUSH_2, false, true);
+        errors += rule_stack_push(stack, R_EXPR_ID, true, false);
+        errors += rule_stack_push(stack, ID, false, false);
+        errors += rule_stack_push(stack, F_P_PUSH_2, false, true);
         break;
 
     case 22:
-        rule_stack_push(stack, R_EXPR_OP, true, false);
-        rule_stack_push(stack, VALUE, false, false);
-        rule_stack_push(stack, F_P_PUSH_2, false, true);
+        errors += rule_stack_push(stack, R_EXPR_OP, true, false);
+        errors += rule_stack_push(stack, VALUE, false, false);
+        errors += rule_stack_push(stack, F_P_PUSH_2, false, true);
         break;
 
     case 23:
-        rule_stack_push(stack, F_S_FUN_ASG, false, true);
-        rule_stack_push(stack, R_EXPR_OP, true, false);
-        rule_stack_push(stack, R_BRAC, false, false);
-        rule_stack_push(stack, R_F_PAR_F, true, false);
-        rule_stack_push(stack, L_BRAC, false, false);
+        errors += rule_stack_push(stack, F_S_FUN_ASG, false, true);
+        errors += rule_stack_push(stack, R_EXPR_OP, true, false);
+        errors += rule_stack_push(stack, R_BRAC, false, false);
+        errors += rule_stack_push(stack, R_F_PAR_F, true, false);
+        errors += rule_stack_push(stack, L_BRAC, false, false);
         break;
 
     case 24:
     case 25:
-        token_stack_unget(token_stack);
+        errors += token_stack_unget(token_stack);
     
     case 20:
     case 52:
-        token_stack_unget(token_stack);
-        rule_stack_pop(stack);
-        rule_stack_push(stack, F_P_PSA, false, true);
+        errors += token_stack_unget(token_stack);
+        errors += rule_stack_pop(stack);
+        errors += rule_stack_push(stack, F_P_PSA, false, true);
         break;
 
     case 29:
-        rule_stack_push(stack, R_F_PAR_ID, true, false);
-        rule_stack_push(stack, ID, false, false);
+        errors += rule_stack_push(stack, R_F_PAR_ID, true, false);
+        errors += rule_stack_push(stack, ID, false, false);
         break;
 
     case 30:
-        rule_stack_push(stack, R_F_PAR_N, true, false);
-        rule_stack_push(stack, R_EXPR_OP, true, false);
-        rule_stack_push(stack, VALUE, false, false);
+        errors += rule_stack_push(stack, R_F_PAR_N, true, false);
+        errors += rule_stack_push(stack, R_EXPR_OP, true, false);
+        errors += rule_stack_push(stack, VALUE, false, false);
         break;
 
     case 31:
-        rule_stack_push(stack, R_F_PAR_N, true, false);
-        rule_stack_push(stack, R_EXPR, true, false);
-        rule_stack_push(stack, D_DOT, false, false);
+        errors += rule_stack_push(stack, R_F_PAR_N, true, false);
+        errors += rule_stack_push(stack, R_EXPR, true, false);
+        errors += rule_stack_push(stack, D_DOT, false, false);
         break;
 
     case 32:
-        rule_stack_push(stack, R_F_PAR_N, true, false);
+        errors += rule_stack_push(stack, R_F_PAR_N, true, false);
         break;
 
     case 33:
-        rule_stack_push(stack, R_F_PAR, true, false);
-        rule_stack_push(stack, COMMA, false, false);
+        errors += rule_stack_push(stack, R_F_PAR, true, false);
+        errors += rule_stack_push(stack, COMMA, false, false);
         break;
 
     case 34:
-        rule_stack_push(stack, R_F_PAR_ID, true, false);
-        rule_stack_push(stack, ID, false, false);
+        errors += rule_stack_push(stack, R_F_PAR_ID, true, false);
+        errors += rule_stack_push(stack, ID, false, false);
         break;
 
     case 35:
-        rule_stack_push(stack, R_F_PAR_N, true, false);
-        rule_stack_push(stack, R_EXPR_OP, true, false);
-        rule_stack_push(stack, VALUE, false, false);
+        errors += rule_stack_push(stack, R_F_PAR_N, true, false);
+        errors += rule_stack_push(stack, R_EXPR_OP, true, false);
+        errors += rule_stack_push(stack, VALUE, false, false);
         break;
 
     case 37:
-        rule_stack_push(stack, R_G_BODY, true, false);
-        rule_stack_push(stack, R_STAT, true, false);
-        rule_stack_push(stack, ID, false, false);
-        rule_stack_push(stack, F_P_PUSH_1, false, true);
+        errors += rule_stack_push(stack, R_G_BODY, true, false);
+        errors += rule_stack_push(stack, R_STAT, true, false);
+        errors += rule_stack_push(stack, ID, false, false);
+        errors += rule_stack_push(stack, F_P_PUSH_1, false, true);
         break;
 
     case 38:
-        rule_stack_push(stack, R_BODY, true, false);
-        rule_stack_push(stack, R_STAT, true, false);
-        rule_stack_push(stack, ID, false, false);
-        rule_stack_push(stack, F_P_PUSH_1, false, true);
+        errors += rule_stack_push(stack, R_BODY, true, false);
+        errors += rule_stack_push(stack, R_STAT, true, false);
+        errors += rule_stack_push(stack, ID, false, false);
+        errors += rule_stack_push(stack, F_P_PUSH_1, false, true);
         break;
 
     case 39:
-        rule_stack_push(stack, F_S_FUN_CAL, false, true);
-        rule_stack_push(stack, R_BRAC, false, false);
-        rule_stack_push(stack, R_F_PAR_F, true, false);
-        rule_stack_push(stack, L_BRAC, false, false);
+        errors += rule_stack_push(stack, F_S_FUN_CAL, false, true);
+        errors += rule_stack_push(stack, R_BRAC, false, false);
+        errors += rule_stack_push(stack, R_F_PAR_F, true, false);
+        errors += rule_stack_push(stack, L_BRAC, false, false);
         break;
 
     case 40:
-        rule_stack_push(stack, F_S_VAL_ASG, false, true);
-        rule_stack_push(stack, R_EXPR, true, false);
-        rule_stack_push(stack, EQUALS, false, false);
+        errors += rule_stack_push(stack, F_S_VAL_ASG, false, true);
+        errors += rule_stack_push(stack, R_EXPR, true, false);
+        errors += rule_stack_push(stack, EQUALS, false, false);
         break;
 
     case 41:
-        rule_stack_push(stack, R_RET_DEF, true, false);
-        rule_stack_push(stack, RETURN, false, false);
+        errors += rule_stack_push(stack, R_RET_DEF, true, false);
+        errors += rule_stack_push(stack, RETURN, false, false);
         break;
 
     case 42:
-        rule_stack_push(stack, R_RET_DEF, true, false);
-        rule_stack_push(stack, RETURN, false, false);
+        errors += rule_stack_push(stack, R_RET_DEF, true, false);
+        errors += rule_stack_push(stack, RETURN, false, false);
         break;
 
     case 44:
-        rule_stack_push(stack, R_EXPR, true, false);
+        errors += rule_stack_push(stack, R_EXPR, true, false);
         break;
 
     case 47:
-        rule_stack_push(stack, R_BRAC, false, false);
-        rule_stack_push(stack, R_F_PAR_F, true, false);
-        rule_stack_push(stack, L_BRAC, false, false);
+        errors += rule_stack_push(stack, R_BRAC, false, false);
+        errors += rule_stack_push(stack, R_F_PAR_F, true, false);
+        errors += rule_stack_push(stack, L_BRAC, false, false);
         break;
 
     case 48:
-        rule_stack_push(stack, ID, false, false);
-        rule_stack_push(stack, ID, false, false);
+        errors += rule_stack_push(stack, ID, false, false);
+        errors += rule_stack_push(stack, ID, false, false);
         break;
 
     case 49:
-        rule_stack_push(stack, ID, false, false);
-        rule_stack_push(stack, UNDERSCR, false, false);
+        errors += rule_stack_push(stack, ID, false, false);
+        errors += rule_stack_push(stack, UNDERSCR, false, false);
         break;
 
     case 50:
-        rule_stack_push(stack, TYPE, false, false);
-        rule_stack_push(stack, F_P_PUSH_1, false, true);
-        rule_stack_push(stack, ARROW, false, false);
+        errors += rule_stack_push(stack, TYPE, false, false);
+        errors += rule_stack_push(stack, F_P_PUSH_1, false, true);
+        errors += rule_stack_push(stack, ARROW, false, false);
         break;
 
     default:
         break;
     }
+
+    if (errors > 0) exit(2);
 }
 
 void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, TokenStackPtr stack_1, TokenStackPtr stack_2, AnalyzerPtr analyzer) {
