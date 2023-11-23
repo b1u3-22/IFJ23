@@ -22,7 +22,7 @@ bool token_stack_push(TokenStackPtr stack, TokenPtr token) {
     // if we hit the allocated capacity for stack data, increase memory by reallocation
     if ((stack->tokens_pos + 1) >= stack->tokens_cap){
         TokenPtr *new_tokens = realloc(stack->tokens, (stack->tokens_cap + TOKEN_STACK_ALLOC_BLOCK) * sizeof(TokenPtr));
-        if (!new_tokens) return false;
+        if (!new_tokens) return true;
 
         // else set old data to new ones and increase data_cap to reflect the change
         stack->tokens = new_tokens;
@@ -33,7 +33,7 @@ bool token_stack_push(TokenStackPtr stack, TokenPtr token) {
     stack->top = token;
 
     stack->empty = false;
-    return true;
+    return false;
 }
 
 bool token_stack_pop(TokenStackPtr stack) {
