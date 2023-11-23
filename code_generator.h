@@ -61,7 +61,7 @@ void while_end();
 void func_start(char* func);
 void func_param(SymTableItemPtr param);
 void func_return(SymTableItemPtr var);
-void func_end(char* func);
+void func_end();
 void func_call();
 void func_call_param(SymTableItemPtr param);
 void func_call_end(char* func);
