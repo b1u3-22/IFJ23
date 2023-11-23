@@ -1,8 +1,14 @@
+/**
+ *  Project:    Implementace překladače imperativního jazyka IFJ23.
+ *  File:       @brief Implementace stavového automatu pro parsování vstupu; výroba tokenů.
+ *  Authors:    @author Nikol Škvařilová xskvar11
+*/
+
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
 #include "scanner.h"
-#include <stdio.h>
 
 
 void unget_token(TokenPtr token) {

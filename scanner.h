@@ -1,3 +1,9 @@
+/**
+ *  Project:    Implementace překladače imperativního jazyka IFJ23.
+ *  File:       @brief Hlavičkový soubor pro skener; deklarace stavů (enum), funkcí, pomocných polí
+ *  Authors:    @author Nikol Škvařilová xskvar11
+*/
+
 #include <stdbool.h>
 #include <ctype.h>
 #ifndef _TOKEN
