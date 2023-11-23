@@ -147,18 +147,6 @@ void push_sym(SymTableItemPtr sym) {
 
 }
 
-void if_let_check(SymTableItemPtr sym) {
-
-    inst("POPS GF@!tmp_var1");
-    inst("JUMPIFEQ @_if", if_new, " nil@nil GF@!tmp_var1");
-
-    inst("CREATEFRAME");
-    inst("PUSHFRAME");
-
-    if_num = if_new++;
-
-}
-
 void if_check() {
 
     inst("POPS GF@!tmp_var1");
