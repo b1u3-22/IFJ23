@@ -241,7 +241,10 @@ token_types get_token_type(scanner_states* state, char c, char* data, TokenPtr t
                 case 3: return RETURN;
                 case 4: return LET;
                 case 5: return VAR;
-                case 6: return NIL;
+                case 6: {
+                    token->value_type = S_NO_TYPE;
+                    return VALUE;
+                }
                 case 7: return WHILE;
                 default: return ERROR;
             }
