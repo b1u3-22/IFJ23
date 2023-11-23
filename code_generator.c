@@ -16,18 +16,21 @@ void code_header() {
     inst("DEFVAR GF@!tmp_var1");
     inst("DEFVAR GF@!tmp_var2");
     //inst("DEFVAR GF@!result");
-    inst("JUMP &main");
+    inst("JUMP @&&main");
 
-	builtin_read();
+    auxil_divdecider();
+    auxil_qqdecider();
+	
+    builtin_read();
     builtin_write();
-	builtin_int2float();
-	builtin_float2int();
-	builtin_len();
-	builtin_substr();
-	builtin_ord();
-	builtin_chr();
+    builtin_int2float();
+    builtin_float2int();
+    builtin_len();
+    builtin_substr();
+    builtin_ord();
+    builtin_chr();
 
-    inst("LABEL &main");
+    inst("LABEL @&&main");
 
 }
 
@@ -38,7 +41,7 @@ void code_footer() {
 
 }
 
-void exp_instruction(ExpressionTypes type) {
+void exp_instruction(int type) {
 
     switch (type) {
         case E_PLS:
@@ -51,7 +54,7 @@ void exp_instruction(ExpressionTypes type) {
             inst("MULS");
             break;
         case E_DIV:
-            inst("DIVS");
+	    inst("CALL @&&divdecider");
             break;
         case E_SM:
             inst("LTS");
@@ -81,14 +84,7 @@ void exp_instruction(ExpressionTypes type) {
             inst("PUSHS GF@!tmp_var1");
             break;
         case E_QQ:
-            inst("POPS GF@!tmp_var2");
-            inst("POPS GF@!tmp_var1");
-            inst("JUMPIFEQ @_qq", qq_num, " GF@!tmp_var1 nil@nil");
-            inst("PUSHS GF@!tmp_var1");
-            inst("JUMP @_qqelse", qq_num);
-            inst("LABEL @_qq", qq_num);
-            inst("PUSHS GF@!tmp_var2");
-            inst("LABEL @_qqelse", qq_num++);
+	    inst("CALL @&&qqdecider");
         case E_EXC:
             inst("NOTS");
         default:
@@ -97,57 +93,57 @@ void exp_instruction(ExpressionTypes type) {
 
 }
 
-void def_var(TokenPtr var) {
+void def_var(SymTableItemPtr var) {
 
-    if (depth == 0)
-        inst("DEFVAR GF@", var->name);
+    if (var->depth == 0)
+        inst("DEFVAR GF@", var->id);
     else
-        inst("DEFVAR LF@", var->name);
+        inst("DEFVAR LF@", var->id);
 
 }
 
-void set_var(TokenPtr var, TokenPtr sym) {
+void set_var(SymTableItemPtr var) {
 
-    if (var->frame == GLOBAL)
-        part("MOVE GF@", var->name);
+    if (var->depth == 0)
+        inst("POP GF@", var->id);
     else //(sym->frame == LOCAL)
-        part("MOVE LF@", var->name);
+        inst("POP LF@", var->id);
 
-    if (sym->type == VAR) {
+    /*if (sym->isVar == true) {
 
-        if (sym->frame == GLOBAL)
-            part(" GF@", sym->name);
-        else //(sym->frame == LOCAL)
-            part(" LF@", sym->name);
+        if (sym->depth == 0)
+            inst(" GF@", sym->id);
+        else //(sym->depth == LOCAL)
+            inst(" LF@", sym->id);
 
-    } else if (sym->type == INT)
-        part(" int@", sym->value);
-    else if (sym->type == FLOAT)
-        part(" float@", sym->value);
-    else if (sym->type == STRING)
-        part(" string@", sym->value);
+    } else if (sym->type == S_INT)
+        inst(" int@", sym->value);
+    else if (sym->type == S_DOUBLE)
+        inst(" float@", sym->value);
+    else // (sym->type == S_STRING)
+        inst(" string@", sym->value);
     else //(sym->type == BOOL)
-        part(" bool@", sym->value);
+        inst(" bool@", sym->value);*/
 
 }
 
-void push_sym(TokenPtr sym) {
+void push_sym(SymTableItemPtr sym) {
 
-    if (sym->type == VAR) {
+    if (sym->isVar == true) {
 
-        if (sym->frame == GLOBAL)
-            inst("PUSHS GF@", sym->name);
-        else //(sym->frame == LOCAL)
-            inst("PUSHS LF@", sym->name);
+        if (sym->depth == 0)
+            inst("PUSHS GF@", sym->id);
+        else
+            inst("PUSHS LF@", sym->id);
 
-    } else if (sym->type == INT)
+    } else if (sym->type == S_INT)
         inst("PUSHS int@", sym->value);
-    else if (sym->type == FLOAT)
+    else if (sym->type == S_DOUBLE)
         inst("PUSHS float@", sym->value);
-    else if (sym->type == STRING)
+    else // (sym->type == S_STRING)
         inst("PUSHS string@", sym->value);
-    else //(sym->type == BOOL)
-        inst("PUSHS bool@", sym->value);
+    /*else //(sym->type == BOOL)
+        inst("PUSHS bool@", sym->value);*/
 
 }
 
@@ -160,7 +156,6 @@ void if_check() {
     inst("PUSHFRAME");
 
     if_num = if_new++;
-    depth++;
 
 }
 
@@ -180,8 +175,6 @@ void if_else_end() {
     inst("POPFRAME");
     inst("LABEL @_else", if_num--);
 
-    depth--;
-
 }
 
 void while_start() {
@@ -200,8 +193,6 @@ void while_check() {
     inst("CREATEFRAME");
     inst("PUSHFRAME");
 
-    depth++;
-
 }
 
 void while_end() {
@@ -209,8 +200,6 @@ void while_end() {
     inst("POPFRAME\n");
     inst("JUMP @_while", while_num);
     inst("LABEL @_whilend", while_num--);
-
-    depth--;
 
 }
 
@@ -222,16 +211,10 @@ void func_start(char* func) {
 
 }
 
-void func_param(TokenPtr param) {
+void func_param(SymTableItemPtr param) {
 
-    inst("DEFVAR LF@", param->name);
-    inst("MOVE LF@", param->name, " LF@%%", num++);
-
-}
-
-void func_return(TokenPtr var) {
-
-    inst("MOVE LF@%%retval LF@", var->name);
+    inst("DEFVAR LF@", param->id);
+    inst("MOVE LF@", param->id, " LF@%%", num++);
 
 }
 
@@ -246,29 +229,28 @@ void func_call() {
 
     num = 0;
     inst("CREATEFRAME");
-    inst("DEFVAR TF@%%retval");
         
 }
 
-void func_call_param(TokenPtr param) {
+void func_call_param(SymTableItemPtr param) {
 
     inst("DEFVAR TF@%%", num);
 
-    if (param->type == VAR) {
+    if (param->isVar == true) {
 
-        if (param->frame == GLOBAL)
-            inst("MOVE TF@%%", num, " GF@", param->name);
-        else //(param->frame == LOCAL)
-            inst("MOVE TF@%%", num, " LF@", param->name);
+        if (param->depth == 0)
+            inst("MOVE TF@%%", num, " GF@", param->id);
+        else
+            inst("MOVE TF@%%", num, " LF@", param->id);
 
-    } else if (param->type == INT)
+    } else if (param->type == S_INT)
         inst("MOVE TF@%%", num, " int@", param->value);
-    else if (param->type == FLOAT)
+    else if (param->type == S_DOUBLE)
         inst("MOVE TF@%%", num, " float@", param->value);
-    else if (param->type == STRING)
+    else // (param->type == S_STRING)
         inst("MOVE TF@%%", num, " string@", param->value);
-    else //(param->type == BOOL)
-        inst("MOVE TF@%%", num, " bool@", param->value);
+    /*else //(param->type == BOOL)
+        inst("MOVE TF@%%", num, " bool@", param->value);*/
 
     num++;
 
@@ -277,12 +259,51 @@ void func_call_param(TokenPtr param) {
 void func_call_end(char* func) {
 
     inst("CALL @&", func);
-    inst("PUSHS TF@%%retval");
 
 }
 
 
 
+
+
+// AUXILIARY FUNCTIONS
+
+void auxil_divdecider() {
+
+    inst("LABEL @&&divdecider");
+    inst("POPS GF@!tmp_var1");
+    inst("TYPE GF@!tmp_var2 GF@!tmp_var1");
+    inst("PUSHS GF@!tmp_var1");
+	
+    inst("JUMPIFEQ @&&dd GF@!tmp_var2 string@int");
+    inst("DIVS");
+    inst("JUMP @&&ddend");
+	
+    inst("LABEL @&&dd");
+    inst("IDIVS");
+	
+    inst("LABEL @&&ddend");
+    inst("RETURN");
+
+}
+
+void auxil_qqdecider() {
+
+    inst("LABEL @&&qqdecider");
+    inst("POPS GF@!tmp_var2");
+    inst("POPS GF@!tmp_var1");
+	
+    inst("JUMPIFEQ @&&qq GF@!tmp_var1 nil@nil");
+    inst("PUSHS GF@!tmp_var1");
+    inst("JUMP @&&qqend");
+	
+    inst("LABEL @&&qq");
+    inst("PUSHS GF@!tmp_var2");
+	
+    inst("LABEL @&&qqend");
+    inst("RETURN");
+
+}
 
 
 
@@ -291,29 +312,29 @@ void func_call_end(char* func) {
 
 void builtin_read() {
 
-    inst("LABEL &&readstr");
+    inst("LABEL @&&readstr");
     inst("READ TF@%%retval string");
-    inst("JUMPIFEQ &&readerr TF@%%retval nil@nil");
+    inst("JUMPIFEQ @&&readerr TF@%%retval nil@nil");
     inst("RETURN");
 
-    inst("LABEL &&readint");
+    inst("LABEL @&&readint");
     inst("READ TF@%%retval int");
-    inst("JUMPIFEQ &&readerr TF@%%retval nil@nil");
+    inst("JUMPIFEQ @&&readerr TF@%%retval nil@nil");
     inst("RETURN");
 
-    inst("LABEL &&readfloat");
+    inst("LABEL @&&readfloat");
     inst("READ TF@%%retval float");
-    inst("JUMPIFEQ &&readerr TF@%%retval nil@nil");
+    inst("JUMPIFEQ @&&readerr TF@%%retval nil@nil");
     inst("RETURN");
 
-    inst("LABEL &&readerr");
+    inst("LABEL @&&readerr");
     inst("EXIT int@1");
 
 }
 
 void builtin_write() {
 
-    inst("LABEL &&write");
+    inst("LABEL @&&write");
     inst("WRITE TF@%%0");
     inst("RETURN");
 
@@ -321,7 +342,7 @@ void builtin_write() {
 
 void builtin_int2float() {
 
-    inst("LABEL &&int2float");
+    inst("LABEL @&&int2float");
     inst("INT2FLOAT TF@%%retval TF@%%0");
     inst("RETURN");
 
@@ -329,7 +350,7 @@ void builtin_int2float() {
 
 void builtin_float2int() {
 
-    inst("LABEL &&float2int");
+    inst("LABEL @&&float2int");
     inst("FLOAT2INT TF@%%retval TF@%%0");
     inst("RETURN");
 
@@ -337,7 +358,7 @@ void builtin_float2int() {
 
 void builtin_length() {
 
-    inst("LABEL &&length");
+    inst("LABEL @&&length");
     inst("STRLEN TF@%%retval TF@%%0");
     inst("RETURN");
 
@@ -345,35 +366,35 @@ void builtin_length() {
 
 void builtin_substring() {
 
-    inst("LABEL &&substring");
+    inst("LABEL @&&substring");
 
     inst("DEFVAR TF@check");
     inst("LT TF@check TF@%%1 int@0");
-    inst("JUMPIFEQ &&substrerr TF@check bool@true");
+    inst("JUMPIFEQ @&&substrerr TF@check bool@true");
 
     inst("DEFVAR TF@len");
     inst("STRLEN TF@len TF@%%0");
     inst("GT TF@check TF@%%2 TF@len");
-    inst("JUMPIFEQ &&substrerr TF@check bool@true");
+    inst("JUMPIFEQ @&&substrerr TF@check bool@true");
 
     inst("GT TF@check TF@%%1 TF@%%2");
-    inst("JUMPIFEQ &&substrerr TF@check bool@true");
+    inst("JUMPIFEQ @&&substrerr TF@check bool@true");
 
     inst("DEFVAR TF@char");
     inst("DEFVAR TF@%%retval");
 
-    inst("LABEL &&substrdo");
+    inst("LABEL @&&substrdo");
 
     inst("GETCHAR TF@char TF@%%0 TF@%%1");
     inst("CONCAT TF@%%retval TF@%%retval TF@char");
 
     inst("ADD TF@%%1 TF@%%1 int@1");
     inst("LT TF@check TF@%%1 TF@%%2");
-    inst("JUMPIFEQ &&substrdo TF@check bool@true");
+    inst("JUMPIFEQ @&&substrdo TF@check bool@true");
 
     inst("RETURN");
 
-    inst("LABEL &&substrerr");
+    inst("LABEL @&&substrerr");
     inst("MOVE TF@%%retval nil@nil");
     inst("RETURN");
 
@@ -381,17 +402,17 @@ void builtin_substring() {
 
 void builtin_ord() {
 
-    inst("LABEL &&ord");
+    inst("LABEL @&&ord");
 
     inst("DEFVAR TF@check");
     inst("STRLEN TF@len TF@%%0");
-    inst("JUMPIFEQ &&orderr TF@len int@0");
+    inst("JUMPIFEQ @&&orderr TF@len int@0");
 
     inst("STRI2INT TF@%%retval TF@%%0 int@0");
 
     inst("RETURN");
 
-    inst("LABEL &&orderr");
+    inst("LABEL @&&orderr");
     inst("MOVE TF@%%retval int@0");
     inst("RETURN");
 
@@ -399,7 +420,7 @@ void builtin_ord() {
 
 void builtin_chr() {
 
-    inst("LABEL &&chr");
+    inst("LABEL @&&chr");
     inst("INT2CHAR TF@%%retval TF@%%0");
     inst("RETURN");
 
