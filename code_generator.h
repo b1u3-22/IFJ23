@@ -14,6 +14,8 @@
 #include <ctype.h>
 #include <string.h>
 
+#include "symtable.h"
+
 
 #define inst(...) \
     do {const char *instruction[] = {__VA_ARGS__}; \
@@ -46,10 +48,10 @@ static unsigned int while_new = 1;
 
 void code_header();
 void code_footer();
-void exp_instruction(ExpressionTypes type);
-void def_var(TokenPtr var);
-void set_var(TokenPtr var, TokenPtr sym);
-void push_sym(TokenPtr sym);
+void exp_instruction(int type);
+void def_var(SymTableItemPtr var);
+void set_var(SymTableItemPtr var, SymTableItemPtr sym);
+void push_sym(SymTableItemPtr sym);
 void if_check();
 void if_end();
 void if_else_end();
@@ -57,11 +59,11 @@ void while_start();
 void while_check();
 void while_end();
 void func_start(char* func);
-void func_param(TokenPtr param);
-void func_return(TokenPtr var);
-void func_end(func);
+void func_param(SymTableItemPtr param);
+void func_return(SymTableItemPtr var);
+void func_end(char* func);
 void func_call();
-void func_call_param(TokenPtr param);
+void func_call_param(SymTableItemPtr param);
 void func_call_end(char* func);
 
 
