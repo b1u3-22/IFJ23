@@ -40,7 +40,8 @@ enum ExpressionTypes {
     E_RBRAC,    // 13
     E_ID,       // 14
     E_VALUE,    // 15
-    E_END       // 16
+    E_END,       // 16
+    E_CONCAT
 };
 
 static const int p_table[P_TABLE_SIZE][P_TABLE_SIZE] = 
