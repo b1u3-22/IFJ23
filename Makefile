@@ -31,7 +31,7 @@ symtable.o: symtable.h symtable.c
 parser.o: parser.h parser.c rule_stack.h token.h scanner.h expression.h expression_stack.h token_stack.h analyzer.h symtable.h param_stack.h code_generator.h
 	$(CC) $(CFLAGS) -c -o $@ parser.c
 
-expression.o: expression.h expression.c token.h scanner.h expression_stack.h
+expression.o: expression.h expression.c token.h scanner.h expression_stack.h code_generator.h
 	$(CC) $(CFLAGS) -c -o $@ expression.c
 
 expression_stack.o: expression_stack.h expression_stack.c
