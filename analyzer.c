@@ -142,28 +142,69 @@ int check_value_assingment(AnalyzerPtr analyzer, TokenStackPtr token_stack_left,
 }
 
 int check_function_assingment(AnalyzerPtr analyzer, TokenStackPtr token_stack_left, TokenStackPtr token_stack_param) {
+    SymTableItemPtr itemToAssign = symtable_get_item_lower_depth_same_block(analyzer->symtable, token_stack_left->top->data, analyzer->depth, analyzer->block[analyzer->depth]);
+    if (itemToAssign == NULL) return 5;    //is left declared?
+    if (!(itemToAssign->isVar) && itemToAssign->isDefined) return 3;    //is left defined let?
+    
+    //call check_function_call and maybe add new bool param
+
     return 0;
 }
 
 int check_function_call(AnalyzerPtr analyzer, TokenStackPtr token_stack_id, TokenStackPtr token_stack_param) {
-    SymTableItemPtr functionId = symtable_get_item(analyzer->symtable, token_stack_id->top->data);
+    SymTableItemPtr functionId = symtable_get_function_item(analyzer->symtable, token_stack_id->top->data);
     if (functionId == NULL) {
         //push token to stack for later check
         return 0;
     }
 
-    //check parameters
-    for(int i = 0; i < token_stack_param->tokens_pos+1; i++) {
-        
+    //check if one of them doesn't have parameters
+    if ((functionId->paramStack->empty && !(token_stack_param->empty)) || (!(functionId->paramStack->empty) && token_stack_param->empty)) {
+        return 4;
     }
+
+    //check if parameter count is matching (by number of IDs)
+    int ids1 = 0;
+    int ids2 = 0;
+
+    for(int i = 0; i < functionId->paramStack->tokens_pos+1; i++) {
+        if(functionId->paramStack->tokens[i]->type = ID) ids1++;
+    }
+
+    for(int i = 0; i < token_stack_param->tokens_pos+1; i++) {
+        if(token_stack_param->tokens[i]->type = ID) ids2++;
+    }
+
+    if (ids1 != ids2) return 4;
+
+    //check parameters if both of them have any
+    if(!(functionId->paramStack->empty && token_stack_param->empty)) {
+        int j = 0;
+        for(int i = 0; i < functionId->paramStack->tokens_pos+1; i++) {
+            if (functionId->paramStack->tokens[i]->type == TYPE) {  //comparing data type
+                if(functionId->paramStack->tokens[i]->value_type != token_stack_param->tokens[j-1]->value_type) {
+                    return 4;
+                }
+            }
+            else {  //comparing id
+                if (!strcmp(functionId->paramStack->tokens[i]->data, token_stack_param->tokens[j]->data)) {
+                    return 4;
+                }
+                else {
+                    j++;
+                }
+            }      
+        }
+    }
+
+    //check return types
 
     return 0;
 }
 
 int check_function_definition(AnalyzerPtr analyzer, TokenStackPtr token_stack_id, TokenStackPtr token_stack_param) {
     //check if redefining function
-    //here should be something like symtable_get_function_item
-    SymTableItemPtr functionId = symtable_get_item(analyzer->symtable, token_stack_id->tokens[0]->data);
+    SymTableItemPtr functionId = symtable_get_function_item(analyzer->symtable, token_stack_id->tokens[0]->data);
     if (functionId) return 3;
 
     //another checks...
@@ -180,13 +221,9 @@ int check_function_definition(AnalyzerPtr analyzer, TokenStackPtr token_stack_id
     newItem->isVar = NULL;
     newItem->value = NULL;
     
-    ParamStackPtr stack = param_stack_init();
-    for(int i = 0; i < (token_stack_param->tokens_pos+1) / 3; i++) {
-        ParamStackItemPtr paramItem = param_stack_item_init();
-        paramItem->name = token_stack_param->tokens[i*3]->data;
-        paramItem->id = token_stack_param->tokens[i*3+1]->data;
-        paramItem->type = token_stack_param->tokens[i*3+2]->value_type;
-        param_stack_push(stack, paramItem);
+    TokenStackPtr stack = token_stack_init();
+    for(int i = 0; i < token_stack_param->tokens_pos+1; i++) {
+        token_stack_push(stack, token_stack_param->tokens[i]);
     }
     newItem->paramStack = stack;
 
