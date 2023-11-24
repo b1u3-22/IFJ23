@@ -12,9 +12,11 @@
 
 
 void unget_token(TokenPtr token) {
+    if (!token || !token->data) return;
+    
     ungetc(' ', stdin);
     
-    for (int i = token->data_len - 1; i >= 0; i--) {
+    for (int i = token->data_len - 2; i >= 0; i--) {
         ungetc(token->data[i], stdin);
     }
 }
@@ -90,11 +92,7 @@ void parse_id(char c, scanner_states* state, bool* true_end, bool* end) {
     if (c == '?') {
         *state = TYPEQ;
         *true_end = true;
-    }
-    else if (c == ' ') {
-        *end = true;
-    }
-    else if (!is_number(c) && !is_letter(c) && (c != '_')) *end = true;
+    } else if (!is_number(c) && !is_letter(c) && (c != '_')) *end = true;
 }
 
 void parse__id(int c, scanner_states* state, bool* true_end) {
@@ -389,7 +387,7 @@ void get_next_token(TokenPtr token) {
     token->value_type = S_NO_TYPE;
 
     while (true) {        
-        c = getchar();
+        c = getchar(); 
         if (c == EOF) break;
 
         switch (state) {
@@ -512,13 +510,13 @@ void get_next_token(TokenPtr token) {
             ungetc(c, stdin); // return back the last read char
             break;
         }
-        if (c != 0) token_add_data(token, c);
+        token_add_data(token, c);
         if (true_end) {
             break;
         }
     }
 
-    // token_add_data(token, '\0');
+    token_add_data(token, '\0');
 
     if (c == EOF) {
         if (state == START) {
@@ -532,12 +530,22 @@ void get_next_token(TokenPtr token) {
 }
 
 // int main() {
+//     int counter = 0;
+//     while (true) {
+//         TokenPtr token = token_init();
+//         get_next_token(token);
+//         if (token->type == END) break;
+//         printf("TYPE: %d, DATA: %s\n", token->type, token->data);
+//         counter++;
+//     }
 
-//     TokenPtr token = token_init();
-//     get_next_token(token);
-    
-//     // printf("last token char: %d, one before last: %d, etc.: %d\n", token->data[token->data_len], token->data[token->data_len - 1], token->data[token->data_len - 2]);
-
-
+//     // TokenPtr token = token_init();
+//     // get_next_token(token);
+//     // unget_token(token);
+//     // token_clear(token);
+//     // get_next_token(token);
+//     // token_clear(token);
+//     // get_next_token(token);
+//     // printf("TYPE: %d, DATA: %s\n", token->type, token->data);
     
 // } 
