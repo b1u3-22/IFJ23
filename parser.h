@@ -1,8 +1,16 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "rule_stack.h"
+
+#ifndef _ANALYZER
+#define _ANALYZER
 #include "analyzer.h"
+#endif
+
+#ifndef _C_GEN
+#define _C_GEN
 #include "code_generator.h"
+#endif
 
 #ifndef _TOKEN
 #define _TOKEN
@@ -83,13 +91,15 @@ enum Function {
     F_G_FUN_R,      // Generate function return
     F_G_FUN_C,      // Generate function call
     F_G_FUN_C_P,    // Generate function call parameter
-    F_G_FUN_E       // Generate end of function definition
+    F_G_FUN_E,      // Generate end of function definition
+    F_G_SAVE_SYM,   // Save item to save it ¯\_(ツ)_/¯
+    F_G_SYM_CONF    // Confirm saving item
 };
 
 static const int ll_table[LL_TABLE_ROW][LL_TABLE_COL] = 
 {  // 0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24  25  26  27  28  29  30  31  32  33
-    {37,  0,  0, 16, 15,  0, 10, 41,  1,  2,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 45,  0,  0,  0,  0,  0, 45},   //  0
-    {38,  0,  0, 18, 17,  0,  0, 42,  3,  4,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 46,  0,  0,  0,  0,  0, 46},   //  1
+    {37,  0,  0, 16, 15,  0, 10, 41,  1,  2,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 53,  0,  0,  0,  0,  0, 45},   //  0
+    {38,  0,  0, 18, 17,  0,  0, 42,  3,  4,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 54,  0,  0,  0,  0,  0, 46},   //  1
     { 5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  7,  6,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0},   //  2
     { 8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  9,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0},   //  3
     {12,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 11,  0,  0,  0,  0,  0, 12,  0,  0},   //  4
@@ -117,7 +127,7 @@ int parse();
  * @param rule int of the rule
  * @param stack TokenStackPtr
 */  
-void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack);
+void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack, TokenStackPtr sa_stack);
 
 void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, TokenStackPtr token_stack, TokenStackPtr stack_1, TokenStackPtr stack_2, AnalyzerPtr analyzer);
 
