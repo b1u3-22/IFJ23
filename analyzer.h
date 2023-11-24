@@ -1,6 +1,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#ifndef _PARAM_STACK
+#define _PARAM_STACK
+#include "param_stack.h"
+#endif
+
 #ifndef _TOKEN_STACK
 #define _TOKEN_STACK
 #include "token_stack.h"
@@ -34,12 +39,14 @@ int check_function_assingment(AnalyzerPtr analyzer, TokenStackPtr token_stack_le
 
 int check_function_call(AnalyzerPtr analyzer, TokenStackPtr token_stack_left, TokenStackPtr token_stack_param);
 
-int check_function_definition(AnalyzerPtr analyzer, TokenStackPtr token_stack_param);
+int check_function_definition(AnalyzerPtr analyzer, TokenStackPtr token_stack_id, TokenStackPtr token_stack_param);
 
 void increase_depth(AnalyzerPtr analyzer);
 
 void decrease_depth(AnalyzerPtr analyzer);
 
-int check_error_5(AnalyzerPtr analyzer);
+int check_is_not_defined(AnalyzerPtr analyzer, TokenStackPtr token_stack);
 
 int check_error_7_8(AnalyzerPtr analyzer, int data_type, TokenStackPtr token_stack);
+
+SymTableItemPtr get_nearest_item(AnalyzerPtr analyzer, char* id);

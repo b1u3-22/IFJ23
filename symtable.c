@@ -14,14 +14,12 @@ SymTableItemPtr symtable_item_init() {
 
     // Set properties
     item->id = NULL;
-    item->type = NULL;
     item->next = NULL;
     item->isFunction = NULL;
     item->isVar = NULL;
     item->isDefined = NULL;
     item->value = NULL;
-    item->depth = NULL;
-    item->block = NULL;
+    item->paramStack = NULL;
 
     return item;
 }
@@ -44,6 +42,28 @@ SymTableItemPtr symtable_get_item(SymTablePtr symtable, char *id) {
     SymTableItemPtr item = symtable[symtable_get_hash(id)]; // Get correct "row"
     while (item && strcmp(item->id, id)) item = item->next; // Find item with the same id
     return item;
+}
+
+SymTableItemPtr symtable_get_item_lower_depth_same_block(SymTablePtr symtable, char *id, int depth, int block) {
+    SymTableItemPtr item = symtable[symtable_get_hash(id)]; // Get correct "row"
+    while (item && strcmp(item->id, id)) item = item->next; // Find item with the same id
+    
+    while (item) {
+        if (item->depth == depth && item->block == block)   return item;
+        else if (item->depth < depth)   return item;
+        else item = item->next;
+    }
+}
+
+SymTableItemPtr symtable_get_function_item(SymTablePtr symtable, char *id) {
+    SymTableItemPtr item = symtable[symtable_get_hash(id)]; // Get correct "row"
+    while (item && strcmp(item->id, id)) item = item->next; // Find item with the same id
+    
+    while (item)
+    {
+        if (item->isFunction)   return item;
+        else    item = item->next;
+    }
 }
 
 void symtable_item_dispose(SymTableItemPtr item) {

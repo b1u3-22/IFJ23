@@ -1,8 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include "expression.h"
 #include "rule_stack.h"
 #include "analyzer.h"
+#include "code_generator.h"
 
 #ifndef _TOKEN
 #define _TOKEN
@@ -22,6 +22,11 @@
 #ifndef _SYMTABLE
 #define _SYMTABLE
 #include "symtable.h"
+#endif
+
+#ifndef _EXPRESSION
+#define _EXPRESSION
+#include "expression.h"
 #endif
 
 #define LL_TABLE_COL 34
@@ -51,8 +56,11 @@ enum Rules {
 };
 
 enum Function {
-    F_P_PUSH_1,     // Push to Stack 1 for semantic analyzer
-    F_P_PUSH_2,     // Push to Stack 2 for semantic analyzer
+    F_P_GET_T,      // Get new token
+    F_P_PUSH_1,     // Push to Stack 1 for analyzer and generator
+    F_P_PUSH_2,     // Push to Stack 2 for analyzer and generator
+    F_P_CLEAR_1,    // Clear Stack 1
+    F_P_CLEAR_2,    // Clear Stack 2
     F_P_PSA,        // Start expression parser
     F_S_INC_DEP,    // Increase depth in semantic analyzer
     F_S_DEC_DEP,    // Decrease depth in semantic analyzer
@@ -61,7 +69,21 @@ enum Function {
     F_S_VAL_ASG,    // Check value assigment with analyzer      e.g. a = 5 + b
     F_S_FUN_ASG,    // Check function assigment with analyzer   e.g. a = b(5, a : c)   
     F_S_FUN_CAL,    // Check function call
-    F_S_FUN_DEF     // Check function definition
+    F_S_FUN_DEF,    // Check function definition
+    F_G_DEF_VAR,    // Generate variable definition
+    F_G_SET_VAR,    // Generate variable assigment
+    F_G_PUSH,       // Push value into generator stack
+    F_G_IF_S,       // Generate start of if
+    F_G_IF_EL,      // Generate end of if, start of else
+    F_G_IF_E,       // Generate end of else
+    F_G_W_S,        // Generate start of while
+    F_G_W_E,        // Generate end of while
+    F_G_FUN_S,      // Generate start of function definition
+    F_G_FUN_P,      // Generate function parameter
+    F_G_FUN_R,      // Generate function return
+    F_G_FUN_C,      // Generate function call
+    F_G_FUN_C_P,    // Generate function call parameter
+    F_G_FUN_E       // Generate end of function definition
 };
 
 static const int ll_table[LL_TABLE_ROW][LL_TABLE_COL] = 
@@ -97,7 +119,7 @@ int parse();
 */  
 void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack);
 
-void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, TokenStackPtr stack_1, TokenStackPtr stack_2, AnalyzerPtr analyzer);
+void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, TokenStackPtr token_stack, TokenStackPtr stack_1, TokenStackPtr stack_2, AnalyzerPtr analyzer);
 
 /** Skip to the next sequence of tokens.
  *  This is used when syntax error occures. 
