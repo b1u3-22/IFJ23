@@ -30,7 +30,7 @@ bool token_stack_push(TokenStackPtr stack, TokenPtr token) {
     }
 
     stack->tokens[++(stack->tokens_pos)] = token;
-    stack->top = token;
+    stack->top = stack->tokens[stack->tokens_pos];
 
     stack->empty = false;
     return false;
@@ -39,7 +39,6 @@ bool token_stack_push(TokenStackPtr stack, TokenPtr token) {
 bool token_stack_pop(TokenStackPtr stack) {
     if (stack->empty) return true;
 
-    //token_dispose(stack->tokens[stack->tokens_pos--]);
     stack->tokens_pos--;
     if (stack->tokens_pos == -1) {
         stack->empty = true;
@@ -75,13 +74,13 @@ void token_stack_dispose(TokenStackPtr stack) {
 bool token_stack_unget(TokenStackPtr stack) {
     if (stack->empty) return true;
     unget_token(stack->top);
-    return token_stack_pop(stack);
+    token_stack_pop(stack);
+    return false;
 }
 
 TokenPtr token_stack_get(TokenStackPtr stack) {
     TokenPtr token = token_stack_create_token(stack);
     if (!token) return NULL;
     get_next_token(token);
-    printf("token type: %02d\n", token->type);
     return token;
 }

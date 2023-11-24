@@ -3,12 +3,6 @@
  // CODE GENERATOR HEADER //
 
 
-
-#ifndef CODE_GENERATOR_H
-#define CODE_GENERATOR_H
-#endif
-
-
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>

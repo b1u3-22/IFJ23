@@ -11,8 +11,8 @@ TokenPtr token_init(){
 
 
 bool token_add_data(TokenPtr token, char c){
-    if (token->data_len == token->data_allocd){ // no more space in data, we need to allocate more memory
-        char* tmp_data = (char*) realloc(token->data, token->data_allocd + TOKEN_ALLOC_BLOCK); // allocate more memory
+    if ((token->data_len + 1) >= token->data_allocd){ // no more space in data, we need to allocate more memory
+        char* tmp_data = (char*) realloc(token->data, (token->data_allocd + TOKEN_ALLOC_BLOCK) * sizeof(char)); // allocate more memory
         if (!tmp_data) return false; // if realloc failed return false
         token->data = tmp_data; // if it succeded set data to new data with more memory
         token->data_allocd += TOKEN_ALLOC_BLOCK; // correct allocated data size
@@ -22,6 +22,7 @@ bool token_add_data(TokenPtr token, char c){
 }
 
 void token_dispose(TokenPtr token) {
+    free(token->data);
     free(token);
 }
 
