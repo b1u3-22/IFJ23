@@ -3,19 +3,21 @@
  // CODE GENERATOR HEADER //
 
 
-
-#ifndef CODE_GENERATOR_H
-#define CODE_GENERATOR_H
-
-
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
 
-#include "symtable.h"
+#ifndef _EXPRESSION
+#define _EXPRESSION
 #include "expression.h"
+#endif
+
+#ifndef _SYMTABLE
+#define _SYMTABLE
+#include "symtable.h"
+#endif
 
 
 #define inst(...) \
@@ -124,6 +126,6 @@ void builtin_write();
 void builtin_int2float();
 void builtin_float2int();
 void builtin_len();
-void builtin_substr();
+void builtin_substring();
 void builtin_ord();
 void builtin_chr();

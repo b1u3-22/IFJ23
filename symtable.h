@@ -2,6 +2,16 @@
 #include <string.h>
 #include <stdlib.h>
 
+#ifndef _PARAM_STACK
+#define _PARAM_STACK
+#include "param_stack.h"
+#endif
+
+#ifndef _TOKEN_STACK
+#define _TOKEN_STACK
+#include "token_stack.h"
+#endif
+
 #define SYMBTABLE_SIZE 49999 // Has to be a prime number
 #define SYMTABLE_ID_ALLOC_BLOCK 5
 
@@ -16,8 +26,8 @@ enum Types {
 };
 
 typedef struct SymTableItem {
-    char *id;                   // ID has to be allocated for item
-    int type;                   // Type too
+    char *id;                   // identifier
+    int type;                   // data type
     bool isFunction;
     bool isVar;
     bool isDefined;
@@ -25,6 +35,7 @@ typedef struct SymTableItem {
     char *value;
     int depth;
     int block;
+    TokenStackPtr paramStack;
 } *SymTableItemPtr;
 
 typedef SymTableItemPtr *SymTablePtr;
@@ -57,6 +68,18 @@ bool symtable_add_item(SymTablePtr symtable, SymTableItemPtr item);
  *  @returns SymTableItemPtr if item is found, NULL otherwise
 */
 SymTableItemPtr symtable_get_item(SymTablePtr symtable, char *id);
+
+/**
+ * Gets item from symtable by id with same depth and block or with lower depth
+ * @returns SymTatbleItemPtr if item is found, NULL otherwise
+*/
+SymTableItemPtr symtable_get_item_lower_depth_same_block(SymTablePtr symtable, char *id, int depth, int block);
+
+/**
+ * Gets item from symtable with atribute isFunction = true
+ * @returns SymTableItemPtr if item is found, NULL otherwise
+*/
+SymTableItemPtr symtable_get_function_item(SymTablePtr symtable, char *id);
 
 /** Correctly disposes item and it's properties
  *  @param item SymTableItemPtr that should be disposed  

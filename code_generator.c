@@ -18,7 +18,7 @@ void code_header() {
     inst("DEFVAR GF@!tmp_var3");
     inst("JUMP @&&main");
 
-    auxil_opdecider()
+    auxil_opdecider();
     auxil_divdecider();
     auxil_qqdecider();
 	
@@ -26,8 +26,8 @@ void code_header() {
     builtin_write();
     builtin_int2float();
     builtin_float2int();
-    builtin_len();
-    builtin_substr();
+    builtin_length();
+    builtin_substring();
     builtin_ord();
     builtin_chr();
 
@@ -81,7 +81,7 @@ void exp_instruction(int type) {
             inst("EQS");
             inst("NOTS");
             break;
-        case CONCAT_RULE:
+        case E_CONCAT:
             inst("POPS GF@!tmp_var2");
             inst("POPS GF@!tmp_var1");
             inst("CONCAT GF@!tmp_var1 GF@!tmp_var1 GF@!tmp_var2");
@@ -398,7 +398,7 @@ void builtin_float2int() {
 
 }
 
-void builtin_len() {
+void builtin_length() {
 
     inst("LABEL @&&length");
     inst("STRLEN GF@!tmp_var1 TF@%%0");

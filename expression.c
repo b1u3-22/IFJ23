@@ -1,6 +1,6 @@
 #include "expression.h"
 
-int parse_expression(int end_type, TokenStackPtr sa_stack) {
+int parse_expression(AnalyzerPtr analyzer, int end_type, TokenStackPtr sa_stack) {
     ExpressionStackPtr stack = expression_stack_init();
     if (!stack) return 99;
 
@@ -28,7 +28,7 @@ int parse_expression(int end_type, TokenStackPtr sa_stack) {
 
         //if (token_stack->top->type <= VALUE) token_stack_push(sa_stack, token_stack->top);
 
-        //printf("[%02d, %02d]: %d\n", stack_type_helper->type, token_type, action);
+        ////printf("[%02d, %02d]: %d\n", stack_type_helper->type, token_type, action);
         switch (action) {
             case E_ERR:
                 return 2;
@@ -39,26 +39,29 @@ int parse_expression(int end_type, TokenStackPtr sa_stack) {
                 break;
             case E_EQL:
                 expression_stack_push(stack, token_type, false);
-                rule_applied = apply_expression_rule(stack);
+                rule_applied = apply_expression_rule(analyzer, stack, token_stack);
                 if (!rule_applied) {
+                    //printf("Error in PSA\n");
                     return 2; // Syntax error occured
                 }
                 if (token_type != E_END) expression_get_next_token(token_stack, end_type, &token_type, sa_stack);
                 break;
             case E_RED:
-                rule_applied = apply_expression_rule(stack);
+                rule_applied = apply_expression_rule(analyzer, stack, token_stack);
                 if (!rule_applied) {
+                    //printf("Error in PSA\n");
                     return 2; // Syntax error occured
                 }
                 break;
             case E_SCS:
+                //printf("Expression ended succ\n");
                 return 0;
                 break; 
         }
-        // for (int i = 0; i <= stack->data_pos; i++) {
-        //     printf("%d ", stack->data[i]->type);
-        // }
-        // printf("\n");
+        for (int i = 0; i <= stack->data_pos; i++) {
+            //printf("%d ", stack->data[i]->type);
+        }
+        //printf("\n");
 
     } while (true); // If we hit the bottom element...
     return 0;
@@ -67,25 +70,16 @@ int parse_expression(int end_type, TokenStackPtr sa_stack) {
 void expression_get_next_token(TokenStackPtr stack, int end_type, int *type, TokenStackPtr sa_stack) {
     TokenPtr token = token_stack_get(stack);
     while (token->type == NEWLINE) {
-        token_stack_pop(stack);
+        token_stack_pop_free(stack);
         token = token_stack_get(stack); // skip newline characters
     }
+    
+    if (token->type == ID || token->type == VALUE) token_stack_push(sa_stack, token);
 
-    if (token->type != end_type) {
-        if (token->type == ID || token->type == VALUE) token_stack_push(sa_stack, token);
-        *type = get_translated_type(token);
-        return;
-    }
+    *type = get_translated_type(token);
 
-    token = token_stack_get(stack); // Get token after that
-    if (get_translated_type(token) == E_END) {
+    if (*type == E_END) {
         token_stack_unget(stack);
-        if (token->type != END) token_stack_unget(stack);
-        *type = E_END;
-    }
-    else {
-        token_stack_unget(stack);
-        *type = get_translated_type(stack->top);
     }
 }
 
@@ -145,12 +139,22 @@ int get_translated_type(TokenPtr token) {
     }
 }
 
-bool apply_expression_rule(ExpressionStackPtr stack) {
+bool apply_expression_rule(AnalyzerPtr analyzer, ExpressionStackPtr stack, TokenStackPtr token_stack) {
     switch (stack->top->type) {
-        case E_ID:
-        case E_VALUE: // Rule E -> ID
+        case E_ID:  // Rule E -> ID
             expression_stack_pop(stack);
             expression_stack_push(stack, E_END, !(stack->top->type == E_LBRAC));
+            SymTableItemPtr item = get_nearest_item(analyzer, token_stack->tokens[token_stack->tokens_pos - (bool)(token_stack->top->type != ID)]->data);
+            if (!item) exit(5);
+            push_sym(item);
+            return true;
+        case E_VALUE:   // Rule E -> VALUE
+            expression_stack_pop(stack);
+            expression_stack_push(stack, E_END, !(stack->top->type == E_LBRAC));
+            item = symtable_item_init();
+            item->value = token_stack->tokens[token_stack->tokens_pos - (bool)(token_stack->top->type != VALUE)]->data;
+            item->type = token_stack->tokens[token_stack->tokens_pos - (bool)(token_stack->top->type != VALUE)]->value_type;
+            push_sym(item);
             return true;
         case E_RBRAC: // Rule E -> (E)
             if (
@@ -188,6 +192,7 @@ bool apply_expression_rule(ExpressionStackPtr stack) {
                 case E_ESM: // E -> E <= E
                 case E_QQ:  // E -> E ?? E
                     if (!stack->top->previous->previous) return false;
+                    exp_instruction(stack->top->previous->type);
                     expression_stack_pop(stack);
                     expression_stack_pop(stack);
                     expression_stack_pop(stack);
