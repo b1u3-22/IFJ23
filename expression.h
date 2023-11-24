@@ -1,3 +1,10 @@
+/**
+ *  Project:    Implementace překladače imperativního jazyka IFJ23.
+ *  File:       @brief Hlavičkový soubor pro expression parser,definice
+ *              enum hodnot a precedenční tabulky
+ *  Authors:    @author Jiří Sedlák xsedla2e
+*/
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>

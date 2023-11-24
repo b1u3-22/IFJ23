@@ -1,3 +1,11 @@
+/**
+ *  Project:    Implementace překladače imperativního jazyka IFJ23.
+ *  File:       @brief Pomocná struktura pro predcedenční analýzu,
+ *              implementovaná jako stack. Položky jsou na sebe "zpětně"
+ *              navázány
+ *  Authors:    @author Jiří Sedlák xsedla2e
+*/
+
 #include "expression_stack.h"
 
 ExpressionStackPtr expression_stack_init() {

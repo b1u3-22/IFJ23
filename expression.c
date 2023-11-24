@@ -1,3 +1,10 @@
+/**
+ *  Project:    Implementace překladače imperativního jazyka IFJ23.
+ *  File:       @brief Implementace precedenčního syntaktického analýzy,
+ *              generování kódu pro výrazy
+ *  Authors:    @author Jiří Sedlák xsedla2e
+*/
+
 #include "expression.h"
 
 int parse_expression(AnalyzerPtr analyzer, int end_type, TokenStackPtr sa_stack) {

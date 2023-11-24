@@ -1,3 +1,10 @@
+/**
+ *  Project:    Implementace překladače imperativního jazyka IFJ23.
+ *  File:       @brief Implementace tokenu
+ *  Authors:    @author Jiří Sedlák xsedla2e
+ *              @author Nikol Škvařilová xskvar11
+*/
+
 #include "token.h"
 
 TokenPtr token_init(){

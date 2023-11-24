@@ -1,3 +1,9 @@
+/**
+ *  Project:    Implementace překladače imperativního jazyka IFJ23.
+ *  File:       @brief Stack tokenů a pomocné funkce pro získání tokenů od scanneru
+ *  Authors:    @author Jiří Sedlák xsedla2e
+*/
+
 #include "token_stack.h"
 
 TokenStackPtr token_stack_init() {

@@ -1,3 +1,10 @@
+/**
+ *  Project:    Implementace překladače imperativního jazyka IFJ23.
+ *  File:       @brief Implementace syntaktické analýzy pomocí prediktivní 
+ *              analýzy řízené LL-tabulkou
+ *  Authors:    @author Jiří Sedlák xsedla2e
+*/
+
 #include "parser.h"
 
 int parse() {
