@@ -1,3 +1,9 @@
+/**
+ *  Project:    Implementace překladače imperativního jazyka IFJ23.
+ *  File:       @brief Pomocná struktura pro parser implementovaná jako stack
+ *  Authors:    @author Jiří Sedlák xsedla2e
+*/
+
 #include "rule_stack.h"
 
 

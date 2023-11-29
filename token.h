@@ -1,3 +1,11 @@
+/**
+ *  Project:    Implementace překladače imperativního jazyka IFJ23.
+ *  File:       @brief Hlavičkový soubor pro token
+ *  Authors:    @author Jiří Sedlák xsedla2e
+ *              @author Nikol Škvařilová xskvar11
+*/
+
+
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>

@@ -1,7 +1,7 @@
 #include "analyzer.h"
 
 AnalyzerPtr analyzer_init(SymTablePtr symtable) {
-    AnalyzerPtr analyzer = malloc(sizeof(AnalyzerPtr));
+    AnalyzerPtr analyzer = malloc(sizeof(struct Analyzer));
     if (!analyzer) return NULL; // Alocation and check
 
     // Set properties

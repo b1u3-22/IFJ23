@@ -1,3 +1,11 @@
+/**
+ *  Project:    Implementace překladače imperativního jazyka IFJ23.
+ *  File:       @brief Implementace tabulky symbolů pomocí hash tabulky
+ *  Authors:    @author Jiří Sedlák xsedla2e
+ *              @author Martin Kučera xkucer??
+*/
+
+
 #include "symtable.h"
 
 // TODO: Write better hash function
