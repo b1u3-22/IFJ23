@@ -69,3 +69,5 @@ dkms.conf
 ##### IGNORE TEST FILES #####
 test.c
 test.txt
+
+test.swift
