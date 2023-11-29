@@ -1,7 +1,8 @@
-
-
-//   generation of code in IFJcode23 to stdout   //
-
+/**
+ *  Project:    Implementace překladače imperativního jazyka IFJ23.
+ *  File:       @brief Implementácia funkcií pre generáciu výsledného kódu IFJcode23
+ *  Authors:    @author Tomáš Mikát xmikat01
+*/
 
 
 
@@ -47,18 +48,18 @@ void exp_instruction(int type) {
     switch (type) {
         case E_PLS:
             inst("CALL @&&opdecider");
-	    inst("ADDS");
+	        inst("ADDS");
             break;
         case E_MIN:
-	    inst("CALL @&&opdecider");
+	        inst("CALL @&&opdecider");
             inst("SUBS");
             break;
         case E_MUL:
-	    inst("CALL @&&opdecider");
+	        inst("CALL @&&opdecider");
             inst("MULS");
             break;
         case E_DIV:
-	    inst("CALL @&&divdecider");
+	        inst("CALL @&&divdecider");
             break;
         case E_SM:
             inst("LTS");
@@ -88,9 +89,11 @@ void exp_instruction(int type) {
             inst("PUSHS GF@!tmp_var1");
             break;
         case E_QQ:
-	    inst("CALL @&&qqdecider");
+	        inst("CALL @&&qqdecider");
+            break;
         case E_EXC:
             inst("NOTS");
+            break;
         default:
             break;
     }
@@ -166,7 +169,9 @@ void confirm_sym() {
 void if_check() {
 
     inst("POPS GF@!tmp_var1");
-    inst("JUMPIFEQ @_if", if_new, " bool@false GF@!tmp_var1");
+    part("JUMPIFEQ @_if");
+    fprintf(stdout, "%d", if_new); 
+    inst(" bool@false GF@!tmp_var1");
 
     inst("CREATEFRAME");
     inst("PUSHFRAME");
@@ -178,8 +183,10 @@ void if_check() {
 void if_end() { // else_start
 
     inst("POPFRAME");
-    inst("JUMP @_else", if_num);
-    inst("LABEL @_if", if_num);
+    part("JUMP @_else");
+    fprintf(stdout, "%d\n", if_num);
+    part("LABEL @_if");
+    fprintf(stdout, "%d\n", if_num);
 
     inst("CREATEFRAME");
     inst("PUSHFRAME");
@@ -189,13 +196,15 @@ void if_end() { // else_start
 void if_else_end() {
 
     inst("POPFRAME");
-    inst("LABEL @_else", if_num--);
+    part("LABEL @_else");
+    fprintf(stdout, "%d\n", if_num--);
 
 }
 
 void while_start() {
 
-    inst("LABEL @_while", while_new);
+    part("LABEL @_while");
+    fprintf(stdout, "%d\n", while_new);
 
     while_num = while_new++;
 
@@ -204,7 +213,9 @@ void while_start() {
 void while_check() {
 
     inst("POPS GF@!tmp_var1");
-    inst("JUMPIFEQ @_whilend", while_num, " bool@false GF@!tmp_var1");
+    part("JUMPIFEQ @_whilend");
+    fprintf(stdout, "%d", while_num);
+    inst(" bool@false GF@!tmp_var1");
 
     inst("CREATEFRAME");
     inst("PUSHFRAME");
@@ -214,15 +225,17 @@ void while_check() {
 void while_end() {
 
     inst("POPFRAME\n");
-    inst("JUMP @_while", while_num);
-    inst("LABEL @_whilend", while_num--);
+    part("JUMP @_while");
+    fprintf(stdout, "%d", while_num);
+    part("LABEL @_whilend");
+    fprintf(stdout, "%d\n", while_num--);
 
 }
 
 void func_start(char* func) {
 
     num = 0;
-    inst("LABEL @&", func);
+    part("LABEL @&", func);
     inst("PUSHFRAME");
 
 }
@@ -230,7 +243,8 @@ void func_start(char* func) {
 void func_param(SymTableItemPtr param) {
 
     inst("DEFVAR LF@", param->id);
-    inst("MOVE LF@", param->id, " LF@%%", num++);
+    part("MOVE LF@", param->id, " LF@%%");
+    fprintf(stdout, "%d\n", num++);
 
 }
 
@@ -250,22 +264,34 @@ void func_call() {
 
 void func_call_param(SymTableItemPtr param) {
 
-    inst("DEFVAR TF@%%", num);
+    part("DEFVAR TF@%%");
+    fprintf(stdout, "%d\n", num);
 
     if (param->isVar == true) {
 
-        if (param->depth == 0)
-            inst("MOVE TF@%%", num, " GF@", param->id);
-        else
-            inst("MOVE TF@%%", num, " LF@", param->id);
+        if (param->depth == 0) {
+            part("MOVE TF@%%");
+            fprintf(stdout, "%d", num);
+            inst(" GF@", param->id);
+        } else {
+            part("MOVE TF@%%");
+            fprintf(stdout, "%d", num);
+            inst(" LF@", param->id);
+        }
 
-    } else if (param->type == S_INT)
-        inst("MOVE TF@%%", num, " int@", param->value);
-    else if (param->type == S_DOUBLE)
-        inst("MOVE TF@%%", num, " float@", param->value);
-    else // (param->type == S_STRING)
-        inst("MOVE TF@%%", num, " string@", param->value);
-    /*else //(param->type == BOOL)
+    } else if (param->type == S_INT) {
+        part("MOVE TF@%%");
+        fprintf(stdout, "%d", num);
+        inst(" int@", param->value);
+    } else if (param->type == S_DOUBLE) {
+        part("MOVE TF@%%");
+        fprintf(stdout, "%d", num);
+        inst(" float@", param->value);
+    } else { // (param->type == S_STRING)
+        part("MOVE TF@%%");
+        fprintf(stdout, "%d", num);
+        inst(" string@", param->value);
+    } /*else //(param->type == BOOL)
         inst("MOVE TF@%%", num, " bool@", param->value);*/
 
     num++;
