@@ -484,13 +484,13 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
             token = token_stack_get(token_stack);
             break;
         case F_P_PSA:
-            if (return_code = parse_expression(analyzer, END, stack_2)) exit(return_code);
+            if ((return_code = parse_expression(analyzer, END, stack_2))) exit(return_code);
             break;
         case F_P_PUSH_1:
-            if (return_code = token_stack_push(stack_1, token)) exit(return_code);
+            if ((return_code = token_stack_push(stack_1, token))) exit(return_code);
             break;
         case F_P_PUSH_2:
-            if (return_code = token_stack_push(stack_2, token)) exit(return_code);
+            if ((return_code = token_stack_push(stack_2, token))) exit(return_code);
             break;
         case F_P_CLEAR_1:
             while (!stack_1->empty) token_stack_pop(stack_1);
@@ -505,22 +505,22 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
             decrease_depth(analyzer);
             break;
         case F_S_VAR_DEC:
-            if (return_code = check_declaration(analyzer, stack_1)) exit(return_code);
+            if ((return_code = check_declaration(analyzer, stack_1))) exit(return_code);
             break; 
         case F_S_VAR_DEF:
-            if (return_code = check_definition(analyzer, stack_1, stack_2)) exit(return_code);
+            if ((return_code = check_definition(analyzer, stack_1, stack_2))) exit(return_code);
             break;
         case F_S_VAL_ASG:
-            if (return_code = check_value_assingment(analyzer, stack_1, stack_2)) exit(return_code);
+            if ((return_code = check_value_assingment(analyzer, stack_1, stack_2))) exit(return_code);
             break;
         case F_S_FUN_ASG:
-            if (return_code = check_function_assingment(analyzer, stack_1, stack_2)) exit(return_code);
+            if ((return_code = check_function_assingment(analyzer, stack_1, stack_2))) exit(return_code);
             break;
         case F_S_FUN_CAL:
-            if (return_code = check_function_call(analyzer, stack_1, stack_2)) exit(return_code);
+            if ((return_code = check_function_call(analyzer, stack_1, stack_2))) exit(return_code);
             break;
         case F_S_FUN_DEF:
-            if (return_code = check_function_definition(analyzer, stack_1, stack_2)) exit(return_code);
+            if ((return_code = check_function_definition(analyzer, stack_1, stack_2))) exit(return_code);
             break;
         case F_G_DEF_VAR:
             def_var(get_nearest_item(analyzer, stack_1->tokens[1]->data));
