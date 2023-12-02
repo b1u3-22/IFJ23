@@ -27,6 +27,8 @@ SymTableItemPtr symtable_item_init() {
 SymTablePtr symtable_init() {
     SymTablePtr symtable = calloc(SYMBTABLE_SIZE, sizeof(SymTableItemPtr));
 
+    symtable_add_built_in_functions(symtable);
+
     return symtable;
 }
 
@@ -35,6 +37,7 @@ bool symtable_add_item(SymTablePtr symtable, SymTableItemPtr item) {
     SymTableItemPtr previous = symtable[hash];
     symtable[hash] = item;
     item->next = previous;
+
     return true;
 }
 
@@ -87,4 +90,202 @@ void symtable_dispose(SymTablePtr symtable) {
         }
     }
     free(symtable);
+}
+
+bool symtable_find_parameter_external_name(ParamStackPtr stack, char* externalName) {
+    for (int i = 0; i < stack->data_pos+1; i++) {
+        if (stack->data[i]->externalName == externalName) return true;
+    }
+
+    return false;
+}
+
+bool symtable_find_parameter_id(ParamStackPtr stack, char* id) {
+    for (int i = 0; i < stack->data_pos+1; i++) {
+        if (stack->data[i]->id == id) return true;
+    }
+
+    return false;
+}
+
+void symtable_add_built_in_functions(SymTablePtr symtable) {
+    //readString() -> String?
+    SymTableItemPtr functionReadString = symtable_item_init();
+    functionReadString->depth = 0;
+    functionReadString->block = 0;
+    functionReadString->id = "readString";
+    functionReadString->isDefined = true;
+    functionReadString->isFunction = true;
+    functionReadString->isVar = NULL;
+    functionReadString->value = NULL;
+    functionReadString->type = S_STRINGQ;
+    ParamStackPtr paramStackReadString = param_stack_init();
+    functionReadString->paramStack = paramStackReadString;
+    symtable_add_item(symtable, functionReadString);
+
+    //readInt() -> Int?
+    SymTableItemPtr functionReadInt = symtable_item_init();
+    functionReadInt->depth = 0;
+    functionReadInt->block = 0;
+    functionReadInt->id = "readInt";
+    functionReadInt->isDefined = true;
+    functionReadInt->isFunction = true;
+    functionReadInt->isVar = NULL;
+    functionReadInt->value = NULL;
+    functionReadInt->type = S_INTQ;
+    ParamStackPtr paramStackReadInt = param_stack_init();
+    functionReadString->paramStack = paramStackReadInt;
+    symtable_add_item(symtable, functionReadInt);
+
+    //readDouble() -> Double?
+    SymTableItemPtr functionReadDouble = symtable_item_init();
+    functionReadDouble->depth = 0;
+    functionReadDouble->block = 0;
+    functionReadDouble->id = "readDouble";
+    functionReadDouble->isDefined = true;
+    functionReadDouble->isFunction = true;
+    functionReadDouble->isVar = NULL;
+    functionReadDouble->value = NULL;
+    functionReadDouble->type = S_DOUBLEQ;
+    ParamStackPtr paramStackReadDouble = param_stack_init();
+    functionReadString->paramStack = paramStackReadDouble;
+    symtable_add_item(symtable, functionReadDouble);
+
+    //Int2Double(_ term : Int) -> Double
+    SymTableItemPtr functionInt2Double = symtable_item_init();
+    functionInt2Double->depth = 0;
+    functionInt2Double->block = 0;
+    functionInt2Double->id = "Int2Double";
+    functionInt2Double->isDefined = true;
+    functionInt2Double->isFunction = true;
+    functionInt2Double->isVar = NULL;
+    functionInt2Double->value = NULL;
+    functionInt2Double->type = S_DOUBLE;
+
+    ParamStackItemPtr item1 = param_stack_item_init();
+    item1->externalName = "_";
+    item1->id = "term";
+    item1->valueType = S_INT;
+
+    ParamStackPtr paramStack1 = param_stack_init();
+    param_stack_push(paramStack1, item1);
+    functionInt2Double->paramStack = paramStack1;
+    symtable_add_item(symtable, functionInt2Double);
+
+    //Double2Int(_ term : Double) -> Int
+    SymTableItemPtr functionDouble2Int = symtable_item_init();
+    functionDouble2Int->depth = 0;
+    functionDouble2Int->block = 0;
+    functionDouble2Int->id = "Double2Int";
+    functionDouble2Int->isDefined = true;
+    functionDouble2Int->isFunction = true;
+    functionDouble2Int->isVar = NULL;
+    functionDouble2Int->value = NULL;
+    functionDouble2Int->type = S_INT;
+
+    ParamStackItemPtr item2 = param_stack_item_init();
+    item2->externalName = "_";
+    item2->id = "term";
+    item2->valueType = S_DOUBLE;
+
+    ParamStackPtr paramStack2 = param_stack_init();
+    param_stack_push(paramStack2, item2);
+    functionDouble2Int->paramStack = paramStack2;
+    symtable_add_item(symtable, functionDouble2Int);
+
+    //length(_ s : String) -> Int
+    SymTableItemPtr functionLength = symtable_item_init();
+    functionLength->depth = 0;
+    functionLength->block = 0;
+    functionLength->id = "length";
+    functionLength->isDefined = true;
+    functionLength->isFunction = true;
+    functionLength->isVar = NULL;
+    functionLength->value = NULL;
+    functionLength->type = S_INT;
+
+    ParamStackItemPtr item3 = param_stack_item_init();
+    item3->externalName = "_";
+    item3->id = "s";
+    item3->valueType = S_STRING;
+
+    ParamStackPtr paramStack3 = param_stack_init();
+    param_stack_push(paramStack3, item3);
+    functionLength->paramStack = paramStack3;
+    symtable_add_item(symtable, functionLength);
+
+    //ord(_ c : String) -> Int
+    SymTableItemPtr functionOrd = symtable_item_init();
+    functionOrd->depth = 0;
+    functionOrd->block = 0;
+    functionOrd->id = "ord";
+    functionOrd->isDefined = true;
+    functionOrd->isFunction = true;
+    functionOrd->isVar = NULL;
+    functionOrd->value = NULL;
+    functionOrd->type = S_INT;
+
+    ParamStackItemPtr item4 = param_stack_item_init();
+    item4->externalName = "_";
+    item4->id = "c";
+    item4->valueType = S_STRING;
+
+    ParamStackPtr paramStack4 = param_stack_init();
+    param_stack_push(paramStack4, item4);
+    functionOrd->paramStack = paramStack4;
+    symtable_add_item(symtable, functionOrd);
+
+    //chr(_ i : Int) -> String
+    SymTableItemPtr functionChr = symtable_item_init();
+    functionChr->depth = 0;
+    functionChr->block = 0;
+    functionChr->id = "chr";
+    functionChr->isDefined = true;
+    functionChr->isFunction = true;
+    functionChr->isVar = NULL;
+    functionChr->value = NULL;
+    functionChr->type = S_STRING;
+
+    ParamStackItemPtr item5 = param_stack_item_init();
+    item5->externalName = "_";
+    item5->id = "i";
+    item5->valueType = S_INT;
+
+    ParamStackPtr paramStack5 = param_stack_init();
+    param_stack_push(paramStack5, item5);
+    functionChr->paramStack = paramStack5;
+    symtable_add_item(symtable, functionChr);
+
+    //substring(of s : String, startingAt i : Int, endingBefore j : Int) -> String?
+    SymTableItemPtr functionSubstring = symtable_item_init();
+    functionSubstring->depth = 0;
+    functionSubstring->block = 0;
+    functionSubstring->id = "substring";
+    functionSubstring->isDefined = true;
+    functionSubstring->isFunction = true;
+    functionSubstring->isVar = NULL;
+    functionSubstring->value = NULL;
+    functionSubstring->type = S_STRINGQ;
+
+    ParamStackItemPtr item6 = param_stack_item_init();
+    item6->externalName = "of";
+    item6->id = "s";
+    item6->valueType = S_STRING;
+
+    ParamStackItemPtr item7 = param_stack_item_init();
+    item7->externalName = "startingAt";
+    item7->id = "i";
+    item7->valueType = S_INT;
+
+    ParamStackItemPtr item8 = param_stack_item_init();
+    item8->externalName = "endingBefore";
+    item8->id = "j";
+    item8->valueType = S_INT;
+
+    ParamStackPtr paramStack6 = param_stack_init();
+    param_stack_push(paramStack6, item6);
+    param_stack_push(paramStack6, item7);
+    param_stack_push(paramStack6, item8);
+    functionSubstring->paramStack = paramStack6;
+    symtable_add_item(symtable, functionSubstring);
 }
