@@ -152,9 +152,36 @@ int check_value_assingment(AnalyzerPtr analyzer, TokenStackPtr token_stack_left,
 }
 
 int check_function_assingment(AnalyzerPtr analyzer, TokenStackPtr token_stack_left, TokenStackPtr token_stack_function) {
+    if (token_stack_left->tokens[0]->type == VAR || token_stack_left->tokens[0]->type == LET) {
+        SymTableItemPtr itemToCompare = symtable_get_item_lower_depth_same_block(analyzer->symtable, token_stack_left->tokens[1]->data, analyzer->depth, analyzer->block[analyzer->depth]);
+        if (itemToCompare) {
+            if (itemToCompare->depth == analyzer->depth && itemToCompare->block == analyzer->block[analyzer->depth]) return 3;
+        }
+
+        SymTableItemPtr newItem = symtable_item_init(); 
+ 
+        newItem->id = token_stack_left->tokens[1]->data; 
+        newItem->depth = analyzer->depth; 
+        newItem->block = analyzer->block[analyzer->depth]; 
+        newItem->isFunction = false; 
+        newItem->isDefined = false; 
+        
+        if (token_stack_left->top->type == TYPE) { 
+            newItem->type = token_stack_left->top->value_type; 
+        } else { 
+            newItem->type = S_NO_TYPE; 
+        } 
+    
+        if (token_stack_left->tokens[0]->type == VAR) newItem->isVar = true; 
+        else newItem->isVar = false; 
+    
+        symtable_add_item(analyzer->symtable, newItem); 
+    }
+    
     SymTableItemPtr itemToAssign = symtable_get_item_lower_depth_same_block(analyzer->symtable, token_stack_left->top->data, analyzer->depth, analyzer->block[analyzer->depth]);
     if (itemToAssign == NULL) return 5;    //is left declared?
     if (!(itemToAssign->isVar) && itemToAssign->isDefined) return 3;    //is left defined let?
+    itemToAssign->isDefined = true; //this is wrong
     
     SymTableItemPtr functionItem = symtable_get_function_item(analyzer->symtable, token_stack_function->tokens[0]->data);
     //if function is not defined, push to stack for later check
@@ -210,11 +237,11 @@ int check_function_call(AnalyzerPtr analyzer, TokenStackPtr token_stack_function
     }
 
     //check return types
-    if (!calledAsAssignment) { //function must be void
-        if (functionId->type != S_NO_TYPE) return 4;
-    }
+    // if (!calledAsAssignment) { //function must be void
+    //     if (functionId->type != S_NO_TYPE) return 4;
+    // }
 
-    return 0;
+    // return 0;
 }
 
 int check_function_definition(AnalyzerPtr analyzer, TokenStackPtr token_stack_id, TokenStackPtr token_stack_param) {
@@ -231,6 +258,17 @@ int check_function_definition(AnalyzerPtr analyzer, TokenStackPtr token_stack_id
         item->externalName = token_stack_param->tokens[3*i]->data;
         item->id = token_stack_param->tokens[3*i+1]->data;
         item->valueType = token_stack_param->tokens[3*i+2]->value_type;
+
+        SymTableItemPtr symtableItem = symtable_item_init();
+        symtableItem->depth = analyzer->depth;
+        symtableItem->block = analyzer->block[analyzer->depth];
+        symtableItem->id = token_stack_param->tokens[3*i+1]->data;
+        symtableItem->isDefined = true;
+        symtableItem->isFunction = false;
+        symtableItem->isVar = true;
+        symtableItem->type = token_stack_param->tokens[3*i+2]->value_type;
+
+        symtable_add_item(analyzer->symtable, symtableItem);
         
         param_stack_push(stack, item);
     }
@@ -327,14 +365,6 @@ int check_error_7_8(AnalyzerPtr analyzer, int data_type, TokenStackPtr token_sta
 
 SymTableItemPtr get_nearest_item(AnalyzerPtr analyzer, char* id) {
     return symtable_get_item_lower_depth_same_block(analyzer->symtable, id, analyzer->depth, analyzer->block[analyzer->depth]);
-}
-
-int get_current_depth(AnalyzerPtr analyzer) {
-    return analyzer->depth;
-}
-
-int get_current_block(AnalyzerPtr analyzer) {
-    return analyzer->block;
 }
 
 int check_undefined_functions(AnalyzerPtr analyzer) {
