@@ -210,11 +210,11 @@ int check_function_call(AnalyzerPtr analyzer, TokenStackPtr token_stack_function
     }
 
     //check return types
-    if (!calledAsAssignment) { //function must be void
-        if (functionId->type != S_NO_TYPE) return 4;
-    }
+    // if (!calledAsAssignment) { //function must be void
+    //     if (functionId->type != S_NO_TYPE) return 4;
+    // }
 
-    return 0;
+    // return 0;
 }
 
 int check_function_definition(AnalyzerPtr analyzer, TokenStackPtr token_stack_id, TokenStackPtr token_stack_param) {
@@ -231,6 +231,17 @@ int check_function_definition(AnalyzerPtr analyzer, TokenStackPtr token_stack_id
         item->externalName = token_stack_param->tokens[3*i]->data;
         item->id = token_stack_param->tokens[3*i+1]->data;
         item->valueType = token_stack_param->tokens[3*i+2]->value_type;
+
+        SymTableItemPtr symtableItem = symtable_item_init();
+        symtableItem->depth = analyzer->depth;
+        symtableItem->block = analyzer->block[analyzer->depth];
+        symtableItem->id = token_stack_param->tokens[3*i+1]->data;
+        symtableItem->isDefined = true;
+        symtableItem->isFunction = false;
+        symtableItem->isVar = true;
+        symtableItem->type = token_stack_param->tokens[3*i+2]->value_type;
+
+        symtable_add_item(analyzer->symtable, symtableItem);
         
         param_stack_push(stack, item);
     }
@@ -327,14 +338,6 @@ int check_error_7_8(AnalyzerPtr analyzer, int data_type, TokenStackPtr token_sta
 
 SymTableItemPtr get_nearest_item(AnalyzerPtr analyzer, char* id) {
     return symtable_get_item_lower_depth_same_block(analyzer->symtable, id, analyzer->depth, analyzer->block[analyzer->depth]);
-}
-
-int get_current_depth(AnalyzerPtr analyzer) {
-    return analyzer->depth;
-}
-
-int get_current_block(AnalyzerPtr analyzer) {
-    return analyzer->block;
 }
 
 int check_undefined_functions(AnalyzerPtr analyzer) {

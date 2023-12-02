@@ -118,18 +118,6 @@ int check_error_7_8(AnalyzerPtr analyzer, int data_type, TokenStackPtr token_sta
 */
 SymTableItemPtr get_nearest_item(AnalyzerPtr analyzer, char* id);
 
-/** Returns current depth
- *  @param analyzer AnalyzerPtr to work with
- *  @returns int of current depth
-*/
-int get_current_depth(AnalyzerPtr analyzer);
-
-/** Returns current block
- *  @param analyzer AnalyzerPtr to work with
- *  @returns int of current block
-*/
-int get_current_block(AnalyzerPtr analyzer);
-
 /** Checks all undefined functions at the end of parsing
  *  @param analyzer AnalyzerPtr to work with
  *  @returns int error code if semantic errors 0 otherwise
