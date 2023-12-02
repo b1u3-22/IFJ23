@@ -35,7 +35,7 @@ int parse_expression(AnalyzerPtr analyzer, int end_type, TokenStackPtr sa_stack)
 
         //if (token_stack->top->type <= VALUE) token_stack_push(sa_stack, token_stack->top);
 
-        ////printf("[%02d, %02d]: %d\n", stack_type_helper->type, token_type, action);
+        //printf("[%02d, %02d]: %d\n", stack_type_helper->type, token_type, action);
         switch (action) {
             case E_ERR:
                 return 2;
@@ -81,6 +81,19 @@ void expression_get_next_token(TokenStackPtr stack, int end_type, int *type, Tok
         token = token_stack_get(stack); // skip newline characters
     }
     
+    // Next token is ID and previous is ID or VALUE, we have to decide if we want to continue
+    // with expression parsing or not, so we search for = sign which would mark start
+    // of the next expression or ( bracket which *could* mark start of function call
+    if (token->type == ID && (*type == E_VALUE || *type == E_ID)) {
+        token = token_stack_get(stack); // get next token
+        if (token->type == EQUALS || token->type == L_BRAC) {
+            token_stack_unget(stack);
+            token_stack_unget(stack);
+            *type = E_END;
+            return;
+        }
+    }
+
     if (token->type == ID || token->type == VALUE) token_stack_push(sa_stack, token);
 
     *type = get_translated_type(token);
