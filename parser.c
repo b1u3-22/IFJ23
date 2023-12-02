@@ -6,6 +6,7 @@
 */
 
 #include "parser.h"
+#include <stdio.h>
 
 int parse() {
     SymTablePtr symtable = symtable_init();
@@ -72,9 +73,10 @@ int parse() {
             if (rule_stack->top->type == F_P_GET_T) {
                 rule_stack_pop(rule_stack);
                 token = token_stack_get(token_stack);
+                //printf("New token type: %d\n", token->type);
             }
             else {
-                apply_function(rule_stack->top->type, rule_stack, token, token_stack, sa_1, sa_2, analyzer);
+                apply_function(rule_stack->top->type, rule_stack, token, token_stack, sa_1, sa_2, analyzer, rule_to_apply);
             }
         }
 
@@ -355,7 +357,6 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack, TokenSt
 
     case 30:
     case 35:
-        errors += token_stack_unget(token_stack);
         errors += rule_stack_push(stack, R_F_PAR_N, true, false);
         errors += rule_stack_push(stack, F_P_GET_T, false, true);
         errors += rule_stack_push(stack, F_P_PSA, false, true);
@@ -471,7 +472,7 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack, TokenSt
     if (errors > 0) exit(99);
 }
 
-void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, TokenStackPtr token_stack, TokenStackPtr stack_1, TokenStackPtr stack_2, AnalyzerPtr analyzer) {
+void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, TokenStackPtr token_stack, TokenStackPtr stack_1, TokenStackPtr stack_2, AnalyzerPtr analyzer, int rule) {
     rule_stack_pop(rule_stack);
     int return_code = 0;
 
@@ -480,7 +481,10 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
             token = token_stack_get(token_stack);
             break;
         case F_P_PSA:
-            if ((return_code = parse_expression(analyzer, END, stack_2))) exit(return_code);
+            int end_type;
+            if (rule == 30 || rule == 35) end_type = R_BRAC;
+            else end_type = END;
+            if ((return_code = parse_expression(analyzer, end_type, stack_2))) exit(return_code);
             break;
         case F_P_PUSH_1:
             if ((return_code = token_stack_push(stack_1, token))) exit(return_code);
@@ -550,8 +554,6 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
             break;      
         case F_G_FUN_S:
             func_start(stack_1->tokens[0]->data);
-            break;    
-        case F_G_FUN_P:
             SymTableItemPtr func_item = symtable_get_function_item(analyzer->symtable, stack_1->tokens[0]->data);
             for (int param = 0; param <= func_item->paramStack->data_pos; param++){
                 func_param(func_item->paramStack->data[param]);
@@ -563,16 +565,18 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
 
             func_call_end(stack_1->tokens[0]->data);
             break;    
-        case F_G_FUN_C_P:
-            break;  
         case F_G_FUN_E:
             func_end();
             break;  
         case F_G_SAVE_SYM:
+            printf("Got here\n");
+            SymTableItemPtr item = get_nearest_item(analyzer, stack_2->tokens[0]->data);
+            printf("item thingies: %s, %d\n", stack_2->tokens[0]->data, stack_2->tokens[0]->type);
+            if (!item) exit(5);
             save_sym(get_nearest_item(analyzer, stack_2->tokens[0]->data));
             break;
         case F_G_SYM_CONF:
-            confirm_sym();
+            if (token_stack->top->type != 1) confirm_sym();
             break;
         default:
             break;
