@@ -100,12 +100,12 @@ void exp_instruction(int type) {
 
 }
 
-void def_var(SymTableItemPtr var) {
+void def_var(char *id, int depth) {
 
-    if (var->depth == 0)
-        inst("DEFVAR GF@", var->id);
+    if (depth == 0)
+        inst("DEFVAR GF@", id);
     else
-        inst("DEFVAR LF@", var->id);
+        inst("DEFVAR LF@", id);
 
 }
 
