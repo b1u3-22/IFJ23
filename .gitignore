@@ -71,3 +71,6 @@ test.c
 test.txt
 
 test.swift
+
+##### IGNORE VALGRIND FILES ####
+vgcore.*
