@@ -208,10 +208,10 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack, TokenSt
         errors += rule_stack_push(stack, F_P_CLEAR_2, false, true);
         errors += rule_stack_push(stack, F_P_CLEAR_1, false, true);
         errors += rule_stack_push(stack, F_G_SET_VAR, false, true);
-        errors += rule_stack_push(stack, F_G_DEF_VAR, false, true);
         errors += rule_stack_push(stack, F_S_VAR_DEF, false, true);
         errors += rule_stack_push(stack, R_EXPR, true, false);
         errors += rule_stack_push(stack, EQUALS, false, false);
+        errors += rule_stack_push(stack, F_G_DEF_VAR, false, true);
         break;
 
     case 10:
@@ -330,12 +330,6 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack, TokenSt
         errors += rule_stack_push(stack, F_P_PUSH_2, false, true);
         break;
 
-    case 22:
-        errors += rule_stack_push(stack, R_EXPR_OP, true, false);
-        errors += rule_stack_push(stack, VALUE, false, false);
-        errors += rule_stack_push(stack, F_P_PUSH_2, false, true);
-        break;
-
     case 23:
         errors += rule_stack_push(stack, F_S_FUN_ASG, false, true);
         errors += rule_stack_push(stack, R_EXPR_OP, true, false);
@@ -348,7 +342,8 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack, TokenSt
     case 25:
         errors += token_stack_unget(token_stack);
 
-    case 20:    
+    case 20:  
+    case 22:  
     case 52:
         errors += token_stack_unget(token_stack);
         rule_stack_push(stack, F_P_GET_T, false, true);
@@ -484,13 +479,13 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
             token = token_stack_get(token_stack);
             break;
         case F_P_PSA:
-            if (return_code = parse_expression(analyzer, END, stack_2)) exit(return_code);
+            if ((return_code = parse_expression(analyzer, END, stack_2))) exit(return_code);
             break;
         case F_P_PUSH_1:
-            if (return_code = token_stack_push(stack_1, token)) exit(return_code);
+            if ((return_code = token_stack_push(stack_1, token))) exit(return_code);
             break;
         case F_P_PUSH_2:
-            if (return_code = token_stack_push(stack_2, token)) exit(return_code);
+            if ((return_code = token_stack_push(stack_2, token))) exit(return_code);
             break;
         case F_P_CLEAR_1:
             while (!stack_1->empty) token_stack_pop(stack_1);
@@ -505,25 +500,32 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
             decrease_depth(analyzer);
             break;
         case F_S_VAR_DEC:
-            if (return_code = check_declaration(analyzer, stack_1)) exit(return_code);
+            if ((return_code = check_declaration(analyzer, stack_1))) exit(return_code);
             break; 
         case F_S_VAR_DEF:
-            if (return_code = check_definition(analyzer, stack_1, stack_2)) exit(return_code);
+            if ((return_code = check_definition(analyzer, stack_1, stack_2))) exit(return_code);
             break;
         case F_S_VAL_ASG:
-            if (return_code = check_value_assingment(analyzer, stack_1, stack_2)) exit(return_code);
+            if ((return_code = check_value_assingment(analyzer, stack_1, stack_2))) exit(return_code);
             break;
         case F_S_FUN_ASG:
-            if (return_code = check_function_assingment(analyzer, stack_1, stack_2)) exit(return_code);
+            if ((return_code = check_function_assingment(analyzer, stack_1, stack_2))) exit(return_code);
             break;
         case F_S_FUN_CAL:
-            if (return_code = check_function_call(analyzer, stack_1, stack_2)) exit(return_code);
+            TokenStackPtr helper_stack = token_stack_init();
+            token_stack_push(helper_stack, stack_1->top);
+
+            for (int i = 0; i <= stack_2->tokens_pos; i++){
+                token_stack_push(helper_stack, stack_2->tokens[i]);
+            }
+            if ((return_code = check_function_call(analyzer, helper_stack, false))) exit(return_code);
+            free(helper_stack);
             break;
         case F_S_FUN_DEF:
-            if (return_code = check_function_definition(analyzer, stack_1, stack_2)) exit(return_code);
+            if ((return_code = check_function_definition(analyzer, stack_1, stack_2))) exit(return_code);
             break;
         case F_G_DEF_VAR:
-            def_var(get_nearest_item(analyzer, stack_1->tokens[1]->data));
+            def_var(stack_1->tokens[1]->data, analyzer->depth);
             break;  
         case F_G_SET_VAR:
             set_var(get_nearest_item(analyzer, stack_1->tokens[1]->data));
@@ -559,6 +561,12 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
         case F_G_FUN_E:
             func_end();
             break;  
+        case F_G_SAVE_SYM:
+            save_sym(get_nearest_item(analyzer, stack_2->tokens[0]->data));
+            break;
+        case F_G_SYM_CONF:
+            confirm_sym();
+            break;
         default:
             break;
     }
@@ -583,19 +591,8 @@ RuleStackItemPtr error_skip(RuleStackPtr stack, TokenStackPtr token_stack) {
 
 
 int main(){
-    // code_header();
+    code_header();
     parse();
-    // code_footer();
-    // TokenStackPtr stack = token_stack_init();
-    // token_stack_get(stack);
-    // token_stack_get(stack);
-    // token_stack_get(stack);
-    // token_stack_get(stack);
-    // token_stack_get(stack);
-    // token_stack_unget(stack);
-    // token_stack_get(stack);
-    // token_stack_unget(stack);
-    // token_stack_get(stack);
-    // //printf("Token at top: %s\n", stack->top->data);
+    code_footer();
     return 0;
 }

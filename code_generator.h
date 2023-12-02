@@ -1,6 +1,9 @@
+/**
+ *  Project:    Implementace překladače imperativního jazyka IFJ23.
+ *  File:       @brief Implementácia hlavičkového súboru pre code_generator.c
+ *  Authors:    @author Tomáš Mikát xmikat01
+*/
 
-
- // CODE GENERATOR HEADER //
 
 
 #include <stdio.h>
@@ -59,7 +62,7 @@ void code_footer();
 void exp_instruction(int type);
 
 // define variable
-void def_var(SymTableItemPtr var);
+void def_var(char *id, int depth);
 
 // pop value to variable
 void set_var(SymTableItemPtr var);
@@ -125,7 +128,7 @@ void builtin_read();
 void builtin_write();
 void builtin_int2float();
 void builtin_float2int();
-void builtin_len();
+void builtin_length();
 void builtin_substring();
 void builtin_ord();
 void builtin_chr();
