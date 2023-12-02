@@ -224,10 +224,10 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack, TokenSt
         errors += rule_stack_push(stack, F_P_CLEAR_2, false, true);
         errors += rule_stack_push(stack, F_P_CLEAR_1, false, true);
         errors += rule_stack_push(stack, L_CBRAC, false, false);
-        errors += rule_stack_push(stack, R_F_RET_DEF, true, false);
-        errors += rule_stack_push(stack, R_BRAC, false, false);
         errors += rule_stack_push(stack, F_G_FUN_S, false, true);
         errors += rule_stack_push(stack, F_S_FUN_DEF, false, true); 
+        errors += rule_stack_push(stack, R_F_RET_DEF, true, false);
+        errors += rule_stack_push(stack, R_BRAC, false, false);
         errors += rule_stack_push(stack, R_F_DEF_F, true, false);
         errors += rule_stack_push(stack, L_BRAC, false, false);
         errors += rule_stack_push(stack, ID, false, false);
@@ -346,9 +346,16 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack, TokenSt
     case 22:  
     case 52:
         errors += token_stack_unget(token_stack);
-        rule_stack_push(stack, F_P_GET_T, false, true);
-        rule_stack_push(stack, F_P_PSA, false, true);
+        errors += rule_stack_push(stack, F_P_GET_T, false, true);
+        errors += rule_stack_push(stack, F_P_PSA, false, true);
         break;
+
+    case 30:
+    case 35:
+        errors += token_stack_unget(token_stack);
+        errors += rule_stack_push(stack, R_F_PAR_N, true, false);
+        errors += rule_stack_push(stack, F_P_GET_T, false, true);
+        errors += rule_stack_push(stack, F_P_PSA, false, true);
 
     case 26:
     case 27:
@@ -358,12 +365,6 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack, TokenSt
     case 29:
         errors += rule_stack_push(stack, R_F_PAR_ID, true, false);
         errors += rule_stack_push(stack, ID, false, false);
-        break;
-
-    case 30:
-        errors += rule_stack_push(stack, R_F_PAR_N, true, false);
-        errors += rule_stack_push(stack, R_EXPR_OP, true, false);
-        errors += rule_stack_push(stack, VALUE, false, false);
         break;
 
     case 31:
@@ -386,12 +387,6 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack, TokenSt
         errors += rule_stack_push(stack, ID, false, false);
         break;
 
-    case 35:
-        errors += rule_stack_push(stack, R_F_PAR_N, true, false);
-        errors += rule_stack_push(stack, R_EXPR_OP, true, false);
-        errors += rule_stack_push(stack, VALUE, false, false);
-        break;
-
     case 37:
         errors += rule_stack_push(stack, R_G_BODY, true, false);
         errors += rule_stack_push(stack, R_STAT, true, false);
@@ -407,6 +402,9 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack, TokenSt
         break;
 
     case 39:
+        errors += rule_stack_push(stack, F_P_CLEAR_2, false, true);
+        errors += rule_stack_push(stack, F_P_CLEAR_1, false, true);
+        errors += rule_stack_push(stack, F_G_FUN_C, false, true);
         errors += rule_stack_push(stack, F_S_FUN_CAL, false, true);
         errors += rule_stack_push(stack, R_BRAC, false, false);
         errors += rule_stack_push(stack, R_F_PAR_F, true, false);
@@ -551,10 +549,13 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
             func_start(stack_1->tokens[0]->data);
             break;    
         case F_G_FUN_P:
-            break;    
-        case F_G_FUN_R:
+            SymTableItemPtr func_item = symtable_get_function_item(analyzer->symtable, stack_1->tokens[0]->data);
+            for (int param = 0; param <= func_item->paramStack->data_pos; param++){
+                func_param(func_item->paramStack->data[param]);
+            }
             break;    
         case F_G_FUN_C:
+            func_call();
             break;    
         case F_G_FUN_C_P:
             break;  
