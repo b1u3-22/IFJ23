@@ -331,6 +331,9 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack, TokenSt
         break;
 
     case 23:
+        errors += rule_stack_push(stack, F_P_CLEAR_2, false, true);
+        errors += rule_stack_push(stack, F_P_CLEAR_1, false, true);
+        errors += rule_stack_push(stack, F_G_FUN_C, false, true);
         errors += rule_stack_push(stack, F_S_FUN_ASG, false, true);
         errors += rule_stack_push(stack, R_EXPR_OP, true, false);
         errors += rule_stack_push(stack, R_BRAC, false, false);
@@ -556,6 +559,9 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
             break;    
         case F_G_FUN_C:
             func_call();
+            
+
+            func_call_end(stack_1->tokens[0]->data);
             break;    
         case F_G_FUN_C_P:
             break;  
