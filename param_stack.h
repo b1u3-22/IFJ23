@@ -5,8 +5,8 @@
 
 typedef struct ParamStackItem {
     char* id;
-    char* name;
-    int type;
+    char* externalName;
+    int valueType;
 } *ParamStackItemPtr;
 
 typedef struct ParamStack {
@@ -28,17 +28,22 @@ ParamStackPtr param_stack_init();
 */
 bool param_stack_pop(ParamStackPtr stack);
 
-/** Push new Token into Token Stack
+/** Push new item into Param Stack
  *  @param stack ParamStackPtr to add Token to
- *  @param token TokenPtr that should be added to stack
+ *  @param item ParamStackItemPtr that should be added to stack
  *  @returns false if succeeded, true otherwise
 */
 bool param_stack_push(ParamStackPtr stack, ParamStackItemPtr item);
 
-/** Dispose and free Token Stack
+/** Dispose and free Param Stack
 */
 void param_stack_dispose(ParamStackPtr stack);
 
+/** Initialize paramItem
+    @returns ParamStackItemPtr if succeded NULL otherwise
+*/
 ParamStackItemPtr param_stack_item_init();
 
+/** Dispose and free Param Stack Item
+*/
 void param_stack_item_dispose(ParamStackItemPtr item);
