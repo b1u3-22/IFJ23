@@ -52,7 +52,7 @@ SymTableItemPtr symtable_get_item_lower_depth_same_block(SymTablePtr symtable, c
     while (item && strcmp(item->id, id)) item = item->next; // Find item with the same id
     
     while (item) {
-        if (item->depth == depth && item->block == block)   return item;
+        if (item->depth == depth && item->block == block && item->isFunction == false)   return item;
         else if (item->depth < depth)   return item;
         else item = item->next;
     }
