@@ -241,7 +241,7 @@ int check_function_call(AnalyzerPtr analyzer, TokenStackPtr token_stack_function
     //     if (functionId->type != S_NO_TYPE) return 4;
     // }
 
-    // return 0;
+    return 0;
 }
 
 int check_function_definition(AnalyzerPtr analyzer, TokenStackPtr token_stack_id, TokenStackPtr token_stack_param) {
