@@ -100,7 +100,7 @@ void while_end();
 void func_start(char* func);
 
 // define single parameter of function
-void func_param(SymTableItemPtr param);
+void func_param(ParamStackItemPtr param);
 
 // end of function
 void func_end();

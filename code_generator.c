@@ -240,7 +240,7 @@ void func_start(char* func) {
 
 }
 
-void func_param(SymTableItemPtr param) {
+void func_param(ParamStackItemPtr param) {
 
     inst("DEFVAR LF@", param->id);
     part("MOVE LF@", param->id, " LF@%%");
