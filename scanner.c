@@ -326,8 +326,8 @@ void get_token_type(scanner_states state, char c, TokenPtr token) {
         if ((i > -1) && (i < 6)) {
             token->value_type = i;
             token->type = TYPE;
-        }
-        token->type = ID;
+        } else token->type = ID;
+        
     } 
     else if (state == OP) {
         switch (c) {
@@ -543,28 +543,14 @@ void get_next_token(TokenPtr token) {
     get_token_type(state, c, token);
 }
 
-// int main() {
-//     TokenPtr token = token_init();
-//     get_next_token(token);
-//     printf("TYPE: %d, DATA: %s, SPECIAL TYPE: %d\n", token->type, token->data, token->value_type);
-    
-//     TokenPtr token2 = token_init();
-//     get_next_token(token2);
-//     printf("TYPE: %d, DATA: %s, SPECIAL TYPE: %d\n", token2->type, token2->data, token2->value_type);
-
-//     printf ("unget first and second\n");
-//     unget_token(token);
-//     unget_token(token2);
-
-//     token_clear(token);
-//     token_clear(token2);
-
-//     printf("TYPE: %d, DATA: %s, SPECIAL TYPE: %d\n", token->type, token->data, token->value_type);
-//     printf("TYPE: %d, DATA: %s, SPECIAL TYPE: %d\n", token2->type, token2->data, token2->value_type);
-
-//     get_next_token(token);
-//     printf("TYPE: %d, DATA: %s, SPECIAL TYPE: %d\n", token->type, token->data, token->value_type);
-    
-//     get_next_token(token2);
-//     printf("TYPE: %d, DATA: %s, SPECIAL TYPE: %d\n", token2->type, token2->data, token2->value_type);
-// } 
+int main() {
+    TokenPtr token = token_init();
+    get_next_token(token);
+        
+    while (token->type != END) {
+        printf("TYPE: %d, DATA: %s, SPECIAL TYPE: %d\n", token->type, token->data, token->value_type);
+        token_clear(token);    
+        get_next_token(token);
+        
+    }
+} 
