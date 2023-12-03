@@ -178,7 +178,7 @@ int check_function_assingment(AnalyzerPtr analyzer, TokenStackPtr token_stack_le
         symtable_add_item(analyzer->symtable, newItem); 
     }
     
-    SymTableItemPtr itemToAssign = symtable_get_item_lower_depth_same_block(analyzer->symtable, token_stack_left->top->data, analyzer->depth, analyzer->block[analyzer->depth]);
+    SymTableItemPtr itemToAssign = symtable_get_item_lower_depth_same_block(analyzer->symtable, token_stack_left->tokens[1]->data, analyzer->depth, analyzer->block[analyzer->depth]);
     if (itemToAssign == NULL) return 5;    //is left declared?
     if (!(itemToAssign->isVar) && itemToAssign->isDefined) return 3;    //is left defined let?
     itemToAssign->isDefined = true; //this is wrong
