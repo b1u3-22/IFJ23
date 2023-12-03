@@ -100,10 +100,9 @@ void expression_get_next_token(TokenStackPtr stack, int end_type, int *type, Tok
     if (token->type == R_BRAC && end_type == R_BRAC) {
         token = token_stack_get(stack);
         int helper_type = get_translated_type(token);
-        //printf("[expr] helper type: %d\n", helper_type);
         if (helper_type == E_ID || helper_type == E_END) {
-            unget_token(stack);
-            unget_token(stack);
+            token_stack_unget(stack);
+            token_stack_unget(stack);
             *type = E_END;
             return;
         }

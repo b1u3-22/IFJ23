@@ -38,8 +38,8 @@ int parse() {
     bool new_line = true;
 
     while (!(rule_stack->empty)) {
-        //printf("Token data: %s\n", token->data);
-        //printf("[%02d, %02d] - %d - %d\n", rule_stack->top->type, token->type, rule_stack->top->rule, rule_stack->top->function);
+        //printf("Token data: %s, Token type: %d\n", token->data, token->type);
+        ////printf("[%02d, %02d] - %d - %d\n", rule_stack->top->type, token->type, rule_stack->top->rule, rule_stack->top->function);
         if (token->type == ERROR) exit(1); // Lexical error occured
         // ===================== Handling of newlines that some things require =====================
         if (token->type == NEWLINE) {
@@ -55,7 +55,7 @@ int parse() {
 
         // Handling for tokens that always require a newline
         else if (token->type <= R_EOL && token->type > R_EOL_B && !new_line) {
-            //printf("Missing newline\n");
+            ////printf("Missing newline\n");
             //error_skip(rule_stack, token_stack);
             exit(2);
         }
@@ -73,7 +73,7 @@ int parse() {
             if (rule_stack->top->type == F_P_GET_T) {
                 rule_stack_pop(rule_stack);
                 token = token_stack_get(token_stack);
-                //printf("New token type: %d\n", token->type);
+                ////printf("New token type: %d\n", token->type);
             }
             else {
                 apply_function(rule_stack->top->type, rule_stack, token, token_stack, sa_1, sa_2, analyzer, rule_to_apply);
@@ -100,42 +100,42 @@ int parse() {
 
     int counter = 0;
     if (rule_stack->empty || (rule_stack->data_pos == 0 && rule_stack->top->type == R_G_BODY)) {
-        //printf("Success! Nothing remaining in parser stack!\n");
+        ////printf("Success! Nothing remaining in parser stack!\n");
     }
 
     else {
         
-        //printf("Remaining in stack:\n");
+        ////printf("Remaining in stack:\n");
         while (!(rule_stack->empty)) {
-            //printf("%02d: %02d - %d\n", counter++, rule_stack->top->type, rule_stack->top->rule);
+            ////printf("%02d: %02d - %d\n", counter++, rule_stack->top->type, rule_stack->top->rule);
             rule_stack_pop(rule_stack);
         }
     }
 
-    //printf("Tokens in token stack:\n");
+    ////printf("Tokens in token stack:\n");
     counter = 0;
     while (!(token_stack->empty)) {
-        //printf("%02d: %02d\n", counter++, token_stack->top->type);
+        ////printf("%02d: %02d\n", counter++, token_stack->top->type);
         token_stack_pop(token_stack);
     }
 
-    //printf("Tokens in sa stack 1:\n");
+    ////printf("Tokens in sa stack 1:\n");
     counter = 0;
     while (!(sa_1->empty)) {
-        //printf("%02d: %02d\n", counter++, sa_1->top->type);
+        ////printf("%02d: %02d\n", counter++, sa_1->top->type);
         token_stack_pop(sa_1);
     }
 
-    //printf("Tokens in sa stack 2:\n");
+    ////printf("Tokens in sa stack 2:\n");
     counter = 0;
     while (!(sa_2->empty)) {
-        //printf("%02d: %02d\n", counter++, sa_2->top->type);
+        ////printf("%02d: %02d\n", counter++, sa_2->top->type);
         token_stack_pop(sa_2);
     }
 
     //rule_stack_dispose(rule_stack);
     //token_dispose(token);
-    return 0;
+    return check_undefined_functions(analyzer);
 }
 
 void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack, TokenStackPtr sa_stack) {
@@ -452,7 +452,7 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack, TokenSt
         errors += rule_stack_push(stack, ID, false, false);
         errors += rule_stack_push(stack, F_P_PUSH_2, false, true);
         errors += rule_stack_push(stack, UNDERSCR, false, false);
-        //errors += rule_stack_push(stack, F_P_PUSH_2, false, true);
+        errors += rule_stack_push(stack, F_P_PUSH_2, false, true);
         break;
 
     case 50:
@@ -475,13 +475,15 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack, TokenSt
 void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, TokenStackPtr token_stack, TokenStackPtr stack_1, TokenStackPtr stack_2, AnalyzerPtr analyzer, int rule) {
     rule_stack_pop(rule_stack);
     int return_code = 0;
+    int end_type;
+    TokenStackPtr helper_stack;
+    SymTableItemPtr item;
 
     switch (function) {
         case F_P_GET_T: 
             token = token_stack_get(token_stack);
             break;
         case F_P_PSA:
-            int end_type;
             if (rule == 30 || rule == 35) end_type = R_BRAC;
             else end_type = END;
             if ((return_code = parse_expression(analyzer, end_type, stack_2))) exit(return_code);
@@ -517,7 +519,7 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
             if ((return_code = check_function_assingment(analyzer, stack_1, stack_2))) exit(return_code);
             break;
         case F_S_FUN_CAL:
-            TokenStackPtr helper_stack = token_stack_init();
+            helper_stack = token_stack_init();
             token_stack_push(helper_stack, stack_1->top);
 
             for (int i = 0; i <= stack_2->tokens_pos; i++){
@@ -569,9 +571,9 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
             func_end();
             break;  
         case F_G_SAVE_SYM:
-            printf("Got here\n");
-            SymTableItemPtr item = get_nearest_item(analyzer, stack_2->tokens[0]->data);
-            printf("item thingies: %s, %d\n", stack_2->tokens[0]->data, stack_2->tokens[0]->type);
+            //printf("Got here\n");
+            item = get_nearest_item(analyzer, stack_2->tokens[0]->data);
+            //printf("item thingies: %s, %d\n", stack_2->tokens[0]->data, stack_2->tokens[0]->type);
             if (!item) exit(5);
             save_sym(get_nearest_item(analyzer, stack_2->tokens[0]->data));
             break;
@@ -584,17 +586,17 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
 }
 
 RuleStackItemPtr error_skip(RuleStackPtr stack, TokenStackPtr token_stack) {
-    printf("Error occured!\n");
+    //printf("Error occured!\n");
     int counter = 0;
-    printf("Remaining in stack:\n");
+    //printf("Remaining in stack:\n");
     while (!(stack->empty)) {
-        printf("%02d: %02d - %d - %d\n", counter++, stack->top->type, stack->top->rule, stack->top->function);
+        //printf("%02d: %02d - %d - %d\n", counter++, stack->top->type, stack->top->rule, stack->top->function);
         rule_stack_pop(stack);
     }
-    printf("Tokens in token stack:\n");
+    //printf("Tokens in token stack:\n");
     counter = 0;
     while (!(token_stack->empty)) {
-        printf("%02d: %02d\n", counter++, token_stack->top->type);
+        //printf("%02d: %02d\n", counter++, token_stack->top->type);
         token_stack_pop(token_stack);
     }
     exit(2);
