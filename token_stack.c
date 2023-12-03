@@ -1,3 +1,9 @@
+/**
+ *  Project:    Implementace překladače imperativního jazyka IFJ23.
+ *  File:       @brief Stack tokenů a pomocné funkce pro získání tokenů od scanneru
+ *  Authors:    @author Jiří Sedlák xsedla2e
+*/
+
 #include "token_stack.h"
 
 TokenStackPtr token_stack_init() {
@@ -30,16 +36,15 @@ bool token_stack_push(TokenStackPtr stack, TokenPtr token) {
     }
 
     stack->tokens[++(stack->tokens_pos)] = token;
-    stack->top = token;
+    stack->top = stack->tokens[stack->tokens_pos];
 
     stack->empty = false;
     return false;
 }
 
 bool token_stack_pop(TokenStackPtr stack) {
-    if (stack->empty) return false;
+    if (stack->empty) return true;
 
-    //token_dispose(stack->tokens[stack->tokens_pos--]);
     stack->tokens_pos--;
     if (stack->tokens_pos == -1) {
         stack->empty = true;
@@ -48,7 +53,7 @@ bool token_stack_pop(TokenStackPtr stack) {
     else {
         stack->top = stack->tokens[stack->tokens_pos];
     }
-    return true;
+    return false;
 }
 
 void token_stack_pop_free(TokenStackPtr stack) {
@@ -73,13 +78,15 @@ void token_stack_dispose(TokenStackPtr stack) {
 }
 
 bool token_stack_unget(TokenStackPtr stack) {
-    if (stack->empty) return false;
+    if (stack->empty) return true;
     unget_token(stack->top);
-    return token_stack_pop(stack);
+    token_stack_pop(stack);
+    return false;
 }
 
 TokenPtr token_stack_get(TokenStackPtr stack) {
     TokenPtr token = token_stack_create_token(stack);
+    if (!token) return NULL;
     get_next_token(token);
     return token;
 }

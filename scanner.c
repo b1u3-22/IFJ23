@@ -1,15 +1,22 @@
+/**
+ *  Project:    Implementace překladače imperativního jazyka IFJ23.
+ *  File:       @brief Implementace stavového automatu pro parsování vstupu; výroba tokenů.
+ *  Authors:    @author Nikol Škvařilová xskvar11
+*/
+
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
 #include "scanner.h"
-#include <stdio.h>
 
 
 void unget_token(TokenPtr token) {
+    if (!token || !token->data) return;
+    
     ungetc(' ', stdin);
     
-    for (int i = token->data_len; i > -1; i--) {
-        if (token->data[i] == '\0') continue;
+    for (int i = token->data_len - 2; i >= 0; i--) {
         ungetc(token->data[i], stdin);
     }
 }
@@ -88,12 +95,9 @@ void parse_id(char c, scanner_states* state, bool* true_end, bool* end) {
     } else if (!is_number(c) && !is_letter(c) && (c != '_')) *end = true;
 }
 
-void parse__id(int c, scanner_states* state, bool* true_end) {
+void parse_underscore(int c, scanner_states* state, bool* end) {
     if (is_number(c) || is_letter(c) || (c == '_')) *state = IDENTIFICATOR;
-    else {
-        *true_end = true;
-        *state = UNDERSCORE;
-    }
+    else *end = true;
 }
 
 void parse_int_flp(int c, scanner_states* state, bool* true_end) {
@@ -122,8 +126,10 @@ void parse_flpe(int c, bool* end) {
 }
 
 void parse_str(int c, scanner_states* state, bool* true_end) {
-    if (c == '\"') *true_end = true;
-    else if (c == '\\') *state = STR_B;
+    if (c == '\"') *state = C_STR;
+    else if (c == '\n') *true_end = true;
+    else if (c == '\\') *state = SLASH_IN_STR;
+    else *state = SIMPLE_STR_IN;
 }
 
 void parse_dash(int c, scanner_states* state, bool* true_end, bool* end) {
@@ -138,17 +144,6 @@ void parse_qmark(int c, scanner_states* state, bool* true_end) {
         *true_end = true;
         *state = QQMARK;
     } else *true_end = true;
-}
-
-void parse_str_b(int c, scanner_states* state, bool* true_end) {
-    int i = 0;
-    while (ALLOWED_BACKSLASH_CHARS[i]) {
-        if (c == ALLOWED_BACKSLASH_CHARS[i++]) {
-            *state = STR;
-            return;
-        }
-    }
-    *true_end = true;
 }
 
 void parse_exl(int c, scanner_states* state, bool* true_end, bool* end) {
@@ -227,83 +222,171 @@ void parse_block_comment_out(int c, scanner_states* state, TokenPtr token, int* 
     } else {
         *state = BLOCK_COMMENT;
     }
-
 }
 
-token_types get_token_type(scanner_states* state, char c, char* data, TokenPtr token) {
-    if (*state == IDENTIFICATOR) {
-        int i = is_keyword(data);
+void parse_c_str(int c, scanner_states* state, bool* end) {
+    if (c == '\"') *state = C_STR_IN;
+    else {
+        *state = SIMPLE_STR;
+        *end = true;
+    }
+}
+
+void parse_simple_str_in(int c, scanner_states* state, bool* true_end, bool* end) {
+    if (c == '\"') {
+        *state = SIMPLE_STR;
+        *true_end = true;
+    } else if (c == '\n') {
+        *end = true;
+    } else if (c == '\\') *state = SLASH_IN_STR;
+}
+
+void parse_c_str_in(int c, scanner_states* state) {
+    if (c == '\"') *state = C_STR_E;
+}
+
+void parse_c_str_e(int c, scanner_states* state) {
+    if (c == '\"') *state = C_STR_EE;
+    else *state = C_STR_IN;
+}
+
+void parse_c_str_ee(int c, scanner_states* state, bool *true_end) {
+    if (c == '\"') {
+        *state = COMPLEX_STR;
+        *true_end = true;
+    } else *state = C_STR_IN;
+}
+
+void parse_slash_in_str(int c, scanner_states* state, bool* end) {
+    int i = 0;
+    while (ALLOWED_BACKSLASH_CHARS[i]) {
+        if (ALLOWED_BACKSLASH_CHARS[i] == c) {
+            *state = SIMPLE_STR_IN;
+            return;
+        }
+        i++;
+    }
+    if (c == 'u') {
+        *state = U_IN_STR;
+        return;
+    }
+
+    *end = true;
+}
+
+void parse_u_in_str(int c, scanner_states* state, bool* end) {
+    if (c == '{') *state = U1;
+    else *end = true;
+}
+
+void parse_u1(int c, scanner_states* state, bool* end) {
+    if (((c >= '0') && (c <= '9')) || ((c >= 'a') && (c <= 'f')) || ((c >= 'A') && (c <= 'F'))) *state = U2;
+    else *end = true;
+}
+
+void parse_u2(int c, scanner_states* state, bool* end) {
+    if (((c >= '0') && (c <= '9')) || ((c >= 'a') && (c <= 'f')) || ((c >= 'A') && (c <= 'F'))) *state = U3;
+    else *end = true;
+}
+
+void parse_u3(int c, scanner_states* state, bool* end) {
+    if (c == '}') *state = SIMPLE_STR_IN;
+    else *end = true;
+}
+
+
+void get_token_type(scanner_states state, char c, TokenPtr token) {
+    if (state == IDENTIFICATOR) {
+        int i = is_keyword(token->data);
         if (i > -1) {
             switch (i) {
-                case 0: return IF;
-                case 1: return ELSE;
-                case 2: return FUNC;
-                case 3: return RETURN;
-                case 4: return LET;
-                case 5: return VAR;
+                case 0: token->type = IF;
+                        break;
+                case 1: token->type = ELSE;
+                        break;
+                case 2: token->type = FUNC;
+                        break;
+                case 3: token->type = RETURN;
+                        break;
+                case 4: token->type = LET;
+                        break;
+                case 5: token->type = VAR;
+                        break;
                 case 6: {
                     token->value_type = S_NO_TYPE;
-                    return VALUE;
+                    token->type = VALUE;
+                    break;
                 }
-                case 7: return WHILE;
-                default: return ERROR;
+                case 7: token->type = WHILE;
+                        break;
+                default: token->type = ERROR;
             }
+            return;
         } 
-        i = is_type(data);
+        i = is_type(token->data);
         if ((i > -1) && (i < 6)) {
             token->value_type = i;
-            return TYPE;
-        }
-        return ID;
+            token->type = TYPE;
+        } else token->type = ID;
+        
     } 
-    else if (*state == OP) {
+    else if (state == OP) {
         switch (c) {
-            case '(': return L_BRAC;
-            case ')': return R_BRAC;
-            case '{': return L_CBRAC;
-            case '}': return R_CBRAC;
-            case '+': return PLUS;
-            case ':': return D_DOT;
-            case '*': return MULT;
-            case ',': return COMMA;
-            default : return ERROR;
+            case '(':   token->type = L_BRAC;
+                        break;
+            case ')': token->type = R_BRAC;
+                        break;
+            case '{': token->type = L_CBRAC;
+                        break;
+            case '}': token->type = R_CBRAC;
+                        break;
+            case '+': token->type = PLUS;
+                        break;
+            case ':': token->type = D_DOT;
+                        break;
+            case '*': token->type = MULT;
+                        break;
+            case ',': token->type = COMMA;
+                        break;
+            default : token->type = ERROR;
         }
     } 
-    else if ((*state == FLP) || (*state == FLPE) || (*state == STR) || (*state == INT)) {
-        if ((*state == FLP) || (*state == FLPE)) {
+    else if ((state == FLP) || (state == FLPE) || (state == SIMPLE_STR) || (state == COMPLEX_STR) || (state == INT)) {
+        if ((state == FLP) || (state == FLPE)) {
             token->value_type = S_DOUBLE;
-        } else if (*state == STR) {
+        } else if ((state == SIMPLE_STR) || (state == COMPLEX_STR)) {
             token->value_type = S_STRING;
-        } else if (*state == INT) {
+        } else if (state == INT) {
             token->value_type = S_INT;
         }
-        return VALUE;
-    } else if (*state == TYPEQ) {
-        int i = is_type(data);
+        token->type = VALUE;
+    } else if (state == TYPEQ) {
+        int i = is_type(token->data);
         if ((i == 1) || (i == 3) || (i == 5)) {
             token->value_type = i;
+            token->type = TYPE;
         } else {
-            ungetc(c, stdin);
+            token->type = ERROR;
+            token->value_type = S_NO_TYPE;
         }
-        return TYPE;
     }
-    else if (*state == NL)          return NEWLINE;
-    else if (*state == QMARK)       return ERROR; // single question mark is not valid
-    else if (*state == QQMARK)      return QQ_MARK;
-    else if (*state == ARR)         return ARROW; 
-    else if (*state == DASH)        return MINUS;
-    else if (*state == END_OF_FILE) return END;
-    else if (*state == EXL)         return EXL_MARK;
-    else if (*state == EXLEQ)       return EXL_EQ_MARK;
-    else if (*state == EQ)          return EQUALS;
-    else if (*state == EQEQ)        return EQUALS_EQUALS;
-    else if (*state == LARGER)      return LARGER_THAN;
-    else if (*state == LARGER_EQ)   return LARGER_EQUALS;
-    else if (*state == LESS)        return SMALLER_THAN;
-    else if (*state == LESS_EQ)     return SMALLER_EQUALS;
-    else if (*state == UNDERSCORE)  return UNDERSCR;
-    else if (*state == SLASH)       return DIV;
-    return ERROR;
+    else if (state == NL)          token->type = NEWLINE;
+    else if (state == QMARK)       token->type = ERROR; // single question mark is not valid
+    else if (state == QQMARK)      token->type = QQ_MARK;
+    else if (state == ARR)         token->type = ARROW; 
+    else if (state == DASH)        token->type = MINUS;
+    else if (state == END_OF_FILE) token->type = END;
+    else if (state == EXL)         token->type = EXL_MARK;
+    else if (state == EXLEQ)       token->type = EXL_EQ_MARK;
+    else if (state == EQ)          token->type = EQUALS;
+    else if (state == EQEQ)        token->type = EQUALS_EQUALS;
+    else if (state == LARGER)      token->type = LARGER_THAN;
+    else if (state == LARGER_EQ)   token->type = LARGER_EQUALS;
+    else if (state == LESS)        token->type = SMALLER_THAN;
+    else if (state == LESS_EQ)     token->type = SMALLER_EQUALS;
+    else if (state == UNDERSCORE)  token->type = UNDERSCR;
+    else if (state == SLASH)       token->type = DIV;
+    else                            token->type = ERROR;
 }
 
 
@@ -326,7 +409,7 @@ void get_next_token(TokenPtr token) {
             case START:
                 if      (is_number(c))      state = INT;
                 else if (is_letter(c))      state = IDENTIFICATOR;
-                else if (c == '_')          state = _IDENTIFICATOR;
+                else if (c == '_')          state = UNDERSCORE;
                 else if (is_space(c))       continue;
                 else if (c == '-')          state = DASH;
                 else if (c == '?')          state = QMARK;
@@ -349,8 +432,8 @@ void get_next_token(TokenPtr token) {
             case IDENTIFICATOR: // IDEN
                 parse_id(c, &state, &true_end, &end);
                 break;
-            case _IDENTIFICATOR: // read '_', expecting letters/numbers/_, becomes IDEN
-                parse__id(c, &state, &true_end);
+            case UNDERSCORE: // read '_', expecting letters/numbers/_, becomes IDEN
+                parse_underscore(c, &state, &end);
                 break;
             case INT:
                 parse_int(c, &state, &end);
@@ -372,9 +455,6 @@ void get_next_token(TokenPtr token) {
                 break;
             case STR: // got double quotation mark
                 parse_str(c, &state, &true_end);
-                break;
-            case STR_B: // got backslash
-                parse_str_b(c, &state, &true_end);
                 break;
             case DASH:
                 parse_dash(c, &state, &true_end, &end);
@@ -409,6 +489,36 @@ void get_next_token(TokenPtr token) {
             case BLOCK_COMMENT_IN:
                 parse_block_comment_in(c, &state, &cb);
                 continue;
+            case C_STR:
+                parse_c_str(c, &state, &end);
+                break;
+            case SIMPLE_STR_IN:
+                parse_simple_str_in(c, &state, &true_end, &end);
+                break;
+            case C_STR_IN:
+                parse_c_str_in(c, &state);
+                break;
+            case C_STR_E:
+                parse_c_str_e(c, &state);
+                break;
+            case C_STR_EE:
+                parse_c_str_ee(c, &state, &true_end);
+                break;
+            case SLASH_IN_STR:
+                parse_slash_in_str(c, &state, &end);
+                break;
+            case U_IN_STR:
+                parse_u_in_str(c, &state, &end);
+                break;
+            case U1:
+                parse_u1(c, &state, &end);
+                break;
+            case U2:
+                parse_u2(c, &state, &end);
+                break;
+            case U3:
+                parse_u3(c, &state, &end);
+                break;
             default: break;
         }
         if (end) {
@@ -431,12 +541,17 @@ void get_next_token(TokenPtr token) {
             ungetc(EOF, stdin);
         }
     }
-    token->type = get_token_type(&state, c, token->data, token);
+    get_token_type(state, c, token);
 }
 
 // int main() {
-//     TokenPtr token = token_init();
-//     get_next_token(token);
-//     printf("TYPE: %d, DATA: %s, SPECIAL TYPE: %d\n", token->type, token->data, token->value_type);
-
+    // TokenPtr token = token_init();
+    // get_next_token(token);
+        
+//     while (token->type != END) {
+//         printf("TYPE: %d, DATA: %s, SPECIAL TYPE: %d\n", token->type, token->data, token->value_type);
+//         token_clear(token);    
+//         get_next_token(token);
+       
+//    }
 // } 

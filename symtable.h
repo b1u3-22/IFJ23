@@ -1,3 +1,10 @@
+/**
+ *  Project:    Implementace překladače imperativního jazyka IFJ23.
+ *  File:       @brief Hlavičkový soubor pro tabulku symbolů
+ *  Authors:    @author Jiří Sedlák xsedla2e
+ *              @author Martin Kučera xkucer??
+*/
+
 #include <stdbool.h>
 #include <string.h>
 #include <stdlib.h>

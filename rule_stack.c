@@ -1,3 +1,9 @@
+/**
+ *  Project:    Implementace překladače imperativního jazyka IFJ23.
+ *  File:       @brief Pomocná struktura pro parser implementovaná jako stack
+ *  Authors:    @author Jiří Sedlák xsedla2e
+*/
+
 #include "rule_stack.h"
 
 
@@ -16,7 +22,7 @@ RuleStackPtr rule_stack_init() {
 }
 
 bool rule_stack_pop(RuleStackPtr stack) {
-    if (stack->empty) return false;
+    if (stack->empty) return true;
 
     free(stack->data[stack->data_pos--]);
     
@@ -25,7 +31,7 @@ bool rule_stack_pop(RuleStackPtr stack) {
         stack->top = NULL;
         stack->empty = true;
     }
-    return true;
+    return false;
 }
 
 bool rule_stack_push(RuleStackPtr stack, int type, bool rule, bool function) {
