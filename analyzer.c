@@ -196,6 +196,17 @@ int check_function_assingment(AnalyzerPtr analyzer, TokenStackPtr token_stack_le
     //check return type
     if (functionItem->type == S_NO_TYPE) return 4;
 
+    if (itemToAssign->type == S_NO_TYPE) {
+        itemToAssign->type = functionItem->type;
+    }
+    else {
+        if      (itemToAssign->type == S_INTQ && (functionItem->type != S_INT && functionItem->type != S_INTQ)) return 4;
+        else if (itemToAssign->type == S_STRINGQ && (functionItem->type != S_STRING && functionItem->type != S_STRINGQ)) return 4;
+        else if (itemToAssign->type == S_DOUBLEQ && (functionItem->type != S_DOUBLE && functionItem->type != S_DOUBLEQ && functionItem->type != S_INT && functionItem->type != S_INTQ)) return 4;
+        else if (itemToAssign->type == S_DOUBLE && (functionItem->type != S_DOUBLE && functionItem->type != S_INT)) return 4;
+        else if (itemToAssign->type != functionItem->type) return 4;
+    }
+
     return 0;
 }
 
@@ -241,7 +252,7 @@ int check_function_call(AnalyzerPtr analyzer, TokenStackPtr token_stack_function
     //     if (functionId->type != S_NO_TYPE) return 4;
     // }
 
-    // return 0;
+    return 0;
 }
 
 int check_function_definition(AnalyzerPtr analyzer, TokenStackPtr token_stack_id, TokenStackPtr token_stack_param) {
@@ -325,15 +336,19 @@ int check_error_7_8(AnalyzerPtr analyzer, int data_type, TokenStackPtr token_sta
         if (token_stack->tokens[i]->type == ID) {
 
             SymTableItemPtr item = symtable_get_item_lower_depth_same_block(analyzer->symtable, token_stack->tokens[i]->data, analyzer->depth, analyzer->block[analyzer->depth]);
-            if (data_type == S_INTQ && (item->type == S_INT || item->type == S_INTQ)) {
+            if (data_type == S_INTQ && (item->type == S_INT || item->type == S_INTQ || item->type == S_NO_TYPE)) {
                 return 0;
             }
 
-            else if (data_type == S_DOUBLEQ && (item->type == S_DOUBLE || item->type == S_DOUBLEQ)) {
+            else if (data_type == S_DOUBLEQ && (item->type == S_DOUBLE || item->type == S_DOUBLEQ || item->type == S_INT || item->type == S_INTQ || item->type == S_NO_TYPE)) {
                 return 0;
             }
 
-            else if (data_type == S_STRINGQ && (item->type == S_STRING || item->type == S_STRINGQ)) {
+            else if (data_type == S_STRINGQ && (item->type == S_STRING || item->type == S_STRINGQ || item->type == S_NO_TYPE)) {
+                return 0;
+            }
+
+            else if (data_type == S_DOUBLE && (item->type == S_DOUBLE || item->type == S_INT)) {
                 return 0;
             }
             
@@ -342,19 +357,23 @@ int check_error_7_8(AnalyzerPtr analyzer, int data_type, TokenStackPtr token_sta
             }
 
         } else {
-            if (data_type == S_INTQ && token_stack->tokens[i]->value_type == S_INT) {
+            if (data_type == S_INTQ && token_stack->tokens[i]->value_type == S_INT || token_stack->tokens[i]->value_type == S_NO_TYPE) {
                 return 0;
             }
 
-            else if (data_type == S_DOUBLEQ && token_stack->tokens[i]->value_type == S_DOUBLE) {
+            else if (data_type == S_DOUBLEQ && (token_stack->tokens[i]->value_type == S_DOUBLE || token_stack->tokens[i]->value_type == S_INT || token_stack->tokens[i]->value_type == S_NO_TYPE)) {
                 return 0;
             }
 
-            else if (data_type == S_STRINGQ && token_stack->tokens[i]->value_type == S_STRING) {
+            else if (data_type == S_STRINGQ && token_stack->tokens[i]->value_type == S_STRING || token_stack->tokens[i]->value_type == S_NO_TYPE) {
                 return 0;
             }
 
-            if (token_stack->tokens[i]->value_type != data_type) {
+            else if (data_type == S_DOUBLE && (token_stack->tokens[i]->value_type == S_DOUBLE || token_stack->tokens[i]->value_type == S_INT)) {
+                return 0;
+            }
+
+            else if (token_stack->tokens[i]->value_type != data_type) {
                 return 1;
             }
         }
