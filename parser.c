@@ -545,10 +545,11 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
             if ((return_code = check_declaration(analyzer, stack_1))) exit(return_code);
             break; 
         case F_S_VAR_DEF:
-            if (*func_ass) {
-                (*func_ass)--;
-                break;
-            }
+            // if (*func_ass) {
+            //     (*func_ass)--;
+            //     break;
+            // }
+            if(PARSER_DEBUG) printf("Token data for check_definition(): %s\n", token->data);
             if ((return_code = check_definition(analyzer, stack_1, stack_2))) exit(return_code);
             break;
         case F_S_VAL_ASG:
@@ -580,6 +581,12 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
             def_var(stack_1->tokens[1]->data, analyzer->depth);
             break;  
         case F_G_SET_VAR:
+            if(PARSER_DEBUG) printf("Token data for set_var(): %s\n", stack_1->tokens[1]->data);
+
+            item = get_nearest_item(analyzer, stack_1->tokens[1]->data);
+            if(PARSER_DEBUG) printf("Item pointer: %d\n", item);
+            if(PARSER_DEBUG) printf("Analyzer: [%02d, %02d]\n", analyzer->depth, analyzer->block[analyzer->depth]);
+
             set_var(get_nearest_item(analyzer, stack_1->tokens[1]->data));
             break;  
         case F_G_PUSH:
