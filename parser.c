@@ -252,7 +252,7 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack, TokenSt
     case 14:
         errors += rule_stack_push(stack, R_F_DEF_N, true, false);
         errors += rule_stack_push(stack, TYPE, false, false);
-        errors += rule_stack_push(stack, R_VAR_ASG, true, false);
+        errors += rule_stack_push(stack, F_P_PUSH_2, false, true);
         errors += rule_stack_push(stack, D_DOT, false, false);
         errors += rule_stack_push(stack, R_F_DEF_ID, true, false);
         errors += rule_stack_push(stack, COMMA, false, false);
