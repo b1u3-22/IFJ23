@@ -142,7 +142,7 @@ void symtable_add_built_in_functions(SymTablePtr symtable) {
     functionReadInt->value = NULL;
     functionReadInt->type = S_INTQ;
     ParamStackPtr paramStackReadInt = param_stack_init();
-    functionReadString->paramStack = paramStackReadInt;
+    functionReadInt->paramStack = paramStackReadInt;
     symtable_add_item(symtable, functionReadInt);
 
     //readDouble() -> Double?
@@ -156,7 +156,7 @@ void symtable_add_built_in_functions(SymTablePtr symtable) {
     functionReadDouble->value = NULL;
     functionReadDouble->type = S_DOUBLEQ;
     ParamStackPtr paramStackReadDouble = param_stack_init();
-    functionReadString->paramStack = paramStackReadDouble;
+    functionReadDouble->paramStack = paramStackReadDouble;
     symtable_add_item(symtable, functionReadDouble);
 
     //Int2Double(_ term : Int) -> Double
