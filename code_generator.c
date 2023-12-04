@@ -136,7 +136,7 @@ void set_var(SymTableItemPtr var) {
 
 void push_sym(SymTableItemPtr sym) {
 
-    if (sym->isVar == true) {
+    if (sym->isLiteral != true) {
 
         if (sym->depth == 0)
             inst("PUSHS GF@", sym->id);
@@ -147,8 +147,10 @@ void push_sym(SymTableItemPtr sym) {
         inst("PUSHS int@", sym->value);
     else if (sym->type == S_DOUBLE)
         inst("PUSHS float@", sym->value);
-    else // (sym->type == S_STRING)
+    else if (sym->type == S_STRING)
         inst("PUSHS string@", sym->value);
+    else // if (sym->type == S_NO_TYPE)
+        inst("PUSHS nil@nil");
     /*else //(sym->type == BOOL)
         inst("PUSHS bool@", sym->value);*/
 
@@ -267,7 +269,7 @@ void func_call_param(SymTableItemPtr param) {
     part("DEFVAR TF@%%");
     fprintf(stdout, "%d\n", num);
 
-    if (param->isVar == true) {
+    if (param->isLiteral != true) {
 
         if (param->depth == 0) {
             part("MOVE TF@%%");
@@ -287,10 +289,14 @@ void func_call_param(SymTableItemPtr param) {
         part("MOVE TF@%%");
         fprintf(stdout, "%d", num);
         inst(" float@", param->value);
-    } else { // (param->type == S_STRING)
+    } else if (param->type == S_STRING) {  
         part("MOVE TF@%%");
         fprintf(stdout, "%d", num);
         inst(" string@", param->value);
+    } else { // (param->type == S_NO_TYPE)
+        part("MOVE TF@%%");
+        fprintf(stdout, "%d", num);
+        inst(" nil@nil");
     } /*else //(param->type == BOOL)
         inst("MOVE TF@%%", num, " bool@", param->value);*/
 
