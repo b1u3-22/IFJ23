@@ -602,27 +602,9 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
     }
 }
 
-RuleStackItemPtr error_skip(RuleStackPtr stack, TokenStackPtr token_stack) {
-    ////printf("Error occured!\n");
-    int counter = 0;
-    ////printf("Remaining in stack:\n");
-    while (!(stack->empty)) {
-        ////printf("%02d: %02d - %d - %d\n", counter++, stack->top->type, stack->top->rule, stack->top->function);
-        rule_stack_pop(stack);
-    }
-    ////printf("Tokens in token stack:\n");
-    counter = 0;
-    while (!(token_stack->empty)) {
-        ////printf("%02d: %02d\n", counter++, token_stack->top->type);
-        token_stack_pop(token_stack);
-    }
-    exit(2);
-}
-
-
 int main(){
-    code_header();
+    if (CODE_GEN) code_header();
     parse();
-    code_footer();
+    if (CODE_GEN) code_footer();
     return 0;
 }
