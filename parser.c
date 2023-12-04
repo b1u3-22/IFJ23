@@ -394,6 +394,7 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack, TokenSt
         errors += rule_stack_push(stack, R_G_BODY, true, false);
         errors += rule_stack_push(stack, R_STAT, true, false);
         errors += rule_stack_push(stack, ID, false, false);
+        errors += rule_stack_push(stack, F_P_PUSH_2, false, true);
         errors += rule_stack_push(stack, F_P_PUSH_1, false, true);
         break;
 
@@ -401,6 +402,7 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack, TokenSt
         errors += rule_stack_push(stack, R_BODY, true, false);
         errors += rule_stack_push(stack, R_STAT, true, false);
         errors += rule_stack_push(stack, ID, false, false);
+        errors += rule_stack_push(stack, F_P_PUSH_2, false, true);
         errors += rule_stack_push(stack, F_P_PUSH_1, false, true);
         break;
 
@@ -418,6 +420,7 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack, TokenSt
         errors += rule_stack_push(stack, F_S_VAL_ASG, false, true);
         errors += rule_stack_push(stack, R_EXPR, true, false);
         errors += rule_stack_push(stack, EQUALS, false, false);
+        errors += rule_stack_push(stack, F_P_CLEAR_2, false, true);
         break;
 
     case 41:
@@ -525,20 +528,7 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
             if ((return_code = check_value_assingment(analyzer, stack_1, stack_2))) exit(return_code);
             break;
         case F_S_FUN_ASG:
-            printf("Check function assigment called!\n");
-
-            for (int i = 0; i <= stack_1->tokens_pos; i++) {
-                printf("STACK1: [%02d] - Token Data: %s\n", i, stack_1->tokens[i]->data);
-            }
-
-
-            for (int i = 0; i <= stack_2->tokens_pos; i++) {
-                printf("STACK2: [%02d] - Token Data: %s\n", i, stack_2->tokens[i]->data);
-            }
-
             if ((return_code = check_function_assingment(analyzer, stack_1, stack_2))) exit(return_code);
-            
-            
             break;
         case F_S_FUN_CAL:
             helper_stack = token_stack_init();
@@ -589,7 +579,7 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
 
             // TODO: func params
 
-            func_call_end(stack_1->tokens[0]->data);
+            func_call_end(stack_2->tokens[0]->data);
             break;    
         case F_G_FUN_E:
             func_end();
