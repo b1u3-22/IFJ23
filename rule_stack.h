@@ -1,3 +1,9 @@
+/**
+ *  Project:    Implementace překladače imperativního jazyka IFJ23.
+ *  File:       @brief Hlavičkový soubor pro rule_stack
+ *  Authors:    @author Jiří Sedlák xsedla2e
+*/
+
 #include <stdlib.h>
 #include <stdbool.h>
 
@@ -6,6 +12,7 @@
 typedef struct RuleStackItem {
     int type;
     bool rule;
+    bool function;
 } *RuleStackItemPtr;
 
 typedef struct RuleStack {
@@ -30,9 +37,9 @@ bool rule_stack_pop(RuleStackPtr stack);
 /** Push new Token into Token Stack
  *  @param stack RuleStackPtr to add Token to
  *  @param token TokenPtr that should be added to stack
- *  @returns true if succeded, false otherwise
+ *  @returns false if succeeded, true otherwise
 */
-bool rule_stack_push(RuleStackPtr stack, int type, bool rule);
+bool rule_stack_push(RuleStackPtr stack, int type, bool rule, bool function);
 
 /** Dispose and free Token Stack
 */

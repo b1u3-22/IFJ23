@@ -1,3 +1,9 @@
+/**
+ *  Project:    Implementace překladače imperativního jazyka IFJ23.
+ *  File:       @brief Pomocná struktura pro parser implementovaná jako stack
+ *  Authors:    @author Jiří Sedlák xsedla2e
+*/
+
 #include "rule_stack.h"
 
 
@@ -16,7 +22,7 @@ RuleStackPtr rule_stack_init() {
 }
 
 bool rule_stack_pop(RuleStackPtr stack) {
-    if (stack->empty) return false;
+    if (stack->empty) return true;
 
     free(stack->data[stack->data_pos--]);
     
@@ -25,14 +31,14 @@ bool rule_stack_pop(RuleStackPtr stack) {
         stack->top = NULL;
         stack->empty = true;
     }
-    return true;
+    return false;
 }
 
-bool rule_stack_push(RuleStackPtr stack, int type, bool rule) {
+bool rule_stack_push(RuleStackPtr stack, int type, bool rule, bool function) {
     // if we hit the allocated capacity for stack data, increase memory by reallocation
     if ((stack->data_pos + 1) >= stack->data_cap){
         RuleStackItemPtr *new_data = realloc(stack->data, (stack->data_cap + RULE_STACK_ALLOC_BLOCK) * sizeof(RuleStackItemPtr));
-        if (!new_data) return false;
+        if (!new_data) return true;
 
         // else set old data to new ones and increase data_cap to reflect the change
         stack->data = new_data;
@@ -41,15 +47,16 @@ bool rule_stack_push(RuleStackPtr stack, int type, bool rule) {
 
     // add new token to data and correct top pointer
     RuleStackItemPtr new_item = (RuleStackItemPtr) malloc(sizeof(struct RuleStackItem));
-    if (!new_item) return false;
+    if (!new_item) return true;
     
     new_item->type = type;
     new_item->rule = rule;
+    new_item->function = function;
     stack->data[++(stack->data_pos)] = new_item;
     stack->top = new_item;
 
     stack->empty = false;
-    return true;
+    return false;
 }
 
 void rule_stack_dispose(RuleStackPtr stack) {

@@ -1,7 +1,13 @@
+/**
+ *  Project:    Implementace překladače imperativního jazyka IFJ23.
+ *  File:       @brief Hlavičkový soubor pro expression parser,definice
+ *              enum hodnot a precedenční tabulky
+ *  Authors:    @author Jiří Sedlák xsedla2e
+*/
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
-#include "expression_stack.h"
 
 #ifndef _SCANNER
 #define _SCANNER
@@ -11,6 +17,16 @@
 #ifndef _TOKEN_STACK
 #define _TOKEN_STACK
 #include "token_stack.h"
+#endif
+
+#ifndef _ANALYZER
+#define _ANALYZER
+#include "analyzer.h"
+#endif
+
+#ifndef _EXP_STACK
+#define _EXP_STACK
+#include "expression_stack.h"
 #endif
 
 #define P_TABLE_SIZE 17
@@ -40,7 +56,8 @@ enum ExpressionTypes {
     E_RBRAC,    // 13
     E_ID,       // 14
     E_VALUE,    // 15
-    E_END       // 16
+    E_END,      // 16
+    E_CONCAT
 };
 
 static const int p_table[P_TABLE_SIZE][P_TABLE_SIZE] = 
@@ -65,7 +82,7 @@ static const int p_table[P_TABLE_SIZE][P_TABLE_SIZE] =
     {E_SFT, E_SFT, E_SFT, E_SFT, E_SFT, E_SFT, E_SFT, E_SFT, E_SFT, E_SFT, E_SFT, E_SFT, E_SFT, E_SFT, E_SFT, E_SFT, E_SCS},    // EN   16
 };
 
-int parse_expression();
-void expression_get_next_token(TokenStackPtr stack, int end_type, int *type);
+int parse_expression(AnalyzerPtr analyzer, int end_type, TokenStackPtr sa_stack);
+void expression_get_next_token(TokenStackPtr stack, int end_type, int *type, TokenStackPtr sa_stack);
 int get_translated_type(TokenPtr token);
-bool apply_expression_rule(ExpressionStackPtr stack);
+bool apply_expression_rule(AnalyzerPtr analyzer, ExpressionStackPtr stack, TokenStackPtr token_stack);

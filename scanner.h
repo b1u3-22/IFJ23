@@ -10,7 +10,12 @@
 #define _TOKEN
 #include "token.h"
 #endif
+
+#ifndef _SYMTABLE
+#define _SYMTABLE
 #include "symtable.h"
+#endif
+
 
 typedef enum {
     START,

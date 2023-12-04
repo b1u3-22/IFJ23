@@ -64,6 +64,13 @@ dkms.conf
 
 .vscode
 
+*.zip
+
 ##### IGNORE TEST FILES #####
 test.c
 test.txt
+
+test.swift
+
+##### IGNORE VALGRIND FILES ####
+vgcore.*
