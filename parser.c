@@ -361,8 +361,10 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack, TokenSt
     case 30:
     case 35:
         errors += rule_stack_push(stack, R_F_PAR_N, true, false);
-        errors += rule_stack_push(stack, F_P_GET_T, false, true);
-        errors += rule_stack_push(stack, F_P_PSA, false, true);
+        errors += rule_stack_push(stack, VALUE, false, false);
+        errors += rule_stack_push(stack, F_P_PUSH_2, false, true);
+        errors += rule_stack_push(stack, F_P_PUSH_1, false, true);
+        break;
 
     case 26:
         errors += rule_stack_push(stack, F_G_SYM_CONF, false, true);
@@ -371,12 +373,14 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack, TokenSt
     case 29:
         errors += rule_stack_push(stack, R_F_PAR_ID, true, false);
         errors += rule_stack_push(stack, ID, false, false);
+        errors += rule_stack_push(stack, F_P_PUSH_2, false, true);
+        errors += rule_stack_push(stack, F_P_PUSH_1, false, true);
         break;
 
     case 31:
-        errors += rule_stack_push(stack, R_F_PAR_N, true, false);
-        errors += rule_stack_push(stack, R_EXPR, true, false);
+        errors += rule_stack_push(stack, R_F_PAR_NA, true, false);
         errors += rule_stack_push(stack, D_DOT, false, false);
+        errors += rule_stack_push(stack, F_P_POP_1, false, true);
         break;
 
     case 32:
@@ -391,6 +395,8 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack, TokenSt
     case 34:
         errors += rule_stack_push(stack, R_F_PAR_ID, true, false);
         errors += rule_stack_push(stack, ID, false, false);
+        errors += rule_stack_push(stack, F_P_PUSH_2, false, true);
+        errors += rule_stack_push(stack, F_P_PUSH_1, false, true);
         break;
 
     case 37:
@@ -427,11 +433,15 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack, TokenSt
         break;
 
     case 41:
+        errors += rule_stack_push(stack, F_P_CLEAR_2, false, true);
+        errors += rule_stack_push(stack, F_P_CLEAR_1, false, true);
         errors += rule_stack_push(stack, R_RET_DEF, true, false);
         errors += rule_stack_push(stack, RETURN, false, false);
         break;
 
     case 42:
+        errors += rule_stack_push(stack, F_P_CLEAR_2, false, true);
+        errors += rule_stack_push(stack, F_P_CLEAR_1, false, true);
         errors += rule_stack_push(stack, R_RET_DEF, true, false);
         errors += rule_stack_push(stack, RETURN, false, false);
         break;
@@ -468,7 +478,22 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack, TokenSt
 
     case 53:
     case 54:
+        break;
         //errors += rule_stack_push(stack, R_CBRAC, false, false);
+
+    case 55:
+        errors += rule_stack_push(stack, R_F_PAR_N, true, false);
+        errors += rule_stack_push(stack, ID, false, false);
+        errors += rule_stack_push(stack, F_P_PUSH_2, false, true);
+        errors += rule_stack_push(stack, F_P_PUSH_1, false, true);
+        break;
+
+    case 56:
+        errors += rule_stack_push(stack, R_F_PAR_N, true, false);
+        errors += rule_stack_push(stack, VALUE, false, false);
+        errors += rule_stack_push(stack, F_P_PUSH_2, false, true);
+        errors += rule_stack_push(stack, F_P_PUSH_1, false, true);
+        break;
 
     default:
         break;
@@ -499,6 +524,12 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
         case F_P_PUSH_2:
             if ((return_code = token_stack_push(stack_2, token))) exit(return_code);
             break;
+        case F_P_POP_1:
+            token_stack_pop(stack_1);
+            break;
+        case F_P_POP_2:
+            token_stack_pop(stack_2);
+            break;
         case F_P_CLEAR_1:
             while (!stack_1->empty) token_stack_pop(stack_1);
             break;
@@ -519,9 +550,7 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
                 (*func_ass)--;
                 break;
             }
-            //printf("fafafa\n");
             if ((return_code = check_definition(analyzer, stack_1, stack_2))) exit(return_code);
-            //printf("fefefe\n");
             break;
         case F_S_VAL_ASG:
             if (*func_ass) {
