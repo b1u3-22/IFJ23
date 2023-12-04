@@ -43,8 +43,11 @@
 #include "expression.h"
 #endif
 
+#define PARSER_DEBUG 0
+#define CODE_GEN 0
+
 #define LL_TABLE_COL 34
-#define LL_TABLE_ROW 18
+#define LL_TABLE_ROW 19
 #define R_EOL_B 2       // Tokens which require EOL only when current rule is either R_G_BODY or R_BODY
 #define R_EOL 9         // Token with types that are less or equal to this number require EOL before them 
 
@@ -66,13 +69,16 @@ enum Rules {
     R_STAT,
     R_RET_DEF,
     R_F_DEF_ID,
-    R_F_RET_DEF
+    R_F_RET_DEF,
+    R_F_PAR_NA
 };
 
 enum Function {
     F_P_GET_T,      // Get new token
     F_P_PUSH_1,     // Push to Stack 1 for analyzer and generator
     F_P_PUSH_2,     // Push to Stack 2 for analyzer and generator
+    F_P_POP_1,      // Pop from Stack 1
+    F_P_POP_2,      // Pop from Stack 2
     F_P_CLEAR_1,    // Clear Stack 1
     F_P_CLEAR_2,    // Clear Stack 2
     F_P_PSA,        // Start expression parser
@@ -121,7 +127,8 @@ static const int ll_table[LL_TABLE_ROW][LL_TABLE_COL] =
     { 0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 40,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 39,  0,  0,  0,  0,  0,  0,  0,  0,  0},   // 14
     {44, 44,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0},   // 15
     {48,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 49,  0,  0},   // 16
-    { 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 51,  0,  0, 50,  0,  0,  0,  0}    // 17
+    { 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 51,  0,  0, 50,  0,  0,  0,  0},   // 17
+    { 55, 56,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0}
 };
 
 /** Parse incoming tokens using predictive syntax analysis using LL(1) grammar 
@@ -136,10 +143,3 @@ int parse();
 void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack, TokenStackPtr sa_stack);
 
 void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, TokenStackPtr token_stack, TokenStackPtr stack_1, TokenStackPtr stack_2, AnalyzerPtr analyzer, int rule, int *func_ass);
-
-/** Skip to the next sequence of tokens.
- *  This is used when syntax error occures. 
- *  @param stack TokenStackPtr
- *  @param token TokenPtr 
-*/
-RuleStackItemPtr error_skip(RuleStackPtr stack, TokenStackPtr token_stack);
