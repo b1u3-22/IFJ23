@@ -68,7 +68,7 @@ int check_value_assingment(AnalyzerPtr analyzer, TokenStackPtr token_stack_left,
  *  @param token_stack_param TokenStackPtr containing function to assign
  *  @returns int error code if semantic errors 0 otherwise
 */
-int check_function_assingment(AnalyzerPtr analyzer, TokenStackPtr token_stack_left, TokenStackPtr token_stack_param);
+int check_function_assingment(AnalyzerPtr analyzer, TokenStackPtr token_stack_left, TokenStackPtr token_stack_function);
 
 /** Semantic checks for function call
  *  @param analyzer AnalyzerPtr to work with
