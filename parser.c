@@ -40,8 +40,8 @@ int parse() {
     int func_ass = 0;
 
     while (!(rule_stack->empty)) {
-        ////printf("Token data: %s, Token type: %d\n", token->data, token->type);
-        ////printf("[%02d, %02d] - %d - %d\n", rule_stack->top->type, token->type, rule_stack->top->rule, rule_stack->top->function);
+        if (PARSER_DEBUG) printf("Token data: %s, Token type: %d\n", token->data, token->type);
+        if (PARSER_DEBUG) printf("[%02d, %02d] - %d - %d\n", rule_stack->top->type, token->type, rule_stack->top->rule, rule_stack->top->function);
         if (token->type == ERROR) exit(1); // Lexical error occured
         // ===================== Handling of newlines that some things require =====================
         if (token->type == NEWLINE) {
@@ -57,8 +57,6 @@ int parse() {
 
         // Handling for tokens that always require a newline
         else if (token->type <= R_EOL && token->type > R_EOL_B && !new_line) {
-            //////printf("Missing newline\n");
-            //error_skip(rule_stack, token_stack);
             exit(2);
         }
 
@@ -66,7 +64,6 @@ int parse() {
         else if (token->type <= R_EOL && token->type <= R_EOL_B && rule_stack->top->rule && (rule_stack->top->type == R_BODY || rule_stack->top->type == R_G_BODY)) {
             if (!new_line) {
                 exit(2);
-                //error_skip(rule_stack, token_stack);
             }
         }
 
@@ -75,7 +72,6 @@ int parse() {
             if (rule_stack->top->type == F_P_GET_T) {
                 rule_stack_pop(rule_stack);
                 token = token_stack_get(token_stack);
-                //////printf("New token type: %d\n", token->type);
             }
             else {
                 apply_function(rule_stack->top->type, rule_stack, token, token_stack, sa_1, sa_2, analyzer, rule_to_apply, &func_ass);
@@ -84,7 +80,7 @@ int parse() {
 
         else if (rule_stack->top->rule) { // Search for rule in LL table if we have rule at top of our rule_stack
             rule_to_apply = ll_table[rule_stack->top->type][token->type];
-            //printf("[%02d, %02d]: %02d\n", rule_stack->top->type, token->type, rule_to_apply);
+            if (PARSER_DEBUG) printf("[%02d, %02d]: %02d\n", rule_stack->top->type, token->type, rule_to_apply);
             apply_rule(rule_to_apply, rule_stack, token_stack, sa_2);
         }
 
@@ -102,41 +98,42 @@ int parse() {
 
     int counter = 0;
     if (rule_stack->empty || (rule_stack->data_pos == 0 && rule_stack->top->type == R_G_BODY)) {
-        //////printf("Success! Nothing remaining in parser stack!\n");
+        if (PARSER_DEBUG) printf("Success! Nothing remaining in parser stack!\n");
     }
 
     else {
-        
-        //////printf("Remaining in stack:\n");
-        while (!(rule_stack->empty)) {
-            //////printf("%02d: %02d - %d\n", counter++, rule_stack->top->type, rule_stack->top->rule);
-            rule_stack_pop(rule_stack);
+        if (PARSER_DEBUG) {
+            printf("Remaining in stack:\n");
+            while (!(rule_stack->empty)) {
+                printf("%02d: %02d - %d\n", counter++, rule_stack->top->type, rule_stack->top->rule);
+                rule_stack_pop(rule_stack);
+            }
         }
     }
 
-    //////printf("Tokens in token stack:\n");
-    counter = 0;
-    while (!(token_stack->empty)) {
-        //////printf("%02d: %02d\n", counter++, token_stack->top->type);
-        token_stack_pop(token_stack);
+        if (PARSER_DEBUG){
+        printf("Tokens in token stack:\n");
+        counter = 0;
+        while (!(token_stack->empty)) {
+            printf("%02d: %02d\n", counter++, token_stack->top->type);
+            token_stack_pop(token_stack);
+        }
+
+        printf("Tokens in sa stack 1:\n");
+        counter = 0;
+        while (!(sa_1->empty)) {
+            printf("%02d: %02d\n", counter++, sa_1->top->type);
+            token_stack_pop(sa_1);
+        }
+
+        printf("Tokens in sa stack 2:\n");
+        counter = 0;
+        while (!(sa_2->empty)) {
+            printf("%02d: %02d\n", counter++, sa_2->top->type);
+            token_stack_pop(sa_2);
+        }
     }
 
-    //////printf("Tokens in sa stack 1:\n");
-    counter = 0;
-    while (!(sa_1->empty)) {
-        //////printf("%02d: %02d\n", counter++, sa_1->top->type);
-        token_stack_pop(sa_1);
-    }
-
-    //////printf("Tokens in sa stack 2:\n");
-    counter = 0;
-    while (!(sa_2->empty)) {
-        //////printf("%02d: %02d\n", counter++, sa_2->top->type);
-        token_stack_pop(sa_2);
-    }
-
-    //rule_stack_dispose(rule_stack);
-    //token_dispose(token);
     int return_code;
     if ((return_code = check_undefined_functions(analyzer))) exit(return_code);
     return 0;
@@ -149,7 +146,7 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack, TokenSt
     switch (rule)
     {
     case 0:
-        error_skip(stack, token_stack);
+        exit(2);
         break;
 
     case 1:
@@ -509,6 +506,8 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
     TokenStackPtr helper_stack;
     SymTableItemPtr item;
 
+    if (!CODE_GEN && function >= F_G_DEF_VAR) return;
+
     switch (function) {
         case F_P_GET_T: 
             token = token_stack_get(token_stack);
@@ -610,12 +609,27 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
         case F_G_FUN_C:
             func_call();
 
-            // TODO: func params
+            for (int i = 1; i <= stack_1->tokens_pos; i++){
+                if (stack_1->tokens[i]->type == ID) {
+                    item = get_nearest_item(analyzer, stack_1->tokens[i]->data);
+                    if (!item) exit(5); // Variable hasn't been declared yet
+                }
 
-            func_call_end(stack_2->tokens[0]->data);
+                else if (stack_1->tokens[i]->type == VALUE) {
+                    item = symtable_item_init();
+                    item->type = stack_1->tokens[i]->value_type;
+                    item->value = stack_1->tokens[i]->data;
+                    item->isLiteral = true;
+                }
+
+                func_call_param(item);
+                symtable_item_dispose(item);
+                item = NULL;
+            }
+
+            func_call_end(stack_1->tokens[0]->data);
             break;    
         case F_G_FUN_E:
-            func_end();
             break;  
         case F_G_SAVE_SYM:
             item = get_nearest_item(analyzer, stack_2->tokens[0]->data);
