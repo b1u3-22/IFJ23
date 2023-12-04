@@ -200,10 +200,10 @@ int check_function_assingment(AnalyzerPtr analyzer, TokenStackPtr token_stack_le
         itemToAssign->type = functionItem->type;
     }
     else {
-        if      (itemToAssign->type == S_INTQ && (functionItem->type != S_INT && functionItem->type != S_INTQ)) return 4;
-        else if (itemToAssign->type == S_STRINGQ && (functionItem->type != S_STRING && functionItem->type != S_STRINGQ)) return 4;
-        else if (itemToAssign->type == S_DOUBLEQ && (functionItem->type != S_DOUBLE && functionItem->type != S_DOUBLEQ && functionItem->type != S_INT && functionItem->type != S_INTQ)) return 4;
-        else if (itemToAssign->type == S_DOUBLE && (functionItem->type != S_DOUBLE && functionItem->type != S_INT)) return 4;
+        if      (itemToAssign->type == S_INTQ && (functionItem->type == S_INT || functionItem->type == S_INTQ)) return 0;
+        else if (itemToAssign->type == S_STRINGQ && (functionItem->type == S_STRING || functionItem->type == S_STRINGQ)) return 0;
+        else if (itemToAssign->type == S_DOUBLEQ && (functionItem->type == S_DOUBLE || functionItem->type == S_DOUBLEQ || functionItem->type == S_INT || functionItem->type == S_INTQ)) return 0;
+        else if (itemToAssign->type == S_DOUBLE && (functionItem->type == S_DOUBLE || functionItem->type == S_INT)) return 0;
         else if (itemToAssign->type != functionItem->type) return 4;
     }
 
@@ -389,6 +389,9 @@ SymTableItemPtr get_nearest_item(AnalyzerPtr analyzer, char* id) {
 
 int check_undefined_functions(AnalyzerPtr analyzer) {
     for (int i = 0; i < analyzer->functionStack->tokens_pos+1; i++) {
-        if (!symtable_get_function_item(analyzer->symtable, analyzer->functionStack->tokens[i]->data)) return 3;
+        SymTableItemPtr item = symtable_get_function_item(analyzer->symtable, analyzer->functionStack->tokens[i]->data);
+        if (item == NULL) return 3;
     }
+
+    return 0;
 }
