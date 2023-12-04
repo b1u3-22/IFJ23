@@ -223,7 +223,6 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack, TokenSt
         errors += rule_stack_push(stack, F_S_DEC_DEP, false, true);
         errors += rule_stack_push(stack, R_CBRAC, false, false);
         errors += rule_stack_push(stack, R_BODY, true, false);
-        errors += rule_stack_push(stack, F_S_INC_DEP, false, true);
         errors += rule_stack_push(stack, F_P_CLEAR_2, false, true);
         errors += rule_stack_push(stack, F_P_CLEAR_1, false, true);
         errors += rule_stack_push(stack, L_CBRAC, false, false);
@@ -233,6 +232,7 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack, TokenSt
         errors += rule_stack_push(stack, R_BRAC, false, false);
         errors += rule_stack_push(stack, R_F_DEF_F, true, false);
         errors += rule_stack_push(stack, L_BRAC, false, false);
+        errors += rule_stack_push(stack, F_S_INC_DEP, false, true);
         errors += rule_stack_push(stack, ID, false, false);
         errors += rule_stack_push(stack, F_P_PUSH_1, false, true);
         errors += rule_stack_push(stack, FUNC, false, false);

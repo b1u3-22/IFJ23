@@ -43,8 +43,8 @@
 #include "expression.h"
 #endif
 
-#define PARSER_DEBUG 0
-#define CODE_GEN 0
+#define PARSER_DEBUG    0
+#define CODE_GEN        1
 
 #define LL_TABLE_COL 34
 #define LL_TABLE_ROW 19
