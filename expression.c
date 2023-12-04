@@ -182,7 +182,9 @@ bool apply_expression_rule(AnalyzerPtr analyzer, ExpressionStackPtr stack, Token
             expression_stack_push(stack, E_END, !(stack->top->type == E_LBRAC));
             SymTableItemPtr item = get_nearest_item(analyzer, token_stack->tokens[token_stack->tokens_pos - (bool)(token_stack->top->type != ID)]->data);
             if (!item) exit(5);
+            printf("Item id: %s\n", item->id);
             push_sym(item);
+            //printf("Done pushing item id: %s\n", item->id);
             return true;
         case E_VALUE:   // Rule E -> VALUE
             expression_stack_pop(stack);
@@ -190,7 +192,10 @@ bool apply_expression_rule(AnalyzerPtr analyzer, ExpressionStackPtr stack, Token
             item = symtable_item_init();
             item->value = token_stack->tokens[token_stack->tokens_pos - (bool)(token_stack->top->type != VALUE)]->data;
             item->type = token_stack->tokens[token_stack->tokens_pos - (bool)(token_stack->top->type != VALUE)]->value_type;
+            item->isLiteral = true;
+            //printf("Pushing constant\n");
             push_sym(item);
+            //printf("Done pushing constant\n");
             return true;
         case E_RBRAC: // Rule E -> (E)
             if (

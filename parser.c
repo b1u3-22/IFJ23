@@ -6,6 +6,7 @@
 */
 
 #include "parser.h"
+#include <stdlib.h>
 #include <stdio.h>
 
 int parse() {
@@ -136,7 +137,9 @@ int parse() {
 
     //rule_stack_dispose(rule_stack);
     //token_dispose(token);
-    return check_undefined_functions(analyzer);
+    int return_code;
+    if ((return_code = check_undefined_functions(analyzer))) exit(return_code);
+    return 0;
 }
 
 void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack, TokenStackPtr sa_stack) {
@@ -529,6 +532,7 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
             break;
         case F_S_FUN_ASG:
             if ((return_code = check_function_assingment(analyzer, stack_1, stack_2))) exit(return_code);
+            (*func_ass)++;
             break;
         case F_S_FUN_CAL:
             helper_stack = token_stack_init();
