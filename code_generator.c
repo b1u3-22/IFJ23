@@ -112,9 +112,9 @@ void def_var(char *id, int depth) {
 void set_var(SymTableItemPtr var) {
 
     if (var->depth == 0)
-        inst("POP GF@", var->id);
+        inst("POPS GF@", var->id);
     else //(sym->frame == LOCAL)
-        inst("POP LF@", var->id);
+        inst("POPS LF@", var->id);
 
     /*if (sym->isVar == true) {
 
