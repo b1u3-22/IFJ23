@@ -1,4 +1,4 @@
-#include "Param_stack.h"
+#include "param_stack.h"
 
 
 ParamStackPtr param_stack_init() {
@@ -59,11 +59,11 @@ ParamStackItemPtr param_stack_item_init() {
 
     // Set properties
     item->id = NULL;
-    item->name = NULL;
+    item->externalName = NULL;
 }
 
 void param_stack_item_dispose(ParamStackItemPtr item) {
     if (item->id) free(item->id);
-    if (item->name) free(item->name);
+    if (item->externalName) free(item->externalName);
     free(item);
 }

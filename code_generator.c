@@ -100,21 +100,21 @@ void exp_instruction(int type) {
 
 }
 
-void def_var(SymTableItemPtr var) {
+void def_var(char *id, int depth) {
 
-    if (var->depth == 0)
-        inst("DEFVAR GF@", var->id);
+    if (depth == 0)
+        inst("DEFVAR GF@", id);
     else
-        inst("DEFVAR LF@", var->id);
+        inst("DEFVAR LF@", id);
 
 }
 
 void set_var(SymTableItemPtr var) {
 
     if (var->depth == 0)
-        inst("POP GF@", var->id);
+        inst("POPS GF@", var->id);
     else //(sym->frame == LOCAL)
-        inst("POP LF@", var->id);
+        inst("POPS LF@", var->id);
 
     /*if (sym->isVar == true) {
 
@@ -240,7 +240,7 @@ void func_start(char* func) {
 
 }
 
-void func_param(SymTableItemPtr param) {
+void func_param(ParamStackItemPtr param) {
 
     inst("DEFVAR LF@", param->id);
     part("MOVE LF@", param->id, " LF@%%");

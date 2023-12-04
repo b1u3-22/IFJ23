@@ -42,7 +42,7 @@ typedef struct SymTableItem {
     char *value;
     int depth;
     int block;
-    TokenStackPtr paramStack;
+    ParamStackPtr paramStack;
 } *SymTableItemPtr;
 
 typedef SymTableItemPtr *SymTablePtr;
@@ -97,3 +97,9 @@ void symtable_item_dispose(SymTableItemPtr item);
  *  @param symtable SymTablePtr that should be disposed
 */
 void symtable_dispose(SymTablePtr symtable);
+
+bool symtable_find_parameter_external_name(ParamStackPtr stack, char* externalName);
+
+bool symtable_find_parameter_id(ParamStackPtr stack, char* id);
+
+void symtable_add_built_in_functions(SymTablePtr symtable);

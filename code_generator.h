@@ -62,7 +62,7 @@ void code_footer();
 void exp_instruction(int type);
 
 // define variable
-void def_var(SymTableItemPtr var);
+void def_var(char *id, int depth);
 
 // pop value to variable
 void set_var(SymTableItemPtr var);
@@ -100,7 +100,7 @@ void while_end();
 void func_start(char* func);
 
 // define single parameter of function
-void func_param(SymTableItemPtr param);
+void func_param(ParamStackItemPtr param);
 
 // end of function
 void func_end();

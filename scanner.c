@@ -95,12 +95,9 @@ void parse_id(char c, scanner_states* state, bool* true_end, bool* end) {
     } else if (!is_number(c) && !is_letter(c) && (c != '_')) *end = true;
 }
 
-void parse__id(int c, scanner_states* state, bool* true_end) {
+void parse_underscore(int c, scanner_states* state, bool* end) {
     if (is_number(c) || is_letter(c) || (c == '_')) *state = IDENTIFICATOR;
-    else {
-        *true_end = true;
-        *state = UNDERSCORE;
-    }
+    else *end = true;
 }
 
 void parse_int_flp(int c, scanner_states* state, bool* true_end) {
@@ -298,80 +295,98 @@ void parse_u3(int c, scanner_states* state, bool* end) {
 }
 
 
-token_types get_token_type(scanner_states* state, char c, char* data, TokenPtr token) {
-    if (*state == IDENTIFICATOR) {
-        int i = is_keyword(data);
+void get_token_type(scanner_states state, char c, TokenPtr token) {
+    if (state == IDENTIFICATOR) {
+        int i = is_keyword(token->data);
         if (i > -1) {
             switch (i) {
-                case 0: return IF;
-                case 1: return ELSE;
-                case 2: return FUNC;
-                case 3: return RETURN;
-                case 4: return LET;
-                case 5: return VAR;
+                case 0: token->type = IF;
+                        break;
+                case 1: token->type = ELSE;
+                        break;
+                case 2: token->type = FUNC;
+                        break;
+                case 3: token->type = RETURN;
+                        break;
+                case 4: token->type = LET;
+                        break;
+                case 5: token->type = VAR;
+                        break;
                 case 6: {
                     token->value_type = S_NO_TYPE;
-                    return VALUE;
+                    token->type = VALUE;
+                    break;
                 }
-                case 7: return WHILE;
-                default: return ERROR;
+                case 7: token->type = WHILE;
+                        break;
+                default: token->type = ERROR;
             }
+            return;
         } 
-        i = is_type(data);
+        i = is_type(token->data);
         if ((i > -1) && (i < 6)) {
             token->value_type = i;
-            return TYPE;
-        }
-        return ID;
+            token->type = TYPE;
+        } else token->type = ID;
+        
     } 
-    else if (*state == OP) {
+    else if (state == OP) {
         switch (c) {
-            case '(': return L_BRAC;
-            case ')': return R_BRAC;
-            case '{': return L_CBRAC;
-            case '}': return R_CBRAC;
-            case '+': return PLUS;
-            case ':': return D_DOT;
-            case '*': return MULT;
-            case ',': return COMMA;
-            default : return ERROR;
+            case '(':   token->type = L_BRAC;
+                        break;
+            case ')': token->type = R_BRAC;
+                        break;
+            case '{': token->type = L_CBRAC;
+                        break;
+            case '}': token->type = R_CBRAC;
+                        break;
+            case '+': token->type = PLUS;
+                        break;
+            case ':': token->type = D_DOT;
+                        break;
+            case '*': token->type = MULT;
+                        break;
+            case ',': token->type = COMMA;
+                        break;
+            default : token->type = ERROR;
         }
     } 
-    else if ((*state == FLP) || (*state == FLPE) || (*state == SIMPLE_STR) || (*state == COMPLEX_STR) || (*state == INT)) {
-        if ((*state == FLP) || (*state == FLPE)) {
+    else if ((state == FLP) || (state == FLPE) || (state == SIMPLE_STR) || (state == COMPLEX_STR) || (state == INT)) {
+        if ((state == FLP) || (state == FLPE)) {
             token->value_type = S_DOUBLE;
-        } else if ((*state == SIMPLE_STR) || (*state == COMPLEX_STR)) {
+        } else if ((state == SIMPLE_STR) || (state == COMPLEX_STR)) {
             token->value_type = S_STRING;
-        } else if (*state == INT) {
+        } else if (state == INT) {
             token->value_type = S_INT;
         }
-        return VALUE;
-    } else if (*state == TYPEQ) {
-        int i = is_type(data);
+        token->type = VALUE;
+    } else if (state == TYPEQ) {
+        int i = is_type(token->data);
         if ((i == 1) || (i == 3) || (i == 5)) {
             token->value_type = i;
+            token->type = TYPE;
         } else {
-            ungetc(c, stdin);
+            token->type = ERROR;
+            token->value_type = S_NO_TYPE;
         }
-        return TYPE;
     }
-    else if (*state == NL)          return NEWLINE;
-    else if (*state == QMARK)       return ERROR; // single question mark is not valid
-    else if (*state == QQMARK)      return QQ_MARK;
-    else if (*state == ARR)         return ARROW; 
-    else if (*state == DASH)        return MINUS;
-    else if (*state == END_OF_FILE) return END;
-    else if (*state == EXL)         return EXL_MARK;
-    else if (*state == EXLEQ)       return EXL_EQ_MARK;
-    else if (*state == EQ)          return EQUALS;
-    else if (*state == EQEQ)        return EQUALS_EQUALS;
-    else if (*state == LARGER)      return LARGER_THAN;
-    else if (*state == LARGER_EQ)   return LARGER_EQUALS;
-    else if (*state == LESS)        return SMALLER_THAN;
-    else if (*state == LESS_EQ)     return SMALLER_EQUALS;
-    else if (*state == UNDERSCORE)  return UNDERSCR;
-    else if (*state == SLASH)       return DIV;
-    return ERROR;
+    else if (state == NL)          token->type = NEWLINE;
+    else if (state == QMARK)       token->type = ERROR; // single question mark is not valid
+    else if (state == QQMARK)      token->type = QQ_MARK;
+    else if (state == ARR)         token->type = ARROW; 
+    else if (state == DASH)        token->type = MINUS;
+    else if (state == END_OF_FILE) token->type = END;
+    else if (state == EXL)         token->type = EXL_MARK;
+    else if (state == EXLEQ)       token->type = EXL_EQ_MARK;
+    else if (state == EQ)          token->type = EQUALS;
+    else if (state == EQEQ)        token->type = EQUALS_EQUALS;
+    else if (state == LARGER)      token->type = LARGER_THAN;
+    else if (state == LARGER_EQ)   token->type = LARGER_EQUALS;
+    else if (state == LESS)        token->type = SMALLER_THAN;
+    else if (state == LESS_EQ)     token->type = SMALLER_EQUALS;
+    else if (state == UNDERSCORE)  token->type = UNDERSCR;
+    else if (state == SLASH)       token->type = DIV;
+    else                            token->type = ERROR;
 }
 
 
@@ -394,7 +409,7 @@ void get_next_token(TokenPtr token) {
             case START:
                 if      (is_number(c))      state = INT;
                 else if (is_letter(c))      state = IDENTIFICATOR;
-                else if (c == '_')          state = _IDENTIFICATOR;
+                else if (c == '_')          state = UNDERSCORE;
                 else if (is_space(c))       continue;
                 else if (c == '-')          state = DASH;
                 else if (c == '?')          state = QMARK;
@@ -417,8 +432,8 @@ void get_next_token(TokenPtr token) {
             case IDENTIFICATOR: // IDEN
                 parse_id(c, &state, &true_end, &end);
                 break;
-            case _IDENTIFICATOR: // read '_', expecting letters/numbers/_, becomes IDEN
-                parse__id(c, &state, &true_end);
+            case UNDERSCORE: // read '_', expecting letters/numbers/_, becomes IDEN
+                parse_underscore(c, &state, &end);
                 break;
             case INT:
                 parse_int(c, &state, &end);
@@ -526,26 +541,17 @@ void get_next_token(TokenPtr token) {
             ungetc(EOF, stdin);
         }
     }
-    token->type = get_token_type(&state, c, token->data, token);
+    get_token_type(state, c, token);
 }
 
 // int main() {
-//     int counter = 0;
-//     while (true) {
-//         TokenPtr token = token_init();
+    // TokenPtr token = token_init();
+    // get_next_token(token);
+        
+//     while (token->type != END) {
+//         printf("TYPE: %d, DATA: %s, SPECIAL TYPE: %d\n", token->type, token->data, token->value_type);
+//         token_clear(token);    
 //         get_next_token(token);
-//         if (token->type == END) break;
-//         printf("TYPE: %d, DATA: %s\n", token->type, token->data);
-//         counter++;
-//     }
-
-//     // TokenPtr token = token_init();
-//     // get_next_token(token);
-//     // unget_token(token);
-//     // token_clear(token);
-//     // get_next_token(token);
-//     // token_clear(token);
-//     // get_next_token(token);
-//     // printf("TYPE: %d, DATA: %s\n", token->type, token->data);
-    
+       
+//    }
 // } 

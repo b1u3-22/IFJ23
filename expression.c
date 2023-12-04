@@ -6,6 +6,7 @@
 */
 
 #include "expression.h"
+#include <stdio.h>
 
 int parse_expression(AnalyzerPtr analyzer, int end_type, TokenStackPtr sa_stack) {
     ExpressionStackPtr stack = expression_stack_init();
@@ -35,7 +36,7 @@ int parse_expression(AnalyzerPtr analyzer, int end_type, TokenStackPtr sa_stack)
 
         //if (token_stack->top->type <= VALUE) token_stack_push(sa_stack, token_stack->top);
 
-        ////printf("[%02d, %02d]: %d\n", stack_type_helper->type, token_type, action);
+        //printf("[%02d, %02d]: %d\n", stack_type_helper->type, token_type, action);
         switch (action) {
             case E_ERR:
                 return 2;
@@ -48,7 +49,7 @@ int parse_expression(AnalyzerPtr analyzer, int end_type, TokenStackPtr sa_stack)
                 expression_stack_push(stack, token_type, false);
                 rule_applied = apply_expression_rule(analyzer, stack, token_stack);
                 if (!rule_applied) {
-                    //printf("Error in PSA\n");
+                    // printf("[expr] error\n");
                     return 2; // Syntax error occured
                 }
                 if (token_type != E_END) expression_get_next_token(token_stack, end_type, &token_type, sa_stack);
@@ -56,12 +57,12 @@ int parse_expression(AnalyzerPtr analyzer, int end_type, TokenStackPtr sa_stack)
             case E_RED:
                 rule_applied = apply_expression_rule(analyzer, stack, token_stack);
                 if (!rule_applied) {
-                    //printf("Error in PSA\n");
+                    // printf("[expr] error\n");
                     return 2; // Syntax error occured
                 }
                 break;
             case E_SCS:
-                //printf("Expression ended succ\n");
+                // printf("[expr] success\n");
                 return 0;
                 break; 
         }
@@ -75,12 +76,38 @@ int parse_expression(AnalyzerPtr analyzer, int end_type, TokenStackPtr sa_stack)
 }
 
 void expression_get_next_token(TokenStackPtr stack, int end_type, int *type, TokenStackPtr sa_stack) {
+    bool new_line = false;
     TokenPtr token = token_stack_get(stack);
     while (token->type == NEWLINE) {
+        new_line = true;
         token_stack_pop_free(stack);
         token = token_stack_get(stack); // skip newline characters
     }
-    
+
+    // Next token is ID and previous is ID or VALUE, we have to decide if we want to continue
+    // with expression parsing or not, so we search for = sign which would mark start
+    // of the next expression or ( bracket which *could* mark start of function call
+    if (token->type == ID && (*type == E_VALUE || *type == E_ID)) {
+        token = token_stack_get(stack); // get next token
+        if (token->type == EQUALS || token->type == L_BRAC) {
+            token_stack_unget(stack);
+            token_stack_unget(stack);
+            *type = E_END;
+            return;
+        }
+    }
+
+    if (token->type == R_BRAC && end_type == R_BRAC) {
+        token = token_stack_get(stack);
+        int helper_type = get_translated_type(token);
+        if (helper_type == E_ID || helper_type == E_END) {
+            token_stack_unget(stack);
+            token_stack_unget(stack);
+            *type = E_END;
+            return;
+        }
+    }
+
     if (token->type == ID || token->type == VALUE) token_stack_push(sa_stack, token);
 
     *type = get_translated_type(token);
@@ -88,6 +115,8 @@ void expression_get_next_token(TokenStackPtr stack, int end_type, int *type, Tok
     if (*type == E_END) {
         token_stack_unget(stack);
     }
+
+    //printf("[expr] translated type: %d\n", *type);
 }
 
 int get_translated_type(TokenPtr token) {

@@ -113,7 +113,7 @@ static const int ll_table[LL_TABLE_ROW][LL_TABLE_COL] =
     { 0,  0,  0,  0,  0,  0,  0,  0, 19,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 20,  0,  0,  0,  0,  0,  0,  0,  0,  0},   //  6
     {21, 22,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 52,  0,  0,  0,  0,  0,  0,  0, 52,  0,  0,  0,  0,  0,  0,  0,  0,  0},   //  7
     {26, 26, 26, 26, 26, 26, 26, 26, 26, 26,  0,  0, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 23, 26,  0, 26,  0,  0,  0,  0,  0, 26},   //  8
-    {27, 27, 27, 27, 27, 27, 27, 27, 27, 27,  0,  0, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25,  0,  0,  0, 27,  0,  0,  0,  0,  0, 27},   //  9
+    {27, 27, 27, 27, 27, 27, 27, 27, 27, 27,  0,  0, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25,  0, 27,  0, 27,  0,  0,  0,  0,  0, 27},   //  9
     {29, 30,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 28,  0,  0,  0,  0,  0,  0,  0,  0},   // 10
     { 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 31,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 47, 32,  0,  0, 32,  0,  0,  0,  0,  0},   // 11
     { 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 36,  0,  0, 33,  0,  0,  0,  0,  0},   // 12
@@ -135,7 +135,7 @@ int parse();
 */  
 void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack, TokenStackPtr sa_stack);
 
-void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, TokenStackPtr token_stack, TokenStackPtr stack_1, TokenStackPtr stack_2, AnalyzerPtr analyzer);
+void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, TokenStackPtr token_stack, TokenStackPtr stack_1, TokenStackPtr stack_2, AnalyzerPtr analyzer, int rule, int *func_ass);
 
 /** Skip to the next sequence of tokens.
  *  This is used when syntax error occures. 
