@@ -581,12 +581,6 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
             def_var(stack_1->tokens[1]->data, analyzer->depth);
             break;  
         case F_G_SET_VAR:
-            if(PARSER_DEBUG) printf("Token data for set_var(): %s\n", stack_1->tokens[1]->data);
-
-            item = get_nearest_item(analyzer, stack_1->tokens[1]->data);
-            if(PARSER_DEBUG) printf("Item pointer: %d\n", item);
-            if(PARSER_DEBUG) printf("Analyzer: [%02d, %02d]\n", analyzer->depth, analyzer->block[analyzer->depth]);
-
             set_var(get_nearest_item(analyzer, stack_1->tokens[1]->data));
             break;  
         case F_G_PUSH:
@@ -615,23 +609,28 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
             break;    
         case F_G_FUN_C:
             func_call();
+            if (rule == 39){
+                for (int i = 1; i <= stack_1->tokens_pos; i++){
+                    if (stack_1->tokens[i]->type == ID) {
+                        item = get_nearest_item(analyzer, stack_1->tokens[i]->data);
+                        if (!item) exit(5); // Variable hasn't been declared yet
+                    }
 
-            for (int i = 1; i <= stack_1->tokens_pos; i++){
-                if (stack_1->tokens[i]->type == ID) {
-                    item = get_nearest_item(analyzer, stack_1->tokens[i]->data);
-                    if (!item) exit(5); // Variable hasn't been declared yet
+                    else if (stack_1->tokens[i]->type == VALUE) {
+                        item = symtable_item_init();
+                        item->type = stack_1->tokens[i]->value_type;
+                        item->value = stack_1->tokens[i]->data;
+                        item->isLiteral = true;
+                    }
+
+                    func_call_param(item);
+                    symtable_item_dispose(item);
+                    item = NULL;
                 }
+            }
 
-                else if (stack_1->tokens[i]->type == VALUE) {
-                    item = symtable_item_init();
-                    item->type = stack_1->tokens[i]->value_type;
-                    item->value = stack_1->tokens[i]->data;
-                    item->isLiteral = true;
-                }
+            else if (rule == 23) {
 
-                func_call_param(item);
-                symtable_item_dispose(item);
-                item = NULL;
             }
 
             func_call_end(stack_1->tokens[0]->data);
