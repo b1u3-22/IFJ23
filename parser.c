@@ -525,6 +525,17 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
             if ((return_code = check_value_assingment(analyzer, stack_1, stack_2))) exit(return_code);
             break;
         case F_S_FUN_ASG:
+            printf("Check function assigment called!\n");
+
+            for (int i = 0; i <= stack_1->tokens_pos; i++) {
+                printf("STACK1: [%02d] - Token Data: %s\n", i, stack_1->tokens[i]->data);
+            }
+
+
+            for (int i = 0; i <= stack_2->tokens_pos; i++) {
+                printf("STACK2: [%02d] - Token Data: %s\n", i, stack_2->tokens[i]->data);
+            }
+
             if ((return_code = check_function_assingment(analyzer, stack_1, stack_2))) exit(return_code);
             
             
@@ -575,10 +586,10 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
             break;    
         case F_G_FUN_C:
             func_call();
-            
-            // todo function call params
 
-            func_call_end(stack_2->tokens[0]->data);
+            // TODO: func params
+
+            func_call_end(stack_1->tokens[0]->data);
             break;    
         case F_G_FUN_E:
             func_end();
