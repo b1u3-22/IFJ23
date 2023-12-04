@@ -211,12 +211,13 @@ int check_function_assingment(AnalyzerPtr analyzer, TokenStackPtr token_stack_le
 }
 
 int check_function_call(AnalyzerPtr analyzer, TokenStackPtr token_stack_function, bool calledAsAssignment) {
+
     SymTableItemPtr functionId = symtable_get_function_item(analyzer->symtable, token_stack_function->tokens[0]->data);
     //if function is not defined, push to stack for later check
     if (functionId == NULL) {
         token_stack_push(analyzer->functionStack, token_stack_function->tokens[0]);
         return 0;
-    }
+    }    
 
     //Check if parameter count is matching (by count of external names and IDs)
     int ids1 = 0;
@@ -228,7 +229,7 @@ int check_function_call(AnalyzerPtr analyzer, TokenStackPtr token_stack_function
     }
 
     for(int i = 1; i < token_stack_function->tokens_pos+1; i++) {
-        if(token_stack_function->tokens[i]->type = ID) ids2++;
+        if(token_stack_function->tokens[i]->type == ID) ids2++;
     }
 
     if (ids1 != ids2) return 4;

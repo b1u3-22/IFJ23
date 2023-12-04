@@ -381,17 +381,17 @@ void auxil_qqdecider() {
 
 void builtin_read() {
 
-    inst("LABEL @&&readstr");
+    inst("LABEL @&readString");
     inst("READ GF@!tmp_var1 string");
     inst("PUSHS GF@!tmp_var1");
     inst("RETURN");
 
-    inst("LABEL @&&readint");
+    inst("LABEL @&readInt");
     inst("READ GF@!tmp_var1 int");
     inst("PUSHS GF@!tmp_var1");
     inst("RETURN");
 
-    inst("LABEL @&&readfloat");
+    inst("LABEL @&readDouble");
     inst("READ GF@!tmp_var1 float");
     inst("PUSHS GF@!tmp_var1");
     inst("RETURN");
@@ -400,7 +400,7 @@ void builtin_read() {
 
 void builtin_write() {
 
-    inst("LABEL @&&write");
+    inst("LABEL @&write");
     inst("WRITE TF@%%0");
     inst("RETURN");
 
@@ -408,7 +408,7 @@ void builtin_write() {
 
 void builtin_int2float() {
 
-    inst("LABEL @&&int2float");
+    inst("LABEL @&Int2Double");
     inst("INT2FLOAT GF@!tmp_var1 TF@%%0");
     inst("PUSHS GF@!tmp_var1");
     inst("RETURN");
@@ -417,7 +417,7 @@ void builtin_int2float() {
 
 void builtin_float2int() {
 
-    inst("LABEL @&&float2int");
+    inst("LABEL @&Double2Int");
     inst("FLOAT2INT GF@!tmp_var1 TF@%%0");
     inst("PUSHS GF@!tmp_var1");
     inst("RETURN");
@@ -426,7 +426,7 @@ void builtin_float2int() {
 
 void builtin_length() {
 
-    inst("LABEL @&&length");
+    inst("LABEL @&length");
     inst("STRLEN GF@!tmp_var1 TF@%%0");
     inst("PUSHS GF@!tmp_var1");
     inst("RETURN");
@@ -435,7 +435,7 @@ void builtin_length() {
 
 void builtin_substring() {
 
-    inst("LABEL @&&substring");
+    inst("LABEL @&substring");
 
     inst("LT GF@!tmp_var1 TF@%%1 int@0");
     inst("JUMPIFEQ @&&substrerr GF@!tmp_var1 bool@true");
@@ -467,7 +467,7 @@ void builtin_substring() {
 
 void builtin_ord() {
 
-    inst("LABEL @&&ord");
+    inst("LABEL @&ord");
 
     inst("STRLEN GF@!tmp_var1 TF@%%0");
     inst("JUMPIFEQ @&&orderr GF@!tmp_var1 int@0");
@@ -485,7 +485,7 @@ void builtin_ord() {
 
 void builtin_chr() {
 
-    inst("LABEL @&&chr");
+    inst("LABEL @&chr");
     inst("INT2CHAR GF@!tmp_var1 TF@%%0");
     inst("PUSHS GF@!tmp_var1");
     inst("RETURN");
