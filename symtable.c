@@ -28,6 +28,7 @@ SymTableItemPtr symtable_item_init() {
     item->isDefined = NULL;
     item->value = NULL;
     item->paramStack = NULL;
+    item->isLiteral = false;
 
     return item;
 }
