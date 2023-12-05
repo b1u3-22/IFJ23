@@ -125,8 +125,11 @@ void parse_flpe(int c, bool* end) {
     if (!is_number(c)) *end = true;
 }
 
-void parse_str(int c, scanner_states* state, bool* true_end) {
-    if (c == '\"') *state = C_STR;
+void parse_str(int c, scanner_states* state, bool* true_end, bool* do_not_add) {
+    if (c == '\"') {
+        *state = C_STR;
+        *do_not_add = true;
+    }
     else if (c == '\n') *true_end = true;
     else if (c == '\\') *state = SLASH_IN_STR;
     else *state = SIMPLE_STR_IN;
@@ -232,10 +235,11 @@ void parse_c_str(int c, scanner_states* state, bool* end) {
     }
 }
 
-void parse_simple_str_in(int c, scanner_states* state, bool* true_end, bool* end) {
+void parse_simple_str_in(int c, scanner_states* state, bool* true_end, bool* end, bool* do_not_add) {
     if (c == '\"') {
         *state = SIMPLE_STR;
         *true_end = true;
+        *do_not_add = true;
     } else if (c == '\n') {
         *end = true;
     } else if (c == '\\') *state = SLASH_IN_STR;
@@ -400,6 +404,7 @@ void get_next_token(TokenPtr token) {
     int c; // read char from stdin
     int cb = 0; // number of comment blocksˇ
     token->value_type = S_NO_TYPE;
+    bool do_not_add = false;
 
     while (true) {        
         c = getchar(); 
@@ -413,7 +418,10 @@ void get_next_token(TokenPtr token) {
                 else if (is_space(c))       continue;
                 else if (c == '-')          state = DASH;
                 else if (c == '?')          state = QMARK;
-                else if (c == '\"')         state = STR;
+                else if (c == '\"') {
+                    state = STR;
+                    do_not_add = true;
+                }
                 else if (c == '!')          state = EXL;
                 else if (c == '=')          state = EQ;
                 else if (c == '<')          state = LESS;
@@ -454,7 +462,7 @@ void get_next_token(TokenPtr token) {
                 parse_flpe(c, &end);
                 break;
             case STR: // got double quotation mark
-                parse_str(c, &state, &true_end);
+                parse_str(c, &state, &true_end, &do_not_add);
                 break;
             case DASH:
                 parse_dash(c, &state, &true_end, &end);
@@ -493,7 +501,7 @@ void get_next_token(TokenPtr token) {
                 parse_c_str(c, &state, &end);
                 break;
             case SIMPLE_STR_IN:
-                parse_simple_str_in(c, &state, &true_end, &end);
+                parse_simple_str_in(c, &state, &true_end, &end, &do_not_add);
                 break;
             case C_STR_IN:
                 parse_c_str_in(c, &state);
@@ -525,7 +533,8 @@ void get_next_token(TokenPtr token) {
             ungetc(c, stdin); // return back the last read char
             break;
         }
-        token_add_data(token, c);
+        if (!do_not_add) token_add_data(token, c);
+        do_not_add = false;
         if (true_end) {
             break;
         }
@@ -544,14 +553,14 @@ void get_next_token(TokenPtr token) {
     get_token_type(state, c, token);
 }
 
-// int main() {
-    // TokenPtr token = token_init();
-    // get_next_token(token);
+int main() {
+    TokenPtr token = token_init();
+    get_next_token(token);
         
-//     while (token->type != END) {
-//         printf("TYPE: %d, DATA: %s, SPECIAL TYPE: %d\n", token->type, token->data, token->value_type);
-//         token_clear(token);    
-//         get_next_token(token);
+    while (token->type != END) {
+        printf("TYPE: %d, DATA: %s, SPECIAL TYPE: %d\n", token->type, token->data, token->value_type);
+        token_clear(token);    
+        get_next_token(token);
        
-//    }
-// } 
+   }
+} 
