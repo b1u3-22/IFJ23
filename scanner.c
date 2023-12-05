@@ -390,6 +390,13 @@ void get_token_type(scanner_states state, char c, TokenPtr token) {
     else if (state == LESS_EQ)     token->type = SMALLER_EQUALS;
     else if (state == UNDERSCORE)  token->type = UNDERSCR;
     else if (state == SLASH)       token->type = DIV;
+    else if (c == EOF) {
+        if (state == C_STR) {
+            
+            token->type = VALUE;
+            token->value_type = S_STRING;
+        }
+    }
     else                            token->type = ERROR;
 }
 
@@ -553,14 +560,14 @@ void get_next_token(TokenPtr token) {
     get_token_type(state, c, token);
 }
 
-int main() {
-    TokenPtr token = token_init();
-    get_next_token(token);
+// int main() {
+//     TokenPtr token = token_init();
+//     get_next_token(token);
         
-    while (token->type != END) {
-        printf("TYPE: %d, DATA: %s, SPECIAL TYPE: %d\n", token->type, token->data, token->value_type);
-        token_clear(token);    
-        get_next_token(token);
+//     while (token->type != END) {
+//         printf("TYPE: %d, DATA: %s, SPECIAL TYPE: %d\n", token->type, token->data, token->value_type);
+//         token_clear(token);    
+//         get_next_token(token);
        
-   }
-} 
+//    }
+// } 
