@@ -232,7 +232,10 @@ void parse_str(int c, scanner_states* state, bool* true_end, bool* do_not_add) {
         *do_not_add = true;
     }
     else if (c == '\n') *true_end = true;
-    else if (c == '\\') *state = SLASH_IN_STR;
+    else if (c == '\\') {
+        *state = SLASH_IN_STR;
+        *do_not_add = true;
+    }
     else *state = SIMPLE_STR_IN;
 }
 
@@ -287,28 +290,55 @@ void parse_simple_str_in(int c, scanner_states* state, bool* true_end, bool* end
         *do_not_add = true;
     } else if (c == '\n') {
         *end = true;
-    } else if (c == '\\') *state = SLASH_IN_STR;
+    } else if (c == '\\') {
+        *state = SLASH_IN_STR;
+        *do_not_add = true;
+    }
 }
 
 
 
 
 
-void parse_slash_in_str(int c, scanner_states* state, bool* end) {
-    int i = 0;
-    while (ALLOWED_BACKSLASH_CHARS[i]) {
-        if (ALLOWED_BACKSLASH_CHARS[i] == c) {
-            *state = SIMPLE_STR_IN;
-            return;
-        }
-        i++;
-    }
-    if (c == 'u') {
-        *state = U_IN_STR;
-        return;
+void parse_slash_in_str(int c, scanner_states* state, bool* end, bool* do_not_add, TokenPtr token) {
+
+    switch (c) {
+        case '\\':
+            token_add_data(token, '\\');
+            token_add_data(token, '0');
+            token_add_data(token, '9');
+            token_add_data(token, '2');
+            break;
+        case 'n':
+            token_add_data(token, '\\');
+            token_add_data(token, '0');
+            token_add_data(token, '1');
+            token_add_data(token, '0');
+            break;
+        case 't':
+            token_add_data(token, '\\');
+            token_add_data(token, '0');
+            token_add_data(token, '0');
+            token_add_data(token, '9');
+            break;
+        case 'r':
+            token_add_data(token, '\\');
+            token_add_data(token, '0');
+            token_add_data(token, '1');
+            token_add_data(token, '3');
+            break;
+        case '"':
+            token_add_data(token, '\"');
+            break;
+        case 'u':
+            *state = U_IN_STR;
+            break;
+        default:
+            *end = true;
     }
 
-    *end = true;
+    *state = STR;
+    *do_not_add = true;
 }
 
 void parse_u_in_str(int c, scanner_states* state, bool* end) {
@@ -442,7 +472,7 @@ void get_next_token(TokenPtr token) {
     bool do_not_add = false;
     bool manual_add = false;
 
-    while (true) {        
+    while (true) {     
         c = getchar(); 
         if (c == EOF) break;
 
@@ -554,7 +584,7 @@ void get_next_token(TokenPtr token) {
                 }
                 break;
             case SLASH_IN_STR:
-                parse_slash_in_str(c, &state, &end);
+                parse_slash_in_str(c, &state, &end, &do_not_add, token);
                 break;
             case U_IN_STR:
                 parse_u_in_str(c, &state, &end);
