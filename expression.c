@@ -84,6 +84,8 @@ void expression_get_next_token(TokenStackPtr stack, int end_type, int *type, Tok
         token = token_stack_get(stack); // skip newline characters
     }
 
+    //printf("Token data: %s\n", token->data);
+
     // Next token is ID and previous is ID or VALUE, we have to decide if we want to continue
     // with expression parsing or not, so we search for = sign which would mark start
     // of the next expression or ( bracket which *could* mark start of function call
@@ -182,7 +184,7 @@ bool apply_expression_rule(AnalyzerPtr analyzer, ExpressionStackPtr stack, Token
             expression_stack_push(stack, E_END, !(stack->top->type == E_LBRAC));
             SymTableItemPtr item = get_nearest_item(analyzer, token_stack->tokens[token_stack->tokens_pos - (bool)(token_stack->top->type != ID)]->data);
             if (!item) exit(5);
-            printf("Item id: %s\n", item->id);
+            //printf("Item id: %s\n", item->id);
             push_sym(item);
             //printf("Done pushing item id: %s\n", item->id);
             return true;

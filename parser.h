@@ -77,10 +77,13 @@ enum Function {
     F_P_GET_T,      // Get new token
     F_P_PUSH_1,     // Push to Stack 1 for analyzer and generator
     F_P_PUSH_2,     // Push to Stack 2 for analyzer and generator
+    F_P_PUSH_3,     // Push to Stack 3 for generator
     F_P_POP_1,      // Pop from Stack 1
     F_P_POP_2,      // Pop from Stack 2
+    F_P_POP_3,      // Pop from Stack 3
     F_P_CLEAR_1,    // Clear Stack 1
     F_P_CLEAR_2,    // Clear Stack 2
+    F_P_CLEAR_3,    // Clear Stack 3
     F_P_PSA,        // Start expression parser
     F_S_INC_DEP,    // Increase depth in semantic analyzer
     F_S_DEC_DEP,    // Decrease depth in semantic analyzer
@@ -142,4 +145,4 @@ int parse();
 */  
 void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack, TokenStackPtr sa_stack);
 
-void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, TokenStackPtr token_stack, TokenStackPtr stack_1, TokenStackPtr stack_2, AnalyzerPtr analyzer, int rule, int *func_ass);
+void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, TokenStackPtr token_stack, TokenStackPtr stack_1, TokenStackPtr stack_2, TokenStackPtr stack_3, AnalyzerPtr analyzer, int rule, int *func_ass);
