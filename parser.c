@@ -46,8 +46,10 @@ int parse() {
         if (token->type == ERROR) exit(1); // Lexical error occured
         // ===================== Handling of newlines that some things require =====================
         if (token->type == NEWLINE) {
+            if (PARSER_DEBUG) printf("Got new line\n");
             token_stack_pop(token_stack); // Don't save newlines in token_stack
             new_line = true;
+            token = token_stack_get(token_stack);
             continue;
         }
 
