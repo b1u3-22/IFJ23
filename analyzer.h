@@ -86,6 +86,8 @@ int check_function_call(AnalyzerPtr analyzer, TokenStackPtr token_stack_function
 */
 int check_function_definition(AnalyzerPtr analyzer, TokenStackPtr token_stack_id, TokenStackPtr token_stack_param);
 
+int check_return(AnalyzerPtr analyzer, TokenStackPtr token_stack);
+
 /** Increases analyzer depth and block attribute
  *  @param analyzer AnalyzerPtr to work with
 */

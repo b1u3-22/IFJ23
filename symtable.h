@@ -43,6 +43,8 @@ typedef struct SymTableItem {
     int depth;
     int block;
     ParamStackPtr paramStack;
+    bool isLiteral;
+    bool definedAtFuncAssign
 } *SymTableItemPtr;
 
 typedef SymTableItemPtr *SymTablePtr;

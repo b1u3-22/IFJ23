@@ -28,6 +28,8 @@ SymTableItemPtr symtable_item_init() {
     item->isDefined = NULL;
     item->value = NULL;
     item->paramStack = NULL;
+    item->isLiteral = false;
+    item->definedAtFuncAssign = false;
 
     return item;
 }
@@ -102,7 +104,7 @@ void symtable_dispose(SymTablePtr symtable) {
 
 bool symtable_find_parameter_external_name(ParamStackPtr stack, char* externalName) {
     for (int i = 0; i < stack->data_pos+1; i++) {
-        if (stack->data[i]->externalName == externalName) return true;
+        if (!strcmp(stack->data[i]->externalName, externalName)) return true;
     }
 
     return false;
@@ -110,7 +112,7 @@ bool symtable_find_parameter_external_name(ParamStackPtr stack, char* externalNa
 
 bool symtable_find_parameter_id(ParamStackPtr stack, char* id) {
     for (int i = 0; i < stack->data_pos+1; i++) {
-        if (stack->data[i]->id == id) return true;
+        if (!strcmp(stack->data[i]->id, id)) return true;
     }
 
     return false;
@@ -142,7 +144,7 @@ void symtable_add_built_in_functions(SymTablePtr symtable) {
     functionReadInt->value = NULL;
     functionReadInt->type = S_INTQ;
     ParamStackPtr paramStackReadInt = param_stack_init();
-    functionReadString->paramStack = paramStackReadInt;
+    functionReadInt->paramStack = paramStackReadInt;
     symtable_add_item(symtable, functionReadInt);
 
     //readDouble() -> Double?
@@ -156,8 +158,22 @@ void symtable_add_built_in_functions(SymTablePtr symtable) {
     functionReadDouble->value = NULL;
     functionReadDouble->type = S_DOUBLEQ;
     ParamStackPtr paramStackReadDouble = param_stack_init();
-    functionReadString->paramStack = paramStackReadDouble;
+    functionReadDouble->paramStack = paramStackReadDouble;
     symtable_add_item(symtable, functionReadDouble);
+
+    //func write ( term1 , term2 , …, term𝑛 )
+    SymTableItemPtr functionWrite = symtable_item_init();
+    functionWrite->depth = 0;
+    functionWrite->block = 0;
+    functionWrite->id = "write";
+    functionWrite->isDefined = true;
+    functionWrite->isFunction = true;
+    functionWrite->isVar = NULL;
+    functionWrite->value = NULL;
+    functionWrite->type = S_NO_TYPE;
+    //ParamStackPtr paramStackReadDouble = param_stack_init();
+    //functionWrite->paramStack = paramStackReadDouble;
+    symtable_add_item(symtable, functionWrite);
 
     //Int2Double(_ term : Int) -> Double
     SymTableItemPtr functionInt2Double = symtable_item_init();
