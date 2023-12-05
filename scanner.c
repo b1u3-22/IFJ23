@@ -450,6 +450,10 @@ void get_next_token(TokenPtr token) {
             case START:
                 if      (is_number(c))      state = INT;
                 else if (is_letter(c))      state = IDENTIFICATOR;
+                else if (c == '\n') {
+                    state = NL;
+                    true_end = true;
+                } 
                 else if (c == '_')          state = UNDERSCORE;
                 else if (is_space(c))       continue;
                 else if (c == '-')          state = DASH;
@@ -465,10 +469,6 @@ void get_next_token(TokenPtr token) {
                 else if (c == '/')          state = SLASH;
                 else if (is_operator(c)) {
                     state = OP;
-                    true_end = true;
-                } 
-                else if (c == '\n') {
-                    state = NL;
                     true_end = true;
                 } 
                 else                        true_end = true;
