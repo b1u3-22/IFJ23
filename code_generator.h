@@ -48,6 +48,7 @@ static unsigned int while_num = 0;
 static unsigned int while_new = 1;
 
 static SymTableItemPtr temp_sym;
+static char* temp_func;
 
 
 ///// FUNCTIONS /////
@@ -125,7 +126,7 @@ void auxil_qqdecider();
 ///// BUILTIN FUNCTIONS /////
 
 void builtin_read();
-void builtin_write();
+//void builtin_write();
 void builtin_int2float();
 void builtin_float2int();
 void builtin_length();

@@ -31,6 +31,7 @@ TokenStackPtr token_stack_init();
 bool token_stack_push(TokenStackPtr stack, TokenPtr token);
 TokenPtr token_stack_create_token(TokenStackPtr stack);
 bool token_stack_pop(TokenStackPtr stack);
+void token_stack_pop_free(TokenStackPtr stack);
 void token_stack_dispose(TokenStackPtr stack);
 bool token_stack_unget(TokenStackPtr stack);
 TokenPtr token_stack_get(TokenStackPtr stack);

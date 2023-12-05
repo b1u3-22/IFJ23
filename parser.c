@@ -46,8 +46,10 @@ int parse() {
         if (token->type == ERROR) exit(1); // Lexical error occured
         // ===================== Handling of newlines that some things require =====================
         if (token->type == NEWLINE) {
+            if (PARSER_DEBUG) printf("Got new line\n");
             token_stack_pop(token_stack); // Don't save newlines in token_stack
             new_line = true;
+            token = token_stack_get(token_stack);
             continue;
         }
 
@@ -422,9 +424,11 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack, TokenSt
         errors += rule_stack_push(stack, R_BRAC, false, false);
         errors += rule_stack_push(stack, R_F_PAR_F, true, false);
         errors += rule_stack_push(stack, L_BRAC, false, false);
+        errors += rule_stack_push(stack, F_P_POP_2, false, true);
         break;
 
     case 40:
+        errors += rule_stack_push(stack, F_G_SET_VAR, false, true);
         errors += rule_stack_push(stack, F_S_VAL_ASG, false, true);
         errors += rule_stack_push(stack, R_EXPR, true, false);
         errors += rule_stack_push(stack, EQUALS, false, false);
@@ -575,6 +579,14 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
             for (int i = 0; i <= stack_2->tokens_pos; i++){
                 token_stack_push(helper_stack, stack_2->tokens[i]);
             }
+
+            if (PARSER_DEBUG) {
+                printf("CHECK FUNCTION CALL\n");
+                for (int i = 0; i <= helper_stack->tokens_pos; i++) {
+                    printf("Token type: %d, token data: %s\n", helper_stack->tokens[i]->type, helper_stack->tokens[i]->data);
+                }
+            }
+
             if ((return_code = check_function_call(analyzer, helper_stack, false))) exit(return_code);
             free(helper_stack);
             break;
@@ -614,31 +626,26 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
             break;    
         case F_G_FUN_C:
             func_call();
-            if (rule == 39){
-                for (int i = 1; i <= stack_1->tokens_pos; i++){
-                    if (stack_1->tokens[i]->type == ID) {
-                        item = get_nearest_item(analyzer, stack_1->tokens[i]->data);
-                        if (!item) exit(5); // Variable hasn't been declared yet
-                    }
 
-                    else if (stack_1->tokens[i]->type == VALUE) {
-                        item = symtable_item_init();
-                        item->type = stack_1->tokens[i]->value_type;
-                        item->value = stack_1->tokens[i]->data;
-                        item->isLiteral = true;
-                    }
-
-                    func_call_param(item);
-                    symtable_item_dispose(item);
-                    item = NULL;
+            for (int i = 1; i <= stack_3->tokens_pos; i++){
+                if (stack_3->tokens[i]->type == ID) {
+                    item = get_nearest_item(analyzer, stack_3->tokens[i]->data);
+                    if (!item) exit(5); // Variable hasn't been declared yet
                 }
+
+                else if (stack_3->tokens[i]->type == VALUE) {
+                    item = symtable_item_init();
+                    item->type = stack_3->tokens[i]->value_type;
+                    item->value = stack_3->tokens[i]->data;
+                    item->isLiteral = true;
+                }
+
+                func_call_param(item);
+                symtable_item_dispose(item);
+                item = NULL;
             }
-
-            else if (rule == 23) {
-
-            }
-
-            func_call_end(stack_1->tokens[0]->data);
+            
+            func_call_end(stack_2->tokens[0]->data);
             break;    
         case F_G_FUN_E:
             break;  
