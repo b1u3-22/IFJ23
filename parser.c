@@ -617,31 +617,26 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
             break;    
         case F_G_FUN_C:
             func_call();
-            if (rule == 39){
-                for (int i = 1; i <= stack_1->tokens_pos; i++){
-                    if (stack_1->tokens[i]->type == ID) {
-                        item = get_nearest_item(analyzer, stack_1->tokens[i]->data);
-                        if (!item) exit(5); // Variable hasn't been declared yet
-                    }
 
-                    else if (stack_1->tokens[i]->type == VALUE) {
-                        item = symtable_item_init();
-                        item->type = stack_1->tokens[i]->value_type;
-                        item->value = stack_1->tokens[i]->data;
-                        item->isLiteral = true;
-                    }
-
-                    func_call_param(item);
-                    symtable_item_dispose(item);
-                    item = NULL;
+            for (int i = 1; i <= stack_3->tokens_pos; i++){
+                if (stack_3->tokens[i]->type == ID) {
+                    item = get_nearest_item(analyzer, stack_3->tokens[i]->data);
+                    if (!item) exit(5); // Variable hasn't been declared yet
                 }
+
+                else if (stack_3->tokens[i]->type == VALUE) {
+                    item = symtable_item_init();
+                    item->type = stack_3->tokens[i]->value_type;
+                    item->value = stack_3->tokens[i]->data;
+                    item->isLiteral = true;
+                }
+
+                func_call_param(item);
+                symtable_item_dispose(item);
+                item = NULL;
             }
-
-            else if (rule == 23) {
-
-            }
-
-            func_call_end(stack_1->tokens[0]->data);
+            
+            func_call_end(stack_2->tokens[0]->data);
             break;    
         case F_G_FUN_E:
             break;  
