@@ -550,6 +550,9 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
         case F_P_CLEAR_2:
             while (!stack_2->empty) token_stack_pop(stack_2);
             break;
+        case F_P_CLEAR_3:
+            while (!stack_3->empty) token_stack_pop(stack_3);
+            break;
         case F_S_INC_DEP:
             increase_depth(analyzer);
             break;
@@ -665,7 +668,7 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
                 }
 
                 func_call_param(item);
-                symtable_item_dispose(item);
+                //symtable_item_dispose(item);
                 item = NULL;
             }
             
