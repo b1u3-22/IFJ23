@@ -161,6 +161,20 @@ void symtable_add_built_in_functions(SymTablePtr symtable) {
     functionReadDouble->paramStack = paramStackReadDouble;
     symtable_add_item(symtable, functionReadDouble);
 
+    //func write ( term1 , term2 , …, term𝑛 )
+    SymTableItemPtr functionWrite = symtable_item_init();
+    functionWrite->depth = 0;
+    functionWrite->block = 0;
+    functionWrite->id = "write";
+    functionWrite->isDefined = true;
+    functionWrite->isFunction = true;
+    functionWrite->isVar = NULL;
+    functionWrite->value = NULL;
+    functionWrite->type = S_NO_TYPE;
+    //ParamStackPtr paramStackReadDouble = param_stack_init();
+    //functionWrite->paramStack = paramStackReadDouble;
+    symtable_add_item(symtable, functionWrite);
+
     //Int2Double(_ term : Int) -> Double
     SymTableItemPtr functionInt2Double = symtable_item_init();
     functionInt2Double->depth = 0;

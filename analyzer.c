@@ -254,58 +254,75 @@ int check_function_assingment(AnalyzerPtr analyzer, TokenStackPtr token_stack_le
 
 int check_function_call(AnalyzerPtr analyzer, TokenStackPtr token_stack_function, bool calledAsAssignment) {
     
+    // for (int i = 0; i < token_stack_function->tokens_pos+1; i++) {
+    //     printf("[ %s ]\n", token_stack_function->tokens[i]->data);
+    // }
+    
     SymTableItemPtr functionId = symtable_get_function_item(analyzer->symtable, token_stack_function->tokens[0]->data);
     //if function is not defined, push to stack for later check
     if (functionId == NULL) {
         token_stack_push(analyzer->functionStack, token_stack_function->tokens[0]);
         return 0;
+    }
+
+    //write function doesn't have set number of parameters
+    //just check, if parameters are defined
+    if (!strcmp(functionId->id, "write")) {
+        
+        // printf("%d\n", token_stack_function->tokens_pos+1);
+        
+        // for (int i = 0; i < token_stack_function->tokens_pos+1; i++) {
+        //     printf("[ %s ]\n", token_stack_function->tokens[i]->data);
+        // }
+
+        for (int i = 1; i < token_stack_function->tokens_pos+1; i++) {
+            if(token_stack_function->tokens[i]->type != VALUE) { //TOHLE JESTE OTESTOVAT
+                SymTableItemPtr itemToCheck = symtable_get_item_lower_depth_same_block(analyzer->symtable, token_stack_function->tokens[i]->data, analyzer->depth, analyzer->block[analyzer->depth]);
+                if (itemToCheck == NULL || itemToCheck->isDefined == false) return 5;
+            }
+        }
+
+        return 0;
     }    
 
     //Check if parameter count is matching (by count of external names and IDs)
-    int ids1 = 0;
-    int ids2 = 0;
+    int numOfExpectedTokens = 0;
 
     for(int i = 0; i < functionId->paramStack->data_pos+1; i++) {
-        if (!strcmp(functionId->paramStack->data[i]->externalName, "_")) ids1++;
-        else ids1 = ids1 + 2;
+        if (!strcmp(functionId->paramStack->data[i]->externalName, "_")) numOfExpectedTokens++;
+        else numOfExpectedTokens = numOfExpectedTokens + 2;
     }
 
-    for(int i = 1; i < token_stack_function->tokens_pos+1; i++) {
-        if(token_stack_function->tokens[i]->type == ID) ids2++;
-    }
-
-    if (ids1 != ids2) return 4;
-
+    if (numOfExpectedTokens != token_stack_function->tokens_pos) return 4;
+    
     //compare external names and parameters data types
     int j = 1; //token_stack_function->tokens index
 
-    for(int i = 0; i < functionId->paramStack->data_pos+1; i++) {
-        //check if parameter is defined - return 5
-        // TODO
-        // TODO
-        // TODO
-        // TODO
-        // TODO
-        // TODO
-        
+    for(int i = 0; i < functionId->paramStack->data_pos+1; i++) {        
         //check external name
         if (strcmp(functionId->paramStack->data[i]->externalName, "_")) {
             if (strcmp(functionId->paramStack->data[i]->externalName, token_stack_function->tokens[j]->data)) return 4;
             else j++;
         }
 
-        SymTableItemPtr itemToCheck = symtable_get_item_lower_depth_same_block(analyzer->symtable, token_stack_function->tokens[j]->data, analyzer->depth, analyzer->block[analyzer->depth]);
-        if (itemToCheck == NULL || itemToCheck->isDefined == false) return 5;
+        //check if parameter is defined
+        if (token_stack_function->tokens[j]->type != VALUE) {
+            SymTableItemPtr itemToCheck = symtable_get_item_lower_depth_same_block(analyzer->symtable, token_stack_function->tokens[j]->data, analyzer->depth, analyzer->block[analyzer->depth]);
+            if (itemToCheck == NULL || itemToCheck->isDefined == false) return 5;
 
-        //check data type
-        if (functionId->paramStack->data[i]->valueType != itemToCheck->type) return 4;
-        else j++;
+            //check data type
+            if (functionId->paramStack->data[i]->valueType != itemToCheck->type) return 4;
+            else j++;
+        } else {
+            //check data type
+            if (functionId->paramStack->data[i]->valueType == S_DOUBLE && (token_stack_function->tokens[j]->value_type == S_DOUBLE || token_stack_function->tokens[j]->value_type == S_INT)) {
+                j++;
+                continue;
+            }
+            else if (functionId->paramStack->data[i]->valueType != token_stack_function->tokens[j]->value_type) return 4;
+            else j++;
+        }
     }
-
-    //check return types
-    // if (!calledAsAssignment) { //function must be void
-    //     if (functionId->type != S_NO_TYPE) return 4;
-    // }
 
     return 0;
 }

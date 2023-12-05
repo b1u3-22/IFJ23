@@ -18,19 +18,22 @@ void code_header() {
     inst("DEFVAR GF@!tmp_var2");
     inst("DEFVAR GF@!tmp_var3");
     inst("JUMP @&&main");
+    inst("");
 
     auxil_opdecider();
     auxil_divdecider();
     auxil_qqdecider();
+    inst("");
 	
     builtin_read();
-    builtin_write();
+    /*builtin_write();*/
     builtin_int2float();
     builtin_float2int();
     builtin_length();
     builtin_substring();
     builtin_ord();
     builtin_chr();
+    inst("");
 
     inst("LABEL @&&main");
 
@@ -103,18 +106,18 @@ void exp_instruction(int type) {
 void def_var(char *id, int depth) {
 
     if (depth == 0)
-        inst("DEFVAR GF@", id);
+        inst("DEFVAR GF@$", id);
     else
-        inst("DEFVAR LF@", id);
+        inst("DEFVAR LF@$", id);
 
 }
 
 void set_var(SymTableItemPtr var) {
 
     if (var->depth == 0)
-        inst("POPS GF@", var->id);
+        inst("POPS GF@$", var->id);
     else //(sym->frame == LOCAL)
-        inst("POPS LF@", var->id);
+        inst("POPS LF@$", var->id);
 
     /*if (sym->isVar == true) {
 
@@ -136,19 +139,21 @@ void set_var(SymTableItemPtr var) {
 
 void push_sym(SymTableItemPtr sym) {
 
-    if (sym->isVar == true) {
+    if (sym->isLiteral != true) {
 
         if (sym->depth == 0)
-            inst("PUSHS GF@", sym->id);
+            inst("PUSHS GF@$", sym->id);
         else
-            inst("PUSHS LF@", sym->id);
+            inst("PUSHS LF@$", sym->id);
 
     } else if (sym->type == S_INT)
         inst("PUSHS int@", sym->value);
     else if (sym->type == S_DOUBLE)
         inst("PUSHS float@", sym->value);
-    else // (sym->type == S_STRING)
+    else if (sym->type == S_STRING)
         inst("PUSHS string@", sym->value);
+    else // (sym->type == S_NO_TYPE)
+        inst("PUSHS nil@nil");
     /*else //(sym->type == BOOL)
         inst("PUSHS bool@", sym->value);*/
 
@@ -235,8 +240,10 @@ void while_end() {
 void func_start(char* func) {
 
     num = 0;
-    part("LABEL @&", func);
+    inst("JUMP @&&def_", func);
+    inst("LABEL @&", func);
     inst("PUSHFRAME");
+    temp_func = func;
 
 }
 
@@ -252,6 +259,7 @@ void func_end() {
 
     inst("POPFRAME");
     inst("RETURN");
+    inst("LABEL @&&def_", temp_func);
 
 }
 
@@ -267,16 +275,16 @@ void func_call_param(SymTableItemPtr param) {
     part("DEFVAR TF@%%");
     fprintf(stdout, "%d\n", num);
 
-    if (param->isVar == true) {
+    if (param->isLiteral != true) {
 
         if (param->depth == 0) {
             part("MOVE TF@%%");
             fprintf(stdout, "%d", num);
-            inst(" GF@", param->id);
+            inst(" GF@$", param->id);
         } else {
             part("MOVE TF@%%");
             fprintf(stdout, "%d", num);
-            inst(" LF@", param->id);
+            inst(" LF@$", param->id);
         }
 
     } else if (param->type == S_INT) {
@@ -287,10 +295,14 @@ void func_call_param(SymTableItemPtr param) {
         part("MOVE TF@%%");
         fprintf(stdout, "%d", num);
         inst(" float@", param->value);
-    } else { // (param->type == S_STRING)
+    } else if (param->type == S_STRING) {
         part("MOVE TF@%%");
         fprintf(stdout, "%d", num);
         inst(" string@", param->value);
+    } else if (param->type == S_NO_TYPE) {
+        part("MOVE TF@%%");
+        fprintf(stdout, "%d", num);
+        inst(" nil@nil");
     } /*else //(param->type == BOOL)
         inst("MOVE TF@%%", num, " bool@", param->value);*/
 
@@ -300,7 +312,13 @@ void func_call_param(SymTableItemPtr param) {
 
 void func_call_end(char* func) {
 
-    inst("CALL @&", func);
+    if (strcmp(func, "write") == 0) {
+        for (unsigned int i = 0; i < num; i++) {
+            part("WRITE TF@%%");
+            fprintf(stdout, "%d\n", i);
+        }
+    } else
+        inst("CALL @&", func);
 
 }
 
@@ -398,13 +416,13 @@ void builtin_read() {
 
 }
 
-void builtin_write() {
+/*void builtin_write() {
 
     inst("LABEL @&write");
     inst("WRITE TF@%%0");
     inst("RETURN");
 
-}
+}*/
 
 void builtin_int2float() {
 
