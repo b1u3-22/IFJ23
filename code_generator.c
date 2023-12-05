@@ -11,7 +11,7 @@
 
 
 void code_header() {
-    return;
+
     inst(".IFJcode23"); 
     inst("");
     inst("DEFVAR GF@!tmp_var1");
