@@ -15,9 +15,16 @@ void unget_token(TokenPtr token) {
     if (!token || !token->data) return;
     
     ungetc(' ', stdin);
+    if ((token->type == VALUE) && (token->value_type == S_STRING)) {
+        ungetc('\"', stdin);
+    }
     
     for (int i = token->data_len - 2; i >= 0; i--) {
         ungetc(token->data[i], stdin);
+    }
+
+    if ((token->type == VALUE) && (token->value_type == S_STRING)) {
+        ungetc('\"', stdin);
     }
 }
 
