@@ -424,6 +424,7 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack, TokenSt
         errors += rule_stack_push(stack, R_BRAC, false, false);
         errors += rule_stack_push(stack, R_F_PAR_F, true, false);
         errors += rule_stack_push(stack, L_BRAC, false, false);
+        errors += rule_stack_push(stack, F_P_POP_2, false, true);
         break;
 
     case 40:
@@ -578,6 +579,14 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
             for (int i = 0; i <= stack_2->tokens_pos; i++){
                 token_stack_push(helper_stack, stack_2->tokens[i]);
             }
+
+            if (PARSER_DEBUG) {
+                printf("CHECK FUNCTION CALL\n");
+                for (int i = 0; i <= helper_stack->tokens_pos; i++) {
+                    printf("Token type: %d, token data: %s\n", helper_stack->tokens[i]->type, helper_stack->tokens[i]->data);
+                }
+            }
+
             if ((return_code = check_function_call(analyzer, helper_stack, false))) exit(return_code);
             free(helper_stack);
             break;
