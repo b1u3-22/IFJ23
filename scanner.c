@@ -453,7 +453,6 @@ void get_next_token(TokenPtr token) {
                 else if (c == '\n') {
                     state = NL;
                     true_end = true;
-                    do_not_add = true;
                 } 
                 else if (c == '_')          state = UNDERSCORE;
                 else if (is_space(c))       continue;
