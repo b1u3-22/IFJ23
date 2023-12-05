@@ -29,6 +29,8 @@
 #include "expression_stack.h"
 #endif
 
+#define EXPR_DEBUG 0
+
 #define P_TABLE_SIZE 17
 
 enum ExpressionOperation {

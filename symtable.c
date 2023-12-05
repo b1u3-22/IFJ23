@@ -29,6 +29,7 @@ SymTableItemPtr symtable_item_init() {
     item->value = NULL;
     item->paramStack = NULL;
     item->isLiteral = false;
+    item->definedAtFuncAssign = false;
 
     return item;
 }
@@ -103,7 +104,7 @@ void symtable_dispose(SymTablePtr symtable) {
 
 bool symtable_find_parameter_external_name(ParamStackPtr stack, char* externalName) {
     for (int i = 0; i < stack->data_pos+1; i++) {
-        if (stack->data[i]->externalName == externalName) return true;
+        if (!strcmp(stack->data[i]->externalName, externalName)) return true;
     }
 
     return false;
@@ -111,7 +112,7 @@ bool symtable_find_parameter_external_name(ParamStackPtr stack, char* externalNa
 
 bool symtable_find_parameter_id(ParamStackPtr stack, char* id) {
     for (int i = 0; i < stack->data_pos+1; i++) {
-        if (stack->data[i]->id == id) return true;
+        if (!strcmp(stack->data[i]->id, id)) return true;
     }
 
     return false;
