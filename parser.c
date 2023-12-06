@@ -215,7 +215,7 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack, TokenSt
         errors += rule_stack_push(stack, F_P_CLEAR_2, false, true);
         errors += rule_stack_push(stack, F_P_CLEAR_1, false, true);
         errors += rule_stack_push(stack, F_G_SET_VAR, false, true);
-        errors += rule_stack_push(stack, F_P_GEN, false, true);
+        errors += rule_stack_push(stack, F_P_GEN_C, false, true);
         errors += rule_stack_push(stack, F_S_VAR_DEF, false, true);
         errors += rule_stack_push(stack, R_EXPR, true, false);
         errors += rule_stack_push(stack, EQUALS, false, false);
@@ -362,6 +362,7 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack, TokenSt
     case 52:
         errors += token_stack_unget(token_stack);
         errors += rule_stack_push(stack, F_P_GET_T, false, true);
+        errors += rule_stack_push(stack, F_P_GEN, false, true);
         errors += rule_stack_push(stack, F_P_PSA, false, true);
         break;
 
@@ -439,7 +440,7 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack, TokenSt
     case 40:
         errors += rule_stack_push(stack, F_P_CLEAR_1, false, true);
         errors += rule_stack_push(stack, F_G_SET_VAR, false, true);
-        errors += rule_stack_push(stack, F_P_GEN, false, true);
+        errors += rule_stack_push(stack, F_P_GEN_C, false, true);
         errors += rule_stack_push(stack, F_S_VAL_ASG, false, true);
         errors += rule_stack_push(stack, R_EXPR, true, false);
         errors += rule_stack_push(stack, EQUALS, false, false);
@@ -530,11 +531,13 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
             else end_type = END;
             if ((return_code = parse_expression(analyzer, end_type, stack_2, gen_stack))) exit(return_code);
             break;
-        case F_P_GEN:
+        
+        case F_P_GEN_C:
             // check typedef
             if (PARSER_DEBUG) printf("Generate from PSA called\n");
             check_typedef(analyzer, stack_1, gen_stack);
 
+        case F_P_GEN:
             // Generate instructions using code_gen
             for (int i = 0; i <= gen_stack->data_pos; i++) {
                 if (PARSER_DEBUG) printf("GEN STACK ITEM: Op: %d, Data: %s, Type: %d\n", gen_stack->data[i]->op, gen_stack->data[i]->token->data, gen_stack->data[i]->token->value_type);
@@ -542,7 +545,9 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
                     exp_instruction(gen_stack->data[i]->token->type);
                 }
                 else if (gen_stack->data[i]->token->type == ID) {
-                    push_sym(get_nearest_item(analyzer, gen_stack->data[i]->token->data));
+                    item = get_nearest_item(analyzer, gen_stack->data[i]->token->data);
+                    if (!item) exit(5);
+                    push_sym(item);
                 }
                 else if (gen_stack->data[i]->token->type == VALUE) {
                     item = symtable_item_init();
