@@ -226,7 +226,7 @@ void parse_block_comment_out(int c, scanner_states* state, TokenPtr token, int* 
     }
 }
 
-void parse_str(int c, scanner_states* state, bool* true_end, bool* do_not_add) {
+void parse_str(int c, scanner_states* state, bool* true_end, bool* do_not_add, TokenPtr token) {
     if (c == '\"') {
         *state = C_STR;
         *do_not_add = true;
@@ -235,6 +235,13 @@ void parse_str(int c, scanner_states* state, bool* true_end, bool* do_not_add) {
     else if (c == '\\') {
         *state = SLASH_IN_STR;
         *do_not_add = true;
+    } else if (c == ' ') {
+        *do_not_add = true;
+        token_add_data(token, '\\');
+        token_add_data(token, '0');
+        token_add_data(token, '3');
+        token_add_data(token, '2');
+        *state = SIMPLE_STR_IN;
     }
     else *state = SIMPLE_STR_IN;
 }
@@ -283,7 +290,7 @@ void parse_c_str_ee(int c, scanner_states* state, bool *true_end, bool* do_not_a
 }
 
 /* inside simple string, received at least one letter */
-void parse_simple_str_in(int c, scanner_states* state, bool* true_end, bool* end, bool* do_not_add) {
+void parse_simple_str_in(int c, scanner_states* state, bool* true_end, bool* end, bool* do_not_add, TokenPtr token) {
     if (c == '\"') {
         *state = SIMPLE_STR;
         *true_end = true;
@@ -293,6 +300,12 @@ void parse_simple_str_in(int c, scanner_states* state, bool* true_end, bool* end
     } else if (c == '\\') {
         *state = SLASH_IN_STR;
         *do_not_add = true;
+    } else if (c == ' ') {
+        *do_not_add = true;
+        token_add_data(token, '\\');
+        token_add_data(token, '0');
+        token_add_data(token, '3');
+        token_add_data(token, '2');
     }
 }
 
@@ -528,7 +541,7 @@ void get_next_token(TokenPtr token) {
                 parse_flpe(c, &end);
                 break;
             case STR: // got double quotation mark
-                parse_str(c, &state, &true_end, &do_not_add);
+                parse_str(c, &state, &true_end, &do_not_add, token);
                 break;
             case DASH:
                 parse_dash(c, &state, &true_end, &end);
@@ -567,7 +580,7 @@ void get_next_token(TokenPtr token) {
                 parse_c_str(c, &state, &end, &do_not_add);
                 break;
             case SIMPLE_STR_IN:
-                parse_simple_str_in(c, &state, &true_end, &end, &do_not_add);
+                parse_simple_str_in(c, &state, &true_end, &end, &do_not_add, token);
                 break;
             case C_STR_IN:
                 parse_c_str_in(c, &state, &do_not_add);
