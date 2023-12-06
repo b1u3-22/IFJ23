@@ -10,7 +10,7 @@ run: all
 clean:
 	rm -rf ./*.o
 
-parser: parser.o token.o rule_stack.o scanner.o expression.o expression_stack.o token_stack.o analyzer.o symtable.o param_stack.o code_generator.o
+parser: parser.o token.o rule_stack.o scanner.o expression.o expression_stack.o token_stack.o analyzer.o symtable.o param_stack.o code_generator.o gen_stack.o
 	$(CC) $(LDFLAGS) -o $@ $^ 
 
 scanner: scanner.o token.o
@@ -31,7 +31,7 @@ symtable.o: symtable.h symtable.c
 parser.o: parser.h parser.c rule_stack.h token.h scanner.h expression.h expression_stack.h token_stack.h analyzer.h symtable.h param_stack.h code_generator.h
 	$(CC) $(CFLAGS) -c -o $@ parser.c
 
-expression.o: expression.h expression.c token.h scanner.h expression_stack.h code_generator.h
+expression.o: expression.h expression.c token.h scanner.h expression_stack.h code_generator.h gen_stack.h
 	$(CC) $(CFLAGS) -c -o $@ expression.c
 
 expression_stack.o: expression_stack.h expression_stack.c
@@ -48,3 +48,6 @@ param_stack.o: param_stack.h param_stack.c
 
 code_generator.o: code_generator.h code_generator.c expression.h
 	$(CC) $(CFLAGS) -c -o $@ code_generator.c
+
+gen_stack.o: gen_stack.h gen_stack.c token.h
+	$(CC) $(CFLAGS) -c -o $@ gen_stack.c

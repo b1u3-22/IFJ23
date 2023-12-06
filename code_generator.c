@@ -27,7 +27,7 @@ void code_header() {
     inst("");
 	
     builtin_read();
-    //builtin_write();
+    // builtin_write() defined inside program
     builtin_int2float();
     builtin_float2int();
     builtin_length();
@@ -123,22 +123,6 @@ void set_var(SymTableItemPtr var) {
     else //(sym->frame == LOCAL)
         inst("POPS LF@$", var->id);
 
-    /*if (sym->isVar == true) {
-
-        if (sym->depth == 0)
-            inst(" GF@", sym->id);
-        else //(sym->depth == LOCAL)
-            inst(" LF@", sym->id);
-
-    } else if (sym->type == S_INT)
-        inst(" int@", sym->value);
-    else if (sym->type == S_DOUBLE)
-        inst(" float@", sym->value);
-    else // (sym->type == S_STRING)
-        inst(" string@", sym->value);
-    else //(sym->type == BOOL)
-        inst(" bool@", sym->value);*/
-
 }
 
 void push_sym(SymTableItemPtr sym) {
@@ -152,8 +136,10 @@ void push_sym(SymTableItemPtr sym) {
 
     } else if (sym->type == S_INT)
         inst("PUSHS int@", sym->value);
-    else if (sym->type == S_DOUBLE)
-        inst("PUSHS float@", sym->value);
+    else if (sym->type == S_DOUBLE) {
+        part("PUSHS float@");
+        fprintf(stdout, "%a\n", atof(sym->value));
+    }
     else if (sym->type == S_STRING)
         inst("PUSHS string@", sym->value);
     else // (sym->type == S_NO_TYPE)
