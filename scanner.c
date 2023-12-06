@@ -726,14 +726,14 @@ void get_next_token(TokenPtr token) {
     get_token_type(state, c, token);
 }
 
-int main() {
-    TokenPtr token = token_init();
-    get_next_token(token);
+// int main() {
+//     TokenPtr token = token_init();
+//     get_next_token(token);
         
-    while (token->type != END) {
-        printf("TYPE: %d, DATA: %s, SPECIAL TYPE: %d\n", token->type, token->data, token->value_type);
-        token_clear(token);    
-        get_next_token(token);
+//     while (token->type != END) {
+//         printf("TYPE: %d, DATA: %s, SPECIAL TYPE: %d\n", token->type, token->data, token->value_type);
+//         token_clear(token);    
+//         get_next_token(token);
        
-   }
-} 
+//    }
+// } 
