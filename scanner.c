@@ -231,7 +231,7 @@ void parse_str(int c, scanner_states* state, bool* true_end, bool* do_not_add, T
         *state = C_STR;
         *do_not_add = true;
     }
-    else if (c == '\n') *true_end = true;
+    else if (c <= 31) *true_end = true;
     else if (c == '\\') {
         *state = SLASH_IN_STR;
         *do_not_add = true;
@@ -374,8 +374,9 @@ void parse_slash_in_str(int c, scanner_states* state, bool* end, bool* do_not_ad
             token_add_data(token, '\"');
             break;
         case 'u':
+            *do_not_add = true;
             *state = U_IN_STR;
-            break;
+            return;
         default:
             *end = true;
     }
@@ -384,24 +385,49 @@ void parse_slash_in_str(int c, scanner_states* state, bool* end, bool* do_not_ad
     *do_not_add = true;
 }
 
-void parse_u_in_str(int c, scanner_states* state, bool* end) {
-    if (c == '{') *state = U1;
+void parse_u_in_str(int c, scanner_states* state, bool* end, bool* do_not_add) {
+    if (c == '{') {
+        *state = U1;
+        *do_not_add = true;
+    } else *end = true;
+}
+
+void parse_u1(int c, scanner_states* state, bool* end, bool* do_not_add, char* u1) {
+    if (((c >= '0') && (c <= '9')) || ((c >= 'a') && (c <= 'f')) || ((c >= 'A') && (c <= 'F'))) {
+        *state = U2;
+        *u1 = c;
+        *do_not_add = true;
+    }
     else *end = true;
 }
 
-void parse_u1(int c, scanner_states* state, bool* end) {
-    if (((c >= '0') && (c <= '9')) || ((c >= 'a') && (c <= 'f')) || ((c >= 'A') && (c <= 'F'))) *state = U2;
+void parse_u2(int c, scanner_states* state, bool* end, bool* do_not_add, char* u2) {
+    if (((c >= '0') && (c <= '9')) || ((c >= 'a') && (c <= 'f')) || ((c >= 'A') && (c <= 'F'))) {
+        *state = U3;
+        *u2 = c;
+        *do_not_add = true;
+    }
     else *end = true;
 }
 
-void parse_u2(int c, scanner_states* state, bool* end) {
-    if (((c >= '0') && (c <= '9')) || ((c >= 'a') && (c <= 'f')) || ((c >= 'A') && (c <= 'F'))) *state = U3;
+void parse_u3(int c, scanner_states* state, bool* end, bool* do_not_add) {
+    if (c == '}') {
+        *state = SIMPLE_STR_IN;
+        *do_not_add = true;
+    }
     else *end = true;
 }
 
-void parse_u3(int c, scanner_states* state, bool* end) {
-    if (c == '}') *state = SIMPLE_STR_IN;
-    else *end = true;
+int hex_to_dec(char u, bool second) {
+    int p = 0;
+    if ((u >= '0') && (u <= '9')) p = u - 48; // zero is ASCII 48
+    else if ((u >= 'A') && (u <= 'F')) p = u - 55; // A is 65 in ascii and represents 10
+    else if ((u >= 'a') && (u <= 'f')) p = u - 87; // a is 97 in ascii and represents 10
+    
+    if (second) {
+        return p * 16;
+    } 
+    return p;
 }
 
 
@@ -514,8 +540,11 @@ void get_next_token(TokenPtr token) {
     token->type = ERROR;
     bool do_not_add = false;
     bool manual_add = false;
+    char u1;
+    char u2;
+    int u_sum;
 
-    while (true) {     
+    while (true) {   
         c = getchar(); 
         if (c == EOF) break;
 
@@ -647,16 +676,26 @@ void get_next_token(TokenPtr token) {
                 parse_slash_in_str(c, &state, &end, &do_not_add, token);
                 break;
             case U_IN_STR:
-                parse_u_in_str(c, &state, &end);
+                parse_u_in_str(c, &state, &end, &do_not_add);
                 break;
             case U1:
-                parse_u1(c, &state, &end);
+                parse_u1(c, &state, &end, &do_not_add, &u1);
                 break;
             case U2:
-                parse_u2(c, &state, &end);
+                parse_u2(c, &state, &end, &do_not_add, &u2);
                 break;
             case U3:
-                parse_u3(c, &state, &end);
+                parse_u3(c, &state, &end, &do_not_add);
+                u_sum = hex_to_dec(u1, true);
+                u_sum += hex_to_dec(u2, false);
+
+                token_add_data(token, '\\');
+                token_add_data(token, (u_sum / 100) + '0');
+                u_sum = u_sum % 100;
+                token_add_data(token, (u_sum / 10) + '0');
+                u_sum = u_sum % 10;
+                token_add_data(token, (u_sum) + '0');
+                
                 break;
             default: break;
         }
