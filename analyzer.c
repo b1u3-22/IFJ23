@@ -10,11 +10,18 @@ AnalyzerPtr analyzer_init(SymTablePtr symtable) {
     AnalyzerPtr analyzer = malloc(sizeof(struct Analyzer));
     if (!analyzer) return NULL; // Alocation and check
 
+    analyzer->block = calloc(ANALYZER_ALLOCK_BLOCK, sizeof(int));
+    if (!analyzer->block) {
+        free(analyzer);
+        return NULL;
+    }
+
     //create function stack
     TokenStackPtr functionStack = token_stack_init();
 
     // Set properties
     analyzer->depth = 0;
+    analyzer->block_allocd = ANALYZER_ALLOCK_BLOCK;
     analyzer->symtable = symtable;
     analyzer->functionStack = functionStack;
 
@@ -355,6 +362,20 @@ int check_return(AnalyzerPtr analyzer, TokenStackPtr token_stack) {
 
 void increase_depth(AnalyzerPtr analyzer) {
     analyzer->depth++;
+
+    // Allocate more memory for block if we hit the allocd limit
+    if (analyzer->depth >= analyzer->block_allocd) {
+        int *temp_block = realloc(analyzer->block, (analyzer->block_allocd + ANALYZER_ALLOCK_BLOCK) * sizeof(int));
+        if (!temp_block) return; // Reallocation failed
+        analyzer->block = temp_block;
+        analyzer->block_allocd += ANALYZER_ALLOCK_BLOCK;
+
+        // Initialize the memory to 0
+        for (int i = analyzer->depth; i < analyzer->block_allocd; i++) {
+            analyzer->block[i] = 0;
+        }
+    }
+
     analyzer->block[analyzer->depth]++;
 }
 
