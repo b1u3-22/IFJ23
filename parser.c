@@ -326,6 +326,7 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack, TokenSt
 
     case 19:
         errors += rule_stack_push(stack, ID, false, false);
+        errors += rule_stack_push(stack, F_G_IF_N, false, true);
         errors += rule_stack_push(stack, LET, false, false);
         break;
 
@@ -627,6 +628,12 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
             break;  
         case F_G_PUSH:
             break;     
+        case F_G_IF_N:
+            item = get_nearest_item(analyzer, token->data);
+            if (!item) exit(5);
+            push_sym(item);
+            exp_instruction(E_NUL);
+            break;
         case F_G_IF_S:
             if_check();
             break;     

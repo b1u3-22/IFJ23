@@ -23,6 +23,7 @@ void code_header() {
     auxil_opdecider();
     auxil_divdecider();
     auxil_qqdecider();
+    auxil_letdecider();
     inst("");
 	
     builtin_read();
@@ -96,6 +97,9 @@ void exp_instruction(int type) {
             break;
         case E_EXC:
             inst("NOTS");
+            break;
+        case E_NUL:
+            inst("CALL &&letdecider");
             break;
         default:
             break;
@@ -171,10 +175,16 @@ void confirm_sym() {
 
 }
 
+void check_var() {
+
+    push_sym(temp_sym);
+
+}
+
 void if_check() {
 
     inst("POPS GF@!tmp_var1");
-    part("JUMPIFEQ @_if");
+    part("JUMPIFEQ _if");
     fprintf(stdout, "%d", if_new); 
     inst(" bool@false GF@!tmp_var1");
 
@@ -188,9 +198,9 @@ void if_check() {
 void if_end() { // else_start
 
     inst("POPFRAME");
-    part("JUMP @_else");
+    part("JUMP _else");
     fprintf(stdout, "%d\n", if_num);
-    part("LABEL @_if");
+    part("LABEL _if");
     fprintf(stdout, "%d\n", if_num);
 
     inst("CREATEFRAME");
@@ -201,14 +211,14 @@ void if_end() { // else_start
 void if_else_end() {
 
     inst("POPFRAME");
-    part("LABEL @_else");
+    part("LABEL _else");
     fprintf(stdout, "%d\n", if_num--);
 
 }
 
 void while_start() {
 
-    part("LABEL @_while");
+    part("LABEL _while");
     fprintf(stdout, "%d\n", while_new);
 
     while_num = while_new++;
@@ -218,7 +228,7 @@ void while_start() {
 void while_check() {
 
     inst("POPS GF@!tmp_var1");
-    part("JUMPIFEQ @_whilend");
+    part("JUMPIFEQ _whilend");
     fprintf(stdout, "%d", while_num);
     inst(" bool@false GF@!tmp_var1");
 
@@ -229,10 +239,10 @@ void while_check() {
 
 void while_end() {
 
-    inst("POPFRAME\n");
-    part("JUMP @_while");
-    fprintf(stdout, "%d", while_num);
-    part("LABEL @_whilend");
+    inst("POPFRAME");
+    part("JUMP _while");
+    fprintf(stdout, "%d\n", while_num);
+    part("LABEL _whilend");
     fprintf(stdout, "%d\n", while_num--);
 
 }
@@ -388,6 +398,23 @@ void auxil_qqdecider() {
     inst("PUSHS GF@!tmp_var2");
 	
     inst("LABEL &&qqend");
+    inst("RETURN");
+
+}
+
+void auxil_letdecider() {
+
+    inst("LABEL &&letdecider");
+    inst("POPS GF@!tmp_var1");
+    inst("JUMPIFEQ &&let GF@!tmp_var1 nil@nil");
+	
+    inst("PUSHS bool@true");
+    inst("JUMP &&letend");
+	
+    inst("LABEL &&let");
+    inst("PUSHS bool@false");
+	
+    inst("LABEL &&letend");
     inst("RETURN");
 
 }
