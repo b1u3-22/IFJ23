@@ -28,39 +28,27 @@ void unget_token(TokenPtr token) {
     }
 }
 
-/* Using the ASCII codes, check whether provided char is a number 0-9.
-    parameters:
-        - char s - the char you want to check
-    return value:
-        - true if s is a number
-        - false if s is not a number
-*/
+void manual_add_newline(TokenPtr token) {
+    token_add_data(token, '\\');
+    token_add_data(token, '0');
+    token_add_data(token, '1');
+    token_add_data(token, '0');
+}
+
+
 static bool is_number(char s) {
     return ((s >= '0') && (s <= '9'));
 }
 
-/* Using the ASCII codes, check whether provided char is a letter A-Z, a-z.
-    parameters:
-        - char s - the char you want to check
-    return value:
-        - true if s is a letter
-        - false if s is not a letter
-*/
 static bool is_letter(char s) {
     return (((s >= 'A') && (s <= 'Z')) || ((s >= 'a') && (s <= 'z')));
 }
 
-/* Check whether provided char is a blank space (space, tab, etc.).
-    parameters:
-        - char s - the char you want to check
-    return value:
-        - true if s is a space
-        - false if s is not a space*/
 static bool is_space(char s) {
     return isspace(s);
 }
 
-static bool is_operator(char s) {
+static bool is_special(char s) {
     int i = 0;
     while (ALLOWED_OPERATORS_AND_SPECIAL_SYMBOLS[i]) {
         if (s == ALLOWED_OPERATORS_AND_SPECIAL_SYMBOLS[i]) return true;
@@ -242,6 +230,13 @@ void parse_str(int c, scanner_states* state, bool* true_end, bool* do_not_add, T
         token_add_data(token, '3');
         token_add_data(token, '2');
         *state = SIMPLE_STR_IN;
+    } else if (c == '#') {
+        *do_not_add = true;
+        token_add_data(token, '\\');
+        token_add_data(token, '0');
+        token_add_data(token, '3');
+        token_add_data(token, '5');
+        *state = SIMPLE_STR_IN;
     }
     else *state = SIMPLE_STR_IN;
 }
@@ -266,11 +261,26 @@ void parse_c_str_nl(int c, scanner_states* state, bool* end, bool* do_not_add) {
 }
 
 /* inside complex string */
-void parse_c_str_in(int c, scanner_states* state, bool *do_not_add) {
+void parse_c_str_in(int c, scanner_states* state, bool *do_not_add, TokenPtr token) {
     if (c == '\n') {
         *state = C_STR_NL_E;
         *do_not_add = true;
     } else if (c == '\"') *state = QM1;
+    else if (c == '#') {
+        *do_not_add = true;
+        token_add_data(token, '\\');
+        token_add_data(token, '0');
+        token_add_data(token, '3');
+        token_add_data(token, '5');
+    } else if (c <= 32) {
+        *do_not_add = true;
+        int u_sum = c;
+        token_add_data(token, '\\');
+        token_add_data(token, '0');
+        token_add_data(token, (u_sum / 10) + '0');
+        u_sum = u_sum % 10;
+        token_add_data(token, (u_sum) + '0');
+    }
 }
 
 void parse_qm1(int c, scanner_states* state) {
@@ -285,13 +295,15 @@ void parse_qm2(int c, scanner_states* state, bool* true_end) {
     } else *state = C_STR_IN;
 }
 
-void parse_c_str_nl_e(int c, scanner_states* state, bool* do_not_add, bool* manual_add) {
+void parse_c_str_nl_e(int c, scanner_states* state, bool* do_not_add, TokenPtr token) {
     if (c == '\"') {
         *state = C_STR_E;
         *do_not_add = true;
     } else {
+        manual_add_newline(token);
+        ungetc(c, stdin);
         *state = C_STR_IN;
-        *manual_add = true;
+        *do_not_add = true;
     }
 }
 
@@ -325,7 +337,7 @@ void parse_simple_str_in(int c, scanner_states* state, bool* true_end, bool* end
         *state = SIMPLE_STR;
         *true_end = true;
         *do_not_add = true;
-    } else if (c == '\n') {
+    } else if (c <= 31) {
         *end = true;
     } else if (c == '\\') {
         *state = SLASH_IN_STR;
@@ -336,6 +348,12 @@ void parse_simple_str_in(int c, scanner_states* state, bool* true_end, bool* end
         token_add_data(token, '0');
         token_add_data(token, '3');
         token_add_data(token, '2');
+    } else if (c == '#') {
+        *do_not_add = true;
+        token_add_data(token, '\\');
+        token_add_data(token, '0');
+        token_add_data(token, '3');
+        token_add_data(token, '5');
     }
 }
 
@@ -353,10 +371,7 @@ void parse_slash_in_str(int c, scanner_states* state, bool* end, bool* do_not_ad
             token_add_data(token, '2');
             break;
         case 'n':
-            token_add_data(token, '\\');
-            token_add_data(token, '0');
-            token_add_data(token, '1');
-            token_add_data(token, '0');
+            manual_add_newline(token);      
             break;
         case 't':
             token_add_data(token, '\\');
@@ -381,7 +396,7 @@ void parse_slash_in_str(int c, scanner_states* state, bool* end, bool* do_not_ad
             *end = true;
     }
 
-    *state = STR;
+    *state = SIMPLE_STR_IN;
     *do_not_add = true;
 }
 
@@ -429,6 +444,8 @@ int hex_to_dec(char u, bool second) {
     } 
     return p;
 }
+
+
 
 
 void get_token_type(scanner_states state, char c, TokenPtr token) {
@@ -521,11 +538,14 @@ void get_token_type(scanner_states state, char c, TokenPtr token) {
         if (state == C_STR) {
             token->type = VALUE;
             token->value_type = S_STRING;
+        } else if (state == LINE_COMMENT) {
+            token->type = END;
+        } 
+        else {
+            token->type = ERROR;
         }
     }
 }
-
-
 
 
 
@@ -544,10 +564,9 @@ void get_next_token(TokenPtr token) {
     char u2;
     int u_sum;
 
-    while (true) {   
+    while (true) {
         c = getchar(); 
         if (c == EOF) break;
-
         switch (state) {
             case START:
                 if      (is_number(c))      state = INT;
@@ -569,37 +588,37 @@ void get_next_token(TokenPtr token) {
                 else if (c == '<')          state = LESS;
                 else if (c == '>')          state = LARGER;
                 else if (c == '/')          state = SLASH;
-                else if (is_operator(c)) {
+                else if (is_special(c)) {
                     state = OP;
                     true_end = true;
                 } 
                 else                        true_end = true;
                 break;
-            case IDENTIFICATOR: // IDEN
+            case IDENTIFICATOR: 
                 parse_id(c, &state, &true_end, &end);
                 break;
-            case UNDERSCORE: // read '_', expecting letters/numbers/_, becomes IDEN
+            case UNDERSCORE: 
                 parse_underscore(c, &state, &end);
                 break;
             case INT:
                 parse_int(c, &state, &end);
                 break;
-            case INT_FLP: // read INT, now got the floating part, expecting one numberc,
+            case INT_FLP:
                 parse_int_flp(c, &state, &true_end);
                 break;
-            case FLP: // got one number after dot, now just load all the numbers after that
+            case FLP: 
                 parse_flp(c, &state, &end);
                 break;
-            case FLP_E: // read INT, now got e
+            case FLP_E:
                 parse_flp_e(c, &state, &true_end);
                 break;
-            case FLP_ES: // read sign (+,-) after e, expecting a number
+            case FLP_ES: 
                 parse_flp_es(c, &state, &true_end);
                 break;
-            case FLPE: // numbers after e
+            case FLPE:
                 parse_flpe(c, &end);
                 break;
-            case STR: // got double quotation mark
+            case STR: 
                 parse_str(c, &state, &true_end, &do_not_add, token);
                 break;
             case DASH:
@@ -642,7 +661,7 @@ void get_next_token(TokenPtr token) {
                 parse_simple_str_in(c, &state, &true_end, &end, &do_not_add, token);
                 break;
             case C_STR_IN:
-                parse_c_str_in(c, &state, &do_not_add);
+                parse_c_str_in(c, &state, &do_not_add, token);
                 break;
             case QM1:
                 parse_qm1(c, &state);
@@ -654,20 +673,19 @@ void get_next_token(TokenPtr token) {
                 parse_c_str_nl(c, &state, &end, &do_not_add);
                 break;
             case C_STR_NL_E:
-                parse_c_str_nl_e(c, &state, &do_not_add, &manual_add);
-                if (manual_add) token_add_data(token, '\n');
+                parse_c_str_nl_e(c, &state, &do_not_add, token);
                 break;
             case C_STR_E:
                 parse_c_str_e(c, &state, &do_not_add, &manual_add);
                 if (manual_add) {
-                    token_add_data(token, '\n');
+                    manual_add_newline(token);
                     token_add_data(token, '\"');
                 }
                 break;
             case C_STR_EE:
                 parse_c_str_ee(c, &state, &true_end, &do_not_add, &manual_add);
                 if (manual_add) {
-                    token_add_data(token, '\n');
+                    manual_add_newline(token);
                     token_add_data(token, '\"');
                     token_add_data(token, '\"');
                 }
@@ -736,4 +754,5 @@ void get_next_token(TokenPtr token) {
 //         get_next_token(token);
        
 //    }
+//         printf("TYPE: %d, DATA: %s, SPECIAL TYPE: %d\n", token->type, token->data, token->value_type);
 // } 
