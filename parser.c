@@ -286,8 +286,9 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack, TokenSt
         errors += rule_stack_push(stack, R_BODY, true, false);
         errors += rule_stack_push(stack, F_S_INC_DEP, false, true);
         errors += rule_stack_push(stack, L_CBRAC, false, false);
-        errors += rule_stack_push(stack, F_G_W_S, false, true);
+        errors += rule_stack_push(stack, F_G_W_C, false, true);
         errors += rule_stack_push(stack, R_CON_DEF, true, false);
+        errors += rule_stack_push(stack, F_G_W_S, false, true);
         errors += rule_stack_push(stack, WHILE, false, false);
         break;
 
@@ -319,8 +320,9 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack, TokenSt
         errors += rule_stack_push(stack, R_BODY, true, false);
         errors += rule_stack_push(stack, F_S_INC_DEP, false, true);
         errors += rule_stack_push(stack, L_CBRAC, false, false);
-        errors += rule_stack_push(stack, F_G_W_S, false, true);
+        errors += rule_stack_push(stack, F_G_W_C, false, true);
         errors += rule_stack_push(stack, R_CON_DEF, true, false);
+        errors += rule_stack_push(stack, F_G_W_S, false, true);
         errors += rule_stack_push(stack, WHILE, false, false);
         break;
 
@@ -435,6 +437,7 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack, TokenSt
         break;
 
     case 40:
+        errors += rule_stack_push(stack, F_P_CLEAR_1, false, true);
         errors += rule_stack_push(stack, F_G_SET_VAR, false, true);
         errors += rule_stack_push(stack, F_S_VAL_ASG, false, true);
         errors += rule_stack_push(stack, R_EXPR, true, false);
@@ -644,6 +647,9 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
             if_else_end();
             break;     
         case F_G_W_S:
+            while_start();
+            break;     
+        case F_G_W_C:
             while_check();
             break;     
         case F_G_W_E:

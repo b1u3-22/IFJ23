@@ -27,9 +27,12 @@
 #include "token.h"
 #endif
 
+#define ANALYZER_ALLOCK_BLOCK 3
+
 typedef struct Analyzer {
     int depth;
-    int block[1000];
+    int *block;
+    int block_allocd;
     SymTablePtr symtable;
     TokenStackPtr functionStack;
 } *AnalyzerPtr;
