@@ -338,6 +338,7 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack, TokenSt
         break;
 
     case 23:
+        errors += rule_stack_push(stack, F_P_CLEAR_3, false, true);
         errors += rule_stack_push(stack, F_P_CLEAR_2, false, true);
         errors += rule_stack_push(stack, F_P_CLEAR_1, false, true);
         errors += rule_stack_push(stack, F_G_FUN_C, false, true);
@@ -544,6 +545,9 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
         case F_P_POP_2:
             token_stack_pop(stack_2);
             break;
+        case F_P_POP_3:
+            token_stack_pop(stack_3);
+            break;
         case F_P_CLEAR_1:
             while (!stack_1->empty) token_stack_pop(stack_1);
             break;
@@ -607,7 +611,19 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
             def_var(stack_1->tokens[1]->data, analyzer->depth);
             break;  
         case F_G_SET_VAR:
-            set_var(get_nearest_item(analyzer, stack_1->tokens[1]->data));
+            if (PARSER_DEBUG) {
+                printf("GENERATE SET VAR STACK 1:\n");
+                for (int i = 0; i <= stack_1->tokens_pos; i++){
+                    printf("[%d] Token data: %s\n", i, stack_1->tokens[i]->data);
+                }
+            }
+            if (stack_1->tokens[0]->type == VAR || stack_1->tokens[0]->type == LET) {
+                set_var(get_nearest_item(analyzer, stack_1->tokens[1]->data));
+            }
+            else {
+                set_var(get_nearest_item(analyzer, stack_1->tokens[0]->data));
+            }
+            
             break;  
         case F_G_PUSH:
             break;     
