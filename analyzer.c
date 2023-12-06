@@ -309,20 +309,6 @@ int check_return(AnalyzerPtr analyzer, TokenStackPtr token_stack) {
 int check_condition(AnalyzerPtr analyzer, TokenStackPtr token_stack) {
     
     if (check_is_not_defined(analyzer, token_stack)) return 5;
-    
-    // //set data_type
-    // int data_type;
-    // if (token_stack->top->type == ID) {     //there's variable at top
-    //     SymTableItemPtr item = symtable_get_item_lower_depth_same_block(analyzer->symtable, token_stack->top->data, analyzer->depth, analyzer->block[analyzer->depth]);
-    //     data_type = item->type;
-    // } else {    //there's literal at top
-    //     data_type = token_stack->top->value_type;
-    // }
-
-    // //check if data types are ctompaible
-    // for (int i = 0; i < token_stack->tokens_pos+1; i++) {
-    //     if (check_data_type(analyzer, token_stack->tokens[i], data_type)) return 7;
-    // }
 
     return 0;
 }
