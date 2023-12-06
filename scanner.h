@@ -64,8 +64,6 @@ typedef enum {
     U3
 } scanner_states;
 
-static const char ALLOWED_BACKSLASH_CHARS[] = {'\"', 'n', 't', 'r', '\\', '\0'};  // WARNING: do not remove '\0',
-                                                                                // it's used to check the end of the array
 
 static const char ALLOWED_OPERATORS_AND_SPECIAL_SYMBOLS[] = {'+', '*', '(', ')', '{', '}', ',', ':', '\0'}; // WARNING_ do nor remove '\0
 
