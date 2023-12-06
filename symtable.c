@@ -30,6 +30,7 @@ SymTableItemPtr symtable_item_init() {
     item->paramStack = NULL;
     item->isLiteral = false;
     item->definedAtFuncAssign = false;
+    item->isNil = false;
 
     return item;
 }
