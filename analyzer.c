@@ -167,7 +167,7 @@ int check_function_assingment(AnalyzerPtr analyzer, TokenStackPtr token_stack_le
     }
 
     //semantic checks for function
-    int error = check_function_call(analyzer, token_stack_function, true);
+    int error = check_function_call(analyzer, token_stack_function);
     if (error)
     {
         return error;
