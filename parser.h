@@ -100,6 +100,7 @@ enum Function {
     F_S_FUN_ASG,    // Check function assigment with analyzer   e.g. a = b(5, a : c)   
     F_S_FUN_CAL,    // Check function call
     F_S_FUN_DEF,    // Check function definition
+    F_S_CON_C,       // Check condition
     F_G_DEF_VAR,    // Generate variable definition
     F_G_SET_VAR,    // Generate variable assigment
     F_G_PUSH,       // Push value into generator stack

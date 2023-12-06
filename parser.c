@@ -365,6 +365,12 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack, TokenSt
         errors += token_stack_unget(token_stack);
 
     case 20:  
+        errors += token_stack_unget(token_stack);
+        errors += rule_stack_push(stack, F_P_GET_T, false, true);
+        errors += rule_stack_push(stack, F_P_GEN, false, true);
+        errors += rule_stack_push(stack, F_S_CON_C, false, true);
+        errors += rule_stack_push(stack, F_P_PSA, false, true);
+        break;
     case 22:  
     case 52:
         errors += token_stack_unget(token_stack);
@@ -654,12 +660,21 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
                 }
             }
 
-            if ((return_code = check_function_call(analyzer, helper_stack))) exit(return_code);
+            if ((return_code = check_function_call(analyzer, helper_stack, false))) exit(return_code);
             free(helper_stack);
             break;
         case F_S_FUN_DEF:
             if ((return_code = check_function_definition(analyzer, stack_1, stack_2))) exit(return_code);
             (*func_ass)++;
+            break;
+        case F_S_CON_C:
+            if (PARSER_DEBUG) {
+                printf("CHECK CONDITION\n");
+                for (int i = 0; i <= stack_2->tokens_pos; i++) {
+                    printf("Token type: %d, token data: %s\n", stack_2->tokens[i]->type, stack_2->tokens[i]->data);
+                }
+            }
+            check_condition(analyzer, stack_2);
             break;
         case F_G_DEF_VAR:
             def_var(stack_1->tokens[1]->data, analyzer->depth);
