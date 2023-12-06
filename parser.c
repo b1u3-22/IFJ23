@@ -678,6 +678,7 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
             break;
         case F_G_DEF_VAR:
             def_var(stack_1->tokens[1]->data, analyzer->depth, analyzer->block[analyzer->depth]);
+            //def_var(stack_1->tokens[1]->data, analyzer->depth);
             break;  
         case F_G_SET_VAR:
             if (PARSER_DEBUG) {
@@ -724,7 +725,7 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
             func_start(stack_1->tokens[0]->data);
             SymTableItemPtr func_item = symtable_get_function_item(analyzer->symtable, stack_1->tokens[0]->data);
             for (int param = 0; param <= func_item->paramStack->data_pos; param++){
-                func_param(func_item->paramStack->data[param]);
+                func_param(func_item->paramStack->data[param], analyzer->depth, analyzer->block[analyzer->depth]);
             }
             break;    
         case F_G_FUN_C:
