@@ -121,6 +121,7 @@ void func_call_end(char* func);
 void auxil_opdecider();
 void auxil_divdecider();
 void auxil_qqdecider();
+void auxil_letdecider();
 
 
 ///// BUILTIN FUNCTIONS /////

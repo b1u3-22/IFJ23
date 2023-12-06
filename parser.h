@@ -96,10 +96,12 @@ enum Function {
     F_G_DEF_VAR,    // Generate variable definition
     F_G_SET_VAR,    // Generate variable assigment
     F_G_PUSH,       // Push value into generator stack
+    F_G_IF_N,       // Generate condition for if let ID
     F_G_IF_S,       // Generate start of if
     F_G_IF_EL,      // Generate end of if, start of else
     F_G_IF_E,       // Generate end of else
     F_G_W_S,        // Generate start of while
+    F_G_W_C,        // Generate condition check for while
     F_G_W_E,        // Generate end of while
     F_G_FUN_S,      // Generate start of function definition
     F_G_FUN_P,      // Generate function parameter
@@ -115,7 +117,7 @@ static const int ll_table[LL_TABLE_ROW][LL_TABLE_COL] =
 {  // 0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24  25  26  27  28  29  30  31  32  33
     {37,  0,  0, 16, 15,  0, 10, 41,  1,  2,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 53,  0,  0,  0,  0,  0, 45},   //  0
     {38,  0,  0, 18, 17,  0,  0, 42,  3,  4,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 54,  0,  0,  0,  0,  0, 46},   //  1
-    { 5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  7,  6,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0},   //  2
+    { 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  7,  6,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0},   //  2
     { 8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  9,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0},   //  3
     {12,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 11,  0,  0,  0,  0,  0, 12,  0,  0},   //  4
     { 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 13,  0,  0, 14,  0,  0,  0,  0,  0},   //  5
