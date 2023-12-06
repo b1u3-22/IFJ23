@@ -8,7 +8,7 @@
 #include "expression.h"
 #include <stdio.h>
 
-int parse_expression(AnalyzerPtr analyzer, int end_type, TokenStackPtr sa_stack) {
+int parse_expression(AnalyzerPtr analyzer, int end_type, TokenStackPtr sa_stack, GenStackPtr gen_stack) {
     ExpressionStackPtr stack = expression_stack_init();
     if (!stack) return 99;
 
@@ -47,7 +47,7 @@ int parse_expression(AnalyzerPtr analyzer, int end_type, TokenStackPtr sa_stack)
                 break;
             case E_EQL:
                 expression_stack_push(stack, token_type, false);
-                rule_applied = apply_expression_rule(analyzer, stack, token_stack);
+                rule_applied = apply_expression_rule(analyzer, stack, token_stack, gen_stack);
                 if (!rule_applied) {
                     if (EXPR_DEBUG) printf("[expr] error\n");
                     return 2; // Syntax error occured
@@ -55,7 +55,7 @@ int parse_expression(AnalyzerPtr analyzer, int end_type, TokenStackPtr sa_stack)
                 if (token_type != E_END) expression_get_next_token(token_stack, end_type, &token_type, sa_stack);
                 break;
             case E_RED:
-                rule_applied = apply_expression_rule(analyzer, stack, token_stack);
+                rule_applied = apply_expression_rule(analyzer, stack, token_stack, gen_stack);
                 if (!rule_applied) {
                     if (EXPR_DEBUG) printf("[expr] error\n");
                     return 2; // Syntax error occured
@@ -104,9 +104,18 @@ void expression_get_next_token(TokenStackPtr stack, int end_type, int *type, Tok
     }
 
     if (token->type == R_BRAC && end_type == R_BRAC) {
+
+        // Skip newlines
         token = token_stack_get(stack);
+        while (token->type == NEWLINE) {
+            new_line = true;
+            token_stack_pop(stack);
+            token = token_stack_get(stack);
+        }
+
         int helper_type = get_translated_type(token);
-        if (helper_type == E_ID || helper_type == E_END) {
+        // If next token is keyword or ID and we also found newline between the R_BRAC and the next token we can end PSA here
+        if ((helper_type == E_ID || helper_type == E_END) && new_line) {
             token_stack_unget(stack);
             token_stack_unget(stack);
             *type = E_END;
@@ -181,40 +190,19 @@ int get_translated_type(TokenPtr token) {
     }
 }
 
-bool apply_expression_rule(AnalyzerPtr analyzer, ExpressionStackPtr stack, TokenStackPtr token_stack) {
+bool apply_expression_rule(AnalyzerPtr analyzer, ExpressionStackPtr stack, TokenStackPtr token_stack, GenStackPtr gen_stack) {
+    TokenPtr helper_token;
+    
     switch (stack->top->type) {
         case E_ID:  // Rule E -> ID
             expression_stack_pop(stack);
             expression_stack_push(stack, E_END, !(stack->top->type == E_LBRAC));
-            if (EXPR_DEBUG) printf("Pushing item in generator\n");
-            SymTableItemPtr item = get_nearest_item(analyzer, token_stack->tokens[token_stack->tokens_pos - (bool)(token_stack->top->type != ID)]->data);
-            if (!item) exit(5);
-            //printf("Item id: %s\n", item->id);
-            push_sym(item);
-            if (EXPR_DEBUG) printf("Done pushing item id: %s\n", item->id);
+            gen_stack_push(gen_stack, token_stack->tokens[token_stack->tokens_pos - (bool)(token_stack->top->type != ID)], false);
             return true;
         case E_VALUE:   // Rule E -> VALUE
-            if (EXPR_DEBUG) printf("[EXPR] Applying REDUCE to VALUE in stack\n");
             expression_stack_pop(stack);
             expression_stack_push(stack, E_END, !(stack->top->type == E_LBRAC));
-            if (EXPR_DEBUG) printf("[EXPR] Creating temporary item\n");
-            item = symtable_item_init();
-            if (EXPR_DEBUG) printf("[EXPR] Item initialized\n");
-
-            if (EXPR_DEBUG) {
-                printf("bla1\n");
-                printf("[EXPR] Token pos: %d\n", token_stack->tokens_pos);
-                printf("bla2\n");
-                printf("[EXPR] Indexing at: %d\n", token_stack->tokens_pos - (bool)(token_stack->top->type != VALUE));
-            }
-
-            item->value = token_stack->tokens[token_stack->tokens_pos - (bool)(token_stack->top->type != VALUE)]->data;
-            item->type = token_stack->tokens[token_stack->tokens_pos - (bool)(token_stack->top->type != VALUE)]->value_type;
-            if (EXPR_DEBUG) printf("[EXPR] Item value and type set\n");
-            item->isLiteral = true;
-            if (EXPR_DEBUG) printf("Pushing constant\n");
-            push_sym(item);
-            if (EXPR_DEBUG) printf("Done pushing constant\n");
+            gen_stack_push(gen_stack, token_stack->tokens[token_stack->tokens_pos - (bool)(token_stack->top->type != VALUE)], false);
             return true;
         case E_RBRAC: // Rule E -> (E)
             if (
@@ -235,8 +223,12 @@ bool apply_expression_rule(AnalyzerPtr analyzer, ExpressionStackPtr stack, Token
         case E_END: // Rest of the rules
             if (!stack->top->previous) return false;
 
+            helper_token = token_init();
+            helper_token->type = stack->top->previous->type;
+
             switch (stack->top->previous->type) {
                 case E_EXC: // E -> !E
+                    gen_stack_push(gen_stack, helper_token, true);
                     expression_stack_pop(stack);
                     expression_stack_pop(stack);
                     break;
@@ -252,7 +244,7 @@ bool apply_expression_rule(AnalyzerPtr analyzer, ExpressionStackPtr stack, Token
                 case E_ESM: // E -> E <= E
                 case E_QQ:  // E -> E ?? E
                     if (!stack->top->previous->previous) return false;
-                    exp_instruction(stack->top->previous->type);
+                    gen_stack_push(gen_stack, helper_token, true);
                     expression_stack_pop(stack);
                     expression_stack_pop(stack);
                     expression_stack_pop(stack);

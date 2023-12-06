@@ -415,3 +415,25 @@ int check_undefined_functions(AnalyzerPtr analyzer) {
 
     return 0;
 }
+
+void check_typedef(AnalyzerPtr analyzer, TokenStackPtr token_stack_left, GenStackPtr token_stack_right) {
+    int data_type;
+    if (token_stack_left->top->type == TYPE) data_type = token_stack_left->top->value_type;
+    else {
+        SymTableItemPtr item = symtable_get_item_lower_depth_same_block(analyzer->symtable, token_stack_left->top->data, analyzer->depth, analyzer->block[analyzer->depth]);
+        data_type = item->type;
+    }
+
+    if (data_type == S_DOUBLE || data_type == S_DOUBLEQ) {
+        for(int i = 0; i < token_stack_right->data_pos+1; i++) {
+            bool isOperator = token_stack_right->data[i]->op;
+            int type = token_stack_right->data[i]->token->type;
+            int token_data_type = token_stack_right->data[i]->token->value_type;
+            if (isOperator != true && type == VALUE && token_data_type == S_INT) {
+                token_stack_right->data[i]->token->value_type = S_DOUBLE;
+            }
+        }
+    }
+
+    return;
+}

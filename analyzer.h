@@ -27,6 +27,11 @@
 #include "token.h"
 #endif
 
+#ifndef _GEN_STACK
+#define _GEN_STACK
+#include "gen_stack.h"
+#endif
+
 #define ANALYZER_ALLOCK_BLOCK 3
 
 typedef struct Analyzer {
@@ -126,3 +131,5 @@ int check_undefined_functions(AnalyzerPtr analyzer);
 int check_redefinition(AnalyzerPtr analyzer, SymTableItemPtr item);
 
 SymTableItemPtr create_new_variable_item(AnalyzerPtr analyzer, TokenPtr let_var_token, TokenPtr id_token, TokenPtr data_type_token);
+
+void check_typedef(AnalyzerPtr analyzer, TokenStackPtr token_stack_left, GenStackPtr token_stack_right);
