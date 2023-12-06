@@ -352,8 +352,15 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack, TokenSt
         break;
 
     case 24:
+        errors += token_stack_unget(token_stack);
+        errors += token_stack_unget(token_stack);
+        errors += rule_stack_push(stack, F_P_GET_T, false, true);
+        errors += rule_stack_push(stack, F_P_GEN, false, true);
+        errors += rule_stack_push(stack, F_P_PSA, false, true);
         errors += rule_stack_push(stack, F_P_POP_3, false, true);
         errors += rule_stack_push(stack, F_P_POP_2, false, true);
+        break;
+
     case 25:
         errors += token_stack_unget(token_stack);
 
@@ -530,6 +537,12 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
             if (rule == 30 || rule == 35) end_type = R_BRAC;
             else end_type = END;
             if ((return_code = parse_expression(analyzer, end_type, stack_2, gen_stack))) exit(return_code);
+            if (PARSER_DEBUG) {
+                printf("STACK 2 AFTER PSA\n");
+                for (int i = 0; i <= stack_2->tokens_pos; i++) {
+                    printf("Token data: %s, token type: %d\n", stack_2->tokens[i]->data, stack_2->tokens[i]->type);
+                }
+            }
             break;
         
         case F_P_GEN_C:
@@ -602,6 +615,17 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
             break; 
         case F_S_VAR_DEF:
             if(PARSER_DEBUG) printf("Token data for check_definition(): %s\n", token->data);
+            if (PARSER_DEBUG) {
+                printf("STACK 2 IN CHECK DEFINITION\n");
+                for (int i = 0; i <= stack_2->tokens_pos; i++) {
+                    printf("Token data: %s, token type: %d\n", stack_2->tokens[i]->data, stack_2->tokens[i]->type);
+                }
+
+                printf("STACK 1 IN CHECK DEFINITION\n");
+                for (int i = 0; i <= stack_1->tokens_pos; i++) {
+                    printf("Token data: %s, token type: %d\n", stack_1->tokens[i]->data, stack_1->tokens[i]->type);
+                }
+            }
             if ((return_code = check_definition(analyzer, stack_1, stack_2))) exit(return_code);
             break;
         case F_S_VAL_ASG:
