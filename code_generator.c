@@ -11,13 +11,13 @@
 
 
 void code_header() {
-
+    
     inst(".IFJcode23"); 
     inst("");
     inst("DEFVAR GF@!tmp_var1");
     inst("DEFVAR GF@!tmp_var2");
     inst("DEFVAR GF@!tmp_var3");
-    inst("JUMP @&&main");
+    inst("JUMP &&main");
     inst("");
 
     auxil_opdecider();
@@ -26,7 +26,7 @@ void code_header() {
     inst("");
 	
     builtin_read();
-    /*builtin_write();*/
+    //builtin_write();
     builtin_int2float();
     builtin_float2int();
     builtin_length();
@@ -35,7 +35,7 @@ void code_header() {
     builtin_chr();
     inst("");
 
-    inst("LABEL @&&main");
+    inst("LABEL &&main");
 
 }
 
@@ -50,19 +50,19 @@ void exp_instruction(int type) {
 
     switch (type) {
         case E_PLS:
-            inst("CALL @&&opdecider");
+            inst("CALL &&opdecider");
 	        inst("ADDS");
             break;
         case E_MIN:
-	        inst("CALL @&&opdecider");
+	        inst("CALL &&opdecider");
             inst("SUBS");
             break;
         case E_MUL:
-	        inst("CALL @&&opdecider");
+	        inst("CALL &&opdecider");
             inst("MULS");
             break;
         case E_DIV:
-	        inst("CALL @&&divdecider");
+	        inst("CALL &&divdecider");
             break;
         case E_SM:
             inst("LTS");
@@ -92,7 +92,7 @@ void exp_instruction(int type) {
             inst("PUSHS GF@!tmp_var1");
             break;
         case E_QQ:
-	        inst("CALL @&&qqdecider");
+	        inst("CALL &&qqdecider");
             break;
         case E_EXC:
             inst("NOTS");
@@ -240,8 +240,8 @@ void while_end() {
 void func_start(char* func) {
 
     num = 0;
-    inst("JUMP @&&def_", func);
-    inst("LABEL @&", func);
+    inst("JUMP &&def_", func);
+    inst("LABEL &", func);
     inst("PUSHFRAME");
     temp_func = func;
 
@@ -259,7 +259,7 @@ void func_end() {
 
     inst("POPFRAME");
     inst("RETURN");
-    inst("LABEL @&&def_", temp_func);
+    inst("LABEL &&def_", temp_func);
 
 }
 
@@ -318,7 +318,7 @@ void func_call_end(char* func) {
             fprintf(stdout, "%d\n", i);
         }
     } else
-        inst("CALL @&", func);
+        inst("CALL &", func);
 
 }
 
@@ -330,26 +330,26 @@ void func_call_end(char* func) {
 
 void auxil_opdecider() {
 
-    inst("LABEL @&&opdecider");
+    inst("LABEL &&opdecider");
     inst("POPS GF@!tmp_var1");
     inst("POPS GF@!tmp_var2");
     inst("TYPE GF@!tmp_var3 GF@!tmp_var2");
     inst("PUSHS GF@!tmp_var2");
-    inst("JUMPIFEQ @&&op GF@!tmp_var3 string@int");
+    inst("JUMPIFEQ &&op GF@!tmp_var3 string@int");
 	
     inst("TYPE GF@!tmp_var3 GF@!tmp_var1");
-    inst("JUMPIFEQ @&&opend GF@!tmp_var2 string@float");
+    inst("JUMPIFEQ &&opend GF@!tmp_var2 string@float");
 
     inst("INT2FLOAT GF@!tmp_var1 GF@!tmp_var1");
-    inst("JUMP @&&opend");
+    inst("JUMP &&opend");
 	
-    inst("LABEL @&&op");
+    inst("LABEL &&op");
     inst("TYPE GF@!tmp_var3 GF@!tmp_var1");
-    inst("JUMPIFEQ @&&opend GF@!tmp_var3 string@int");
+    inst("JUMPIFEQ &&opend GF@!tmp_var3 string@int");
 	
     inst("INT2FLOATS");
 	
-    inst("LABEL @&&opend");
+    inst("LABEL &&opend");
     inst("PUSHS GF@!tmp_var1");
     inst("RETURN");
 
@@ -357,37 +357,37 @@ void auxil_opdecider() {
 
 void auxil_divdecider() {
 
-    inst("LABEL @&&divdecider");
+    inst("LABEL &&divdecider");
     inst("POPS GF@!tmp_var1");
     inst("TYPE GF@!tmp_var2 GF@!tmp_var1");
     inst("PUSHS GF@!tmp_var1");
-    inst("JUMPIFEQ @&&dd GF@!tmp_var2 string@int");
+    inst("JUMPIFEQ &&dd GF@!tmp_var2 string@int");
 	
     inst("DIVS");
-    inst("JUMP @&&ddend");
+    inst("JUMP &&ddend");
 	
-    inst("LABEL @&&dd");
+    inst("LABEL &&dd");
     inst("IDIVS");
 	
-    inst("LABEL @&&ddend");
+    inst("LABEL &&ddend");
     inst("RETURN");
 
 }
 
 void auxil_qqdecider() {
 
-    inst("LABEL @&&qqdecider");
+    inst("LABEL &&qqdecider");
     inst("POPS GF@!tmp_var2");
     inst("POPS GF@!tmp_var1");
-    inst("JUMPIFEQ @&&qq GF@!tmp_var1 nil@nil");
+    inst("JUMPIFEQ &&qq GF@!tmp_var1 nil@nil");
 	
     inst("PUSHS GF@!tmp_var1");
-    inst("JUMP @&&qqend");
+    inst("JUMP &&qqend");
 	
-    inst("LABEL @&&qq");
+    inst("LABEL &&qq");
     inst("PUSHS GF@!tmp_var2");
 	
-    inst("LABEL @&&qqend");
+    inst("LABEL &&qqend");
     inst("RETURN");
 
 }
@@ -399,17 +399,17 @@ void auxil_qqdecider() {
 
 void builtin_read() {
 
-    inst("LABEL @&readString");
+    inst("LABEL &readString");
     inst("READ GF@!tmp_var1 string");
     inst("PUSHS GF@!tmp_var1");
     inst("RETURN");
 
-    inst("LABEL @&readInt");
+    inst("LABEL &readInt");
     inst("READ GF@!tmp_var1 int");
     inst("PUSHS GF@!tmp_var1");
     inst("RETURN");
 
-    inst("LABEL @&readDouble");
+    inst("LABEL &readDouble");
     inst("READ GF@!tmp_var1 float");
     inst("PUSHS GF@!tmp_var1");
     inst("RETURN");
@@ -418,7 +418,7 @@ void builtin_read() {
 
 /*void builtin_write() {
 
-    inst("LABEL @&write");
+    inst("LABEL &write");
     inst("WRITE TF@%%0");
     inst("RETURN");
 
@@ -426,7 +426,7 @@ void builtin_read() {
 
 void builtin_int2float() {
 
-    inst("LABEL @&Int2Double");
+    inst("LABEL &Int2Double");
     inst("INT2FLOAT GF@!tmp_var1 TF@%%0");
     inst("PUSHS GF@!tmp_var1");
     inst("RETURN");
@@ -435,7 +435,7 @@ void builtin_int2float() {
 
 void builtin_float2int() {
 
-    inst("LABEL @&Double2Int");
+    inst("LABEL &Double2Int");
     inst("FLOAT2INT GF@!tmp_var1 TF@%%0");
     inst("PUSHS GF@!tmp_var1");
     inst("RETURN");
@@ -444,7 +444,7 @@ void builtin_float2int() {
 
 void builtin_length() {
 
-    inst("LABEL @&length");
+    inst("LABEL &length");
     inst("STRLEN GF@!tmp_var1 TF@%%0");
     inst("PUSHS GF@!tmp_var1");
     inst("RETURN");
@@ -453,31 +453,31 @@ void builtin_length() {
 
 void builtin_substring() {
 
-    inst("LABEL @&substring");
+    inst("LABEL &substring");
 
     inst("LT GF@!tmp_var1 TF@%%1 int@0");
-    inst("JUMPIFEQ @&&substrerr GF@!tmp_var1 bool@true");
+    inst("JUMPIFEQ &&substrerr GF@!tmp_var1 bool@true");
 
     inst("STRLEN GF@!tmp_var2 TF@%%0");
     inst("GT GF@!tmp_var1 TF@%%2 GF@!tmp_var2");
-    inst("JUMPIFEQ @&&substrerr GF@!tmp_var1 bool@true");
+    inst("JUMPIFEQ &&substrerr GF@!tmp_var1 bool@true");
 
     inst("GT GF@!tmp_var1 TF@%%1 TF@%%2");
-    inst("JUMPIFEQ @&&substrerr GF@!tmp_var1 bool@true");
+    inst("JUMPIFEQ &&substrerr GF@!tmp_var1 bool@true");
 
     inst("MOVE GF@!tmp_var1 string@");
 
-    inst("LABEL @&&substrdo");
+    inst("LABEL &&substrdo");
     inst("GETCHAR GF@!tmp_var2 TF@%%0 TF@%%1");
     inst("CONCAT GF@!tmp_var1 GF@!tmp_var1 GF@!tmp_var2");
     inst("ADD TF@%%1 TF@%%1 int@1");
     inst("LT GF@!tmp_var2 TF@%%1 TF@%%2");
-    inst("JUMPIFEQ @&&substrdo GF@!tmp_var2 bool@true");
+    inst("JUMPIFEQ &&substrdo GF@!tmp_var2 bool@true");
 
     inst("PUSHS GF@!tmp_var1");
     inst("RETURN");
 
-    inst("LABEL @&&substrerr");
+    inst("LABEL &&substrerr");
     inst("PUSHS nil@nil");
     inst("RETURN");
 
@@ -485,17 +485,17 @@ void builtin_substring() {
 
 void builtin_ord() {
 
-    inst("LABEL @&ord");
+    inst("LABEL &ord");
 
     inst("STRLEN GF@!tmp_var1 TF@%%0");
-    inst("JUMPIFEQ @&&orderr GF@!tmp_var1 int@0");
+    inst("JUMPIFEQ &&orderr GF@!tmp_var1 int@0");
 
     inst("STRI2INT GF@!tmp_var1 TF@%%0 int@0");
     inst("PUSHS GF@!tmp_var1");
 
     inst("RETURN");
 
-    inst("LABEL @&&orderr");
+    inst("LABEL &&orderr");
     inst("PUSHS int@0");
     inst("RETURN");
 
@@ -503,7 +503,7 @@ void builtin_ord() {
 
 void builtin_chr() {
 
-    inst("LABEL @&chr");
+    inst("LABEL &chr");
     inst("INT2CHAR GF@!tmp_var1 TF@%%0");
     inst("PUSHS GF@!tmp_var1");
     inst("RETURN");
