@@ -1,3 +1,10 @@
+/**
+ *  Project:    Implementace překladače imperativního jazyka IFJ23.
+ *  File:       @brief Implementace zásobníku s parametry pro atribut v tabulce symbolů
+ *  Authors:    @author Jiří Sedlák xsedla2e
+ *              @author Martin Kučera xkucer0s
+*/
+
 #include "param_stack.h"
 
 
