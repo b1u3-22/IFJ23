@@ -79,7 +79,7 @@ int parse() {
                 token = token_stack_get(token_stack);
             }
             else {
-                apply_function(rule_stack->top->type, rule_stack, token, token_stack, sa_1, sa_2, sa_3, analyzer, rule_to_apply, &func_ass);
+                apply_function(rule_stack->top->type, rule_stack, token, token_stack, sa_1, sa_2, sa_3, analyzer, rule_to_apply, &func_ass, gen_stack);
             }
         }
 
@@ -528,7 +528,7 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
             else end_type = END;
             if ((return_code = parse_expression(analyzer, end_type, stack_2, gen_stack))) exit(return_code);
 
-            
+
 
             break;
         case F_P_PUSH_1:
