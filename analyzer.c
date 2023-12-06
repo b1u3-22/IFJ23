@@ -47,7 +47,7 @@ int check_declaration(AnalyzerPtr analyzer, TokenStackPtr token_stack) {
     return 0;
 }
 
-int check_definition(AnalyzerPtr analyzer, TokenStackPtr token_stack_left, TokenStackPtr token_stack_right) {
+int check_definition(AnalyzerPtr analyzer, TokenStackPtr token_stack_left, TokenStackPtr token_stack_right) {    
     //check for redeclaration
     SymTableItemPtr itemToCompare = symtable_get_item_lower_depth_same_block(analyzer->symtable, token_stack_left->tokens[1]->data, analyzer->depth, analyzer->block[analyzer->depth]);
     int redefinition = check_redefinition(analyzer, itemToCompare);
@@ -307,22 +307,22 @@ int check_return(AnalyzerPtr analyzer, TokenStackPtr token_stack) {
 }
 
 int check_condition(AnalyzerPtr analyzer, TokenStackPtr token_stack) {
-    //check for definition
+    
     if (check_is_not_defined(analyzer, token_stack)) return 5;
     
-    //set data_type
-    int data_type;
-    if (token_stack->top->type == ID) {     //there's variable at top
-        SymTableItemPtr item = symtable_get_item_lower_depth_same_block(analyzer->symtable, token_stack->top->data, analyzer->depth, analyzer->block[analyzer->depth]);
-        data_type = item->type;
-    } else {    //there's literal at top
-        data_type = token_stack->top->value_type;
-    }
+    // //set data_type
+    // int data_type;
+    // if (token_stack->top->type == ID) {     //there's variable at top
+    //     SymTableItemPtr item = symtable_get_item_lower_depth_same_block(analyzer->symtable, token_stack->top->data, analyzer->depth, analyzer->block[analyzer->depth]);
+    //     data_type = item->type;
+    // } else {    //there's literal at top
+    //     data_type = token_stack->top->value_type;
+    // }
 
-    //check if data types are ctompaible
-    for (int i = 0; i < token_stack->tokens_pos+1; i++) {
-        if (check_data_type(analyzer, token_stack->tokens[i], data_type)) return 7;
-    }
+    // //check if data types are ctompaible
+    // for (int i = 0; i < token_stack->tokens_pos+1; i++) {
+    //     if (check_data_type(analyzer, token_stack->tokens[i], data_type)) return 7;
+    // }
 
     return 0;
 }
@@ -403,6 +403,7 @@ int check_is_not_defined(AnalyzerPtr analyzer, TokenStackPtr token_stack) {
 }
 
 int check_data_type(AnalyzerPtr analyzer, TokenPtr token, int data_type) {
+    
     if (token->type == ID) {
         SymTableItemPtr item = symtable_get_item_lower_depth_same_block(analyzer->symtable, token->data, analyzer->depth, analyzer->block[analyzer->depth]);
         if (data_type == S_INTQ && (item->type == S_INTQ || item->type == S_INT || item->type == S_NO_TYPE)) return 0;
