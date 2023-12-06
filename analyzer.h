@@ -96,6 +96,8 @@ int check_function_definition(AnalyzerPtr analyzer, TokenStackPtr token_stack_id
 
 int check_return(AnalyzerPtr analyzer, TokenStackPtr token_stack);
 
+int check_condition(AnalyzerPtr analyzer, TokenStackPtr token_stack);
+
 /** Increases analyzer depth and block attribute
  *  @param analyzer AnalyzerPtr to work with
 */

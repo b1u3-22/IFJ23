@@ -1,3 +1,10 @@
+/**
+ *  Project:    Implementace překladače imperativního jazyka IFJ23.
+ *  File:       @brief Hlavičkový soubor pro zásobník s parametry
+ *  Authors:    @author Jiří Sedlák xsedla2e
+ *              @author Martin Kučera xkucer0s
+*/
+
 #include <stdlib.h>
 #include <stdbool.h>
 

@@ -654,7 +654,7 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
                 }
             }
 
-            if ((return_code = check_function_call(analyzer, helper_stack, false))) exit(return_code);
+            if ((return_code = check_function_call(analyzer, helper_stack))) exit(return_code);
             free(helper_stack);
             break;
         case F_S_FUN_DEF:
