@@ -53,7 +53,7 @@ static char* temp_func;
 
 ///// FUNCTIONS /////
 
-// beginning of file (header and definition of builtin function)
+// beginning of file (header, axuiliary variables, auxiliary functions, builtin functions)
 void code_header();
 
 // ending of file
@@ -63,7 +63,7 @@ void code_footer();
 void exp_instruction(int type);
 
 // define variable
-void def_var(char *id, int depth);
+void def_var(char *id, int depth, int block);
 
 // pop value to variable
 void set_var(SymTableItemPtr var);
@@ -101,7 +101,7 @@ void while_end();
 void func_start(char* func);
 
 // define single parameter of function
-void func_param(ParamStackItemPtr param);
+void func_param(ParamStackItemPtr param, int depth, int block);
 
 // end of function
 void func_end();
