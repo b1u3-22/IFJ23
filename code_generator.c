@@ -14,34 +14,55 @@ void code_header() {
     
     inst(".IFJcode23"); 
     inst("");
+    inst("# AUXILIARY VARIABLES");
+    inst("");
     inst("DEFVAR GF@!tmp_var1");
     inst("DEFVAR GF@!tmp_var2");
     inst("DEFVAR GF@!tmp_var3");
+    inst("");
+    inst("CREATEFRAME");
+    inst("PUSHFRAME");
     inst("JUMP &&main");
     inst("");
 
+    inst("# AUXILIARY FUNCTIONS");
+    inst("");
     auxil_opdecider();
+    inst("");
     auxil_divdecider();
+    inst("");
     auxil_qqdecider();
+    inst("");
     auxil_letdecider();
     inst("");
 	
+    inst("# BUILTIN FUNCTIONS");
+    inst("");
     builtin_read();
-    // builtin_write() defined inside program
+    inst("");
+    // builtin write defined inside program
     builtin_int2float();
+    inst("");
     builtin_float2int();
+    inst("");
     builtin_length();
+    inst("");
     builtin_substring();
+    inst("");
     builtin_ord();
+    inst("");
     builtin_chr();
     inst("");
 
+    inst("# MAIN PROGRAM");
+    inst("");
     inst("LABEL &&main");
 
 }
 
 void code_footer() {
 
+    inst("");
     inst("CLEARS");
     inst("EXIT int@0");
 
@@ -49,6 +70,7 @@ void code_footer() {
 
 void exp_instruction(int type) {
 
+    // decide type of operator
     switch (type) {
         case E_PLS:
             inst("CALL &&opdecider");
@@ -107,12 +129,14 @@ void exp_instruction(int type) {
 
 }
 
-void def_var(char *id, int depth) {
+void def_var(char *id, int depth, int block) {
 
     if (depth == 0)
         inst("DEFVAR GF@$", id);
-    else
-        inst("DEFVAR LF@$", id);
+    else {
+        fprintf(stdout, "DEFVAR LF@$%d$%d$", block, depth);
+        inst(id);
+    }
 
 }
 
@@ -120,8 +144,10 @@ void set_var(SymTableItemPtr var) {
 
     if (var->depth == 0)
         inst("POPS GF@$", var->id);
-    else //(sym->frame == LOCAL)
-        inst("POPS LF@$", var->id);
+    else {
+        fprintf(stdout, "POPS LF@$%d$%d$", var->block, var->depth);
+        inst(var->id);
+    }
 
 }
 
@@ -131,21 +157,19 @@ void push_sym(SymTableItemPtr sym) {
 
         if (sym->depth == 0)
             inst("PUSHS GF@$", sym->id);
-        else
-            inst("PUSHS LF@$", sym->id);
+        else {
+            fprintf(stdout, "PUSHS LF@$%d$%d$", sym->block, sym->depth);
+            inst(sym->id);
+        }
 
     } else if (sym->type == S_INT)
         inst("PUSHS int@", sym->value);
-    else if (sym->type == S_DOUBLE) {
-        part("PUSHS float@");
-        fprintf(stdout, "%a\n", atof(sym->value));
-    }
+    else if (sym->type == S_DOUBLE)
+        fprintf(stdout, "PUSHS float@%a\n", atof(sym->value));
     else if (sym->type == S_STRING)
         inst("PUSHS string@", sym->value);
     else // (sym->type == S_NO_TYPE)
         inst("PUSHS nil@nil");
-    /*else //(sym->type == BOOL)
-        inst("PUSHS bool@", sym->value);*/
 
 }
 
@@ -161,21 +185,10 @@ void confirm_sym() {
 
 }
 
-void check_var() {
-
-    push_sym(temp_sym);
-
-}
-
 void if_check() {
 
     inst("POPS GF@!tmp_var1");
-    part("JUMPIFEQ _if");
-    fprintf(stdout, "%d", if_new); 
-    inst(" bool@false GF@!tmp_var1");
-
-    inst("CREATEFRAME");
-    inst("PUSHFRAME");
+    fprintf(stdout, "JUMPIFEQ _if%d bool@false GF@!tmp_var1\n", if_new); 
 
     if_num = if_new++;
 
@@ -183,29 +196,20 @@ void if_check() {
 
 void if_end() { // else_start
 
-    inst("POPFRAME");
-    part("JUMP _else");
-    fprintf(stdout, "%d\n", if_num);
-    part("LABEL _if");
-    fprintf(stdout, "%d\n", if_num);
-
-    inst("CREATEFRAME");
-    inst("PUSHFRAME");
+    fprintf(stdout, "JUMP _else%d\n", if_num);
+    fprintf(stdout, "LABEL _if%d\n", if_num);
 
 }
 
 void if_else_end() {
 
-    inst("POPFRAME");
-    part("LABEL _else");
-    fprintf(stdout, "%d\n", if_num--);
+    fprintf(stdout, "LABEL _else%d\n", if_num--);
 
 }
 
 void while_start() {
 
-    part("LABEL _while");
-    fprintf(stdout, "%d\n", while_new);
+    fprintf(stdout, "LABEL _while%d\n", while_new);
 
     while_num = while_new++;
 
@@ -214,22 +218,14 @@ void while_start() {
 void while_check() {
 
     inst("POPS GF@!tmp_var1");
-    part("JUMPIFEQ _whilend");
-    fprintf(stdout, "%d", while_num);
-    inst(" bool@false GF@!tmp_var1");
-
-    inst("CREATEFRAME");
-    inst("PUSHFRAME");
+    fprintf(stdout, "JUMPIFEQ _whilend%d bool@false GF@!tmp_var1\n", while_num);
 
 }
 
 void while_end() {
 
-    inst("POPFRAME");
-    part("JUMP _while");
-    fprintf(stdout, "%d\n", while_num);
-    part("LABEL _whilend");
-    fprintf(stdout, "%d\n", while_num--);
+    fprintf(stdout, "JUMP _while%d\n", while_num);
+    fprintf(stdout, "LABEL _whilend%d\n", while_num--);
 
 }
 
@@ -243,11 +239,13 @@ void func_start(char* func) {
 
 }
 
-void func_param(ParamStackItemPtr param) {
+void func_param(ParamStackItemPtr param, int depth, int block) {
 
-    inst("DEFVAR LF@", param->id);
-    part("MOVE LF@", param->id, " LF@?");
-    fprintf(stdout, "%d\n", num++);
+    fprintf(stdout, "DEFVAR LF@$%d$%d$", block, depth);
+    inst(param->id);
+    fprintf(stdout, "MOVE LF@$%d$%d$", block, depth);
+    part(param->id);
+    fprintf(stdout, " LF@?%d\n", num++);
 
 }
 
@@ -268,39 +266,31 @@ void func_call() {
 
 void func_call_param(SymTableItemPtr param) {
 
-    part("DEFVAR TF@?");
-    fprintf(stdout, "%d\n", num);
+    fprintf(stdout, "DEFVAR TF@?%d\n", num);
 
     if (param->isLiteral != true) {
 
         if (param->depth == 0) {
-            part("MOVE TF@?");
-            fprintf(stdout, "%d", num);
-            inst(" GF@$", param->id);
+            fprintf(stdout, "MOVE TF@?%d GF@$", num);
+            inst(param->id);
         } else {
-            part("MOVE TF@?");
-            fprintf(stdout, "%d", num);
-            inst(" LF@$", param->id);
+            fprintf(stdout, "MOVE TF@?%d LF@$%d$%d$", num, param->block, param->depth);
+            inst(param->id);
         }
 
     } else if (param->type == S_INT) {
-        part("MOVE TF@?");
-        fprintf(stdout, "%d", num);
+        fprintf(stdout, "MOVE TF@?%d", num);
         inst(" int@", param->value);
     } else if (param->type == S_DOUBLE) {
-        part("MOVE TF@?");
-        fprintf(stdout, "%d", num);
+        fprintf(stdout, "MOVE TF@?%d", num);
         inst(" float@", param->value);
     } else if (param->type == S_STRING) {
-        part("MOVE TF@?");
-        fprintf(stdout, "%d", num);
+        fprintf(stdout, "MOVE TF@?%d", num);
         inst(" string@", param->value);
-    } else if (param->type == S_NO_TYPE) {
-        part("MOVE TF@?");
-        fprintf(stdout, "%d", num);
+    } else { // (param->type == S_NO_TYPE) 
+        fprintf(stdout, "MOVE TF@?%d", num);
         inst(" nil@nil");
-    } /*else //(param->type == BOOL)
-        inst("MOVE TF@?", num, " bool@", param->value);*/
+    }
 
     num++;
 
@@ -334,7 +324,7 @@ void auxil_opdecider() {
     inst("JUMPIFEQ &&op GF@!tmp_var3 string@int");
 	
     inst("TYPE GF@!tmp_var3 GF@!tmp_var1");
-    inst("JUMPIFEQ &&opend GF@!tmp_var2 string@float");
+    inst("JUMPIFEQ &&opend GF@!tmp_var3 string@float");
 
     inst("INT2FLOAT GF@!tmp_var1 GF@!tmp_var1");
     inst("JUMP &&opend");
