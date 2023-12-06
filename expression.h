@@ -29,6 +29,12 @@
 #include "expression_stack.h"
 #endif
 
+#ifndef _GEN_STACK
+#define _GEN_STACK
+#include "gen_stack.h"
+#endif
+
+
 #define EXPR_DEBUG 0
 
 #define P_TABLE_SIZE 17
@@ -59,7 +65,8 @@ enum ExpressionTypes {
     E_ID,       // 14
     E_VALUE,    // 15
     E_END,      // 16
-    E_CONCAT
+    E_CONCAT,   // 17
+    E_NUL       // 18
 };
 
 static const int p_table[P_TABLE_SIZE][P_TABLE_SIZE] = 
@@ -84,7 +91,7 @@ static const int p_table[P_TABLE_SIZE][P_TABLE_SIZE] =
     {E_SFT, E_SFT, E_SFT, E_SFT, E_SFT, E_SFT, E_SFT, E_SFT, E_SFT, E_SFT, E_SFT, E_SFT, E_SFT, E_SFT, E_SFT, E_SFT, E_SCS},    // EN   16
 };
 
-int parse_expression(AnalyzerPtr analyzer, int end_type, TokenStackPtr sa_stack);
+int parse_expression(AnalyzerPtr analyzer, int end_type, TokenStackPtr sa_stack, GenStackPtr gen_stack);
 void expression_get_next_token(TokenStackPtr stack, int end_type, int *type, TokenStackPtr sa_stack);
 int get_translated_type(TokenPtr token);
-bool apply_expression_rule(AnalyzerPtr analyzer, ExpressionStackPtr stack, TokenStackPtr token_stack);
+bool apply_expression_rule(AnalyzerPtr analyzer, ExpressionStackPtr stack, TokenStackPtr token_stack, GenStackPtr gen_stack);

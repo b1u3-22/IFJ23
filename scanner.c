@@ -226,19 +226,29 @@ void parse_block_comment_out(int c, scanner_states* state, TokenPtr token, int* 
     }
 }
 
-void parse_str(int c, scanner_states* state, bool* true_end, bool* do_not_add) {
+void parse_str(int c, scanner_states* state, bool* true_end, bool* do_not_add, TokenPtr token) {
     if (c == '\"') {
         *state = C_STR;
         *do_not_add = true;
     }
-    else if (c == '\n') *true_end = true;
-    else if (c == '\\') *state = SLASH_IN_STR;
+    else if (c <= 31) *true_end = true;
+    else if (c == '\\') {
+        *state = SLASH_IN_STR;
+        *do_not_add = true;
+    } else if (c == ' ') {
+        *do_not_add = true;
+        token_add_data(token, '\\');
+        token_add_data(token, '0');
+        token_add_data(token, '3');
+        token_add_data(token, '2');
+        *state = SIMPLE_STR_IN;
+    }
     else *state = SIMPLE_STR_IN;
 }
 
 void parse_c_str(int c, scanner_states* state, bool* end, bool* do_not_add) {
     if (c == '\"') {
-        *state = C_STR_IN;
+        *state = C_STR_NL;
         *do_not_add = true;
     }
     else {
@@ -247,12 +257,42 @@ void parse_c_str(int c, scanner_states* state, bool* end, bool* do_not_add) {
     }
 }
 
+void parse_c_str_nl(int c, scanner_states* state, bool* end, bool* do_not_add) {
+    if (c == '\n') {
+        *state = C_STR_IN;
+        *do_not_add = true;
+    }
+    else *end = true;
+}
+
 /* inside complex string */
 void parse_c_str_in(int c, scanner_states* state, bool *do_not_add) {
+    if (c == '\n') {
+        *state = C_STR_NL_E;
+        *do_not_add = true;
+    } else if (c == '\"') *state = QM1;
+}
+
+void parse_qm1(int c, scanner_states* state) {
+    if (c == '\"') *state = QM2;
+    else *state = C_STR_IN;
+}
+
+void parse_qm2(int c, scanner_states* state, bool* true_end) {
+    if (c == '\"') {
+        *true_end = true;
+        *state = QM3;
+    } else *state = C_STR_IN;
+}
+
+void parse_c_str_nl_e(int c, scanner_states* state, bool* do_not_add, bool* manual_add) {
     if (c == '\"') {
         *state = C_STR_E;
         *do_not_add = true;
-    } 
+    } else {
+        *state = C_STR_IN;
+        *manual_add = true;
+    }
 }
 
 /* got first " */
@@ -280,55 +320,114 @@ void parse_c_str_ee(int c, scanner_states* state, bool *true_end, bool* do_not_a
 }
 
 /* inside simple string, received at least one letter */
-void parse_simple_str_in(int c, scanner_states* state, bool* true_end, bool* end, bool* do_not_add) {
+void parse_simple_str_in(int c, scanner_states* state, bool* true_end, bool* end, bool* do_not_add, TokenPtr token) {
     if (c == '\"') {
         *state = SIMPLE_STR;
         *true_end = true;
         *do_not_add = true;
     } else if (c == '\n') {
         *end = true;
-    } else if (c == '\\') *state = SLASH_IN_STR;
+    } else if (c == '\\') {
+        *state = SLASH_IN_STR;
+        *do_not_add = true;
+    } else if (c == ' ') {
+        *do_not_add = true;
+        token_add_data(token, '\\');
+        token_add_data(token, '0');
+        token_add_data(token, '3');
+        token_add_data(token, '2');
+    }
 }
 
 
 
 
 
-void parse_slash_in_str(int c, scanner_states* state, bool* end) {
-    int i = 0;
-    while (ALLOWED_BACKSLASH_CHARS[i]) {
-        if (ALLOWED_BACKSLASH_CHARS[i] == c) {
-            *state = SIMPLE_STR_IN;
+void parse_slash_in_str(int c, scanner_states* state, bool* end, bool* do_not_add, TokenPtr token) {
+
+    switch (c) {
+        case '\\':
+            token_add_data(token, '\\');
+            token_add_data(token, '0');
+            token_add_data(token, '9');
+            token_add_data(token, '2');
+            break;
+        case 'n':
+            token_add_data(token, '\\');
+            token_add_data(token, '0');
+            token_add_data(token, '1');
+            token_add_data(token, '0');
+            break;
+        case 't':
+            token_add_data(token, '\\');
+            token_add_data(token, '0');
+            token_add_data(token, '0');
+            token_add_data(token, '9');
+            break;
+        case 'r':
+            token_add_data(token, '\\');
+            token_add_data(token, '0');
+            token_add_data(token, '1');
+            token_add_data(token, '3');
+            break;
+        case '"':
+            token_add_data(token, '\"');
+            break;
+        case 'u':
+            *do_not_add = true;
+            *state = U_IN_STR;
             return;
-        }
-        i++;
-    }
-    if (c == 'u') {
-        *state = U_IN_STR;
-        return;
+        default:
+            *end = true;
     }
 
-    *end = true;
+    *state = STR;
+    *do_not_add = true;
 }
 
-void parse_u_in_str(int c, scanner_states* state, bool* end) {
-    if (c == '{') *state = U1;
+void parse_u_in_str(int c, scanner_states* state, bool* end, bool* do_not_add) {
+    if (c == '{') {
+        *state = U1;
+        *do_not_add = true;
+    } else *end = true;
+}
+
+void parse_u1(int c, scanner_states* state, bool* end, bool* do_not_add, char* u1) {
+    if (((c >= '0') && (c <= '9')) || ((c >= 'a') && (c <= 'f')) || ((c >= 'A') && (c <= 'F'))) {
+        *state = U2;
+        *u1 = c;
+        *do_not_add = true;
+    }
     else *end = true;
 }
 
-void parse_u1(int c, scanner_states* state, bool* end) {
-    if (((c >= '0') && (c <= '9')) || ((c >= 'a') && (c <= 'f')) || ((c >= 'A') && (c <= 'F'))) *state = U2;
+void parse_u2(int c, scanner_states* state, bool* end, bool* do_not_add, char* u2) {
+    if (((c >= '0') && (c <= '9')) || ((c >= 'a') && (c <= 'f')) || ((c >= 'A') && (c <= 'F'))) {
+        *state = U3;
+        *u2 = c;
+        *do_not_add = true;
+    }
     else *end = true;
 }
 
-void parse_u2(int c, scanner_states* state, bool* end) {
-    if (((c >= '0') && (c <= '9')) || ((c >= 'a') && (c <= 'f')) || ((c >= 'A') && (c <= 'F'))) *state = U3;
+void parse_u3(int c, scanner_states* state, bool* end, bool* do_not_add) {
+    if (c == '}') {
+        *state = SIMPLE_STR_IN;
+        *do_not_add = true;
+    }
     else *end = true;
 }
 
-void parse_u3(int c, scanner_states* state, bool* end) {
-    if (c == '}') *state = SIMPLE_STR_IN;
-    else *end = true;
+int hex_to_dec(char u, bool second) {
+    int p = 0;
+    if ((u >= '0') && (u <= '9')) p = u - 48; // zero is ASCII 48
+    else if ((u >= 'A') && (u <= 'F')) p = u - 55; // A is 65 in ascii and represents 10
+    else if ((u >= 'a') && (u <= 'f')) p = u - 87; // a is 97 in ascii and represents 10
+    
+    if (second) {
+        return p * 16;
+    } 
+    return p;
 }
 
 
@@ -441,8 +540,11 @@ void get_next_token(TokenPtr token) {
     token->type = ERROR;
     bool do_not_add = false;
     bool manual_add = false;
+    char u1;
+    char u2;
+    int u_sum;
 
-    while (true) {        
+    while (true) {   
         c = getchar(); 
         if (c == EOF) break;
 
@@ -498,7 +600,7 @@ void get_next_token(TokenPtr token) {
                 parse_flpe(c, &end);
                 break;
             case STR: // got double quotation mark
-                parse_str(c, &state, &true_end, &do_not_add);
+                parse_str(c, &state, &true_end, &do_not_add, token);
                 break;
             case DASH:
                 parse_dash(c, &state, &true_end, &end);
@@ -537,36 +639,63 @@ void get_next_token(TokenPtr token) {
                 parse_c_str(c, &state, &end, &do_not_add);
                 break;
             case SIMPLE_STR_IN:
-                parse_simple_str_in(c, &state, &true_end, &end, &do_not_add);
+                parse_simple_str_in(c, &state, &true_end, &end, &do_not_add, token);
                 break;
             case C_STR_IN:
                 parse_c_str_in(c, &state, &do_not_add);
                 break;
+            case QM1:
+                parse_qm1(c, &state);
+                break;
+            case QM2:
+                parse_qm2(c, &state, &true_end);
+                break;
+            case C_STR_NL:
+                parse_c_str_nl(c, &state, &end, &do_not_add);
+                break;
+            case C_STR_NL_E:
+                parse_c_str_nl_e(c, &state, &do_not_add, &manual_add);
+                if (manual_add) token_add_data(token, '\n');
+                break;
             case C_STR_E:
                 parse_c_str_e(c, &state, &do_not_add, &manual_add);
-                if (manual_add) token_add_data(token, '\"');
+                if (manual_add) {
+                    token_add_data(token, '\n');
+                    token_add_data(token, '\"');
+                }
                 break;
             case C_STR_EE:
                 parse_c_str_ee(c, &state, &true_end, &do_not_add, &manual_add);
                 if (manual_add) {
+                    token_add_data(token, '\n');
                     token_add_data(token, '\"');
                     token_add_data(token, '\"');
                 }
                 break;
             case SLASH_IN_STR:
-                parse_slash_in_str(c, &state, &end);
+                parse_slash_in_str(c, &state, &end, &do_not_add, token);
                 break;
             case U_IN_STR:
-                parse_u_in_str(c, &state, &end);
+                parse_u_in_str(c, &state, &end, &do_not_add);
                 break;
             case U1:
-                parse_u1(c, &state, &end);
+                parse_u1(c, &state, &end, &do_not_add, &u1);
                 break;
             case U2:
-                parse_u2(c, &state, &end);
+                parse_u2(c, &state, &end, &do_not_add, &u2);
                 break;
             case U3:
-                parse_u3(c, &state, &end);
+                parse_u3(c, &state, &end, &do_not_add);
+                u_sum = hex_to_dec(u1, true);
+                u_sum += hex_to_dec(u2, false);
+
+                token_add_data(token, '\\');
+                token_add_data(token, (u_sum / 100) + '0');
+                u_sum = u_sum % 100;
+                token_add_data(token, (u_sum / 10) + '0');
+                u_sum = u_sum % 10;
+                token_add_data(token, (u_sum) + '0');
+                
                 break;
             default: break;
         }
