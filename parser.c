@@ -367,6 +367,8 @@ void apply_rule(int rule, RuleStackPtr stack, TokenStackPtr token_stack, TokenSt
     case 20:  
         errors += token_stack_unget(token_stack);
         errors += rule_stack_push(stack, F_P_GET_T, false, true);
+        errors += rule_stack_push(stack, F_P_CLEAR_2, false, true);
+        errors += rule_stack_push(stack, F_P_CLEAR_1, false, true);
         errors += rule_stack_push(stack, F_P_GEN, false, true);
         errors += rule_stack_push(stack, F_S_CON_C, false, true);
         errors += rule_stack_push(stack, F_P_PSA, false, true);
