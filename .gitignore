@@ -74,3 +74,5 @@ test.swift
 
 ##### IGNORE VALGRIND FILES ####
 vgcore.*
+
+!rozdeleni

@@ -2,7 +2,7 @@
  *  Project:    Implementace překladače imperativního jazyka IFJ23.
  *  File:       @brief Implementace tabulky symbolů pomocí hash tabulky
  *  Authors:    @author Jiří Sedlák xsedla2e
- *              @author Martin Kučera xkucer??
+ *              @author Martin Kučera xkucer0s
 */
 
 
@@ -30,6 +30,7 @@ SymTableItemPtr symtable_item_init() {
     item->paramStack = NULL;
     item->isLiteral = false;
     item->definedAtFuncAssign = false;
+    item->isNil = false;
 
     return item;
 }
@@ -72,8 +73,7 @@ SymTableItemPtr symtable_get_function_item(SymTablePtr symtable, char *id) {
     SymTableItemPtr item = symtable[symtable_get_hash(id)]; // Get correct "row"
     while (item && strcmp(item->id, id)) item = item->next; // Find item with the same id
     
-    while (item)
-    {
+    while (item) {
         if (item->isFunction)   return item;
         else    item = item->next;
     }
