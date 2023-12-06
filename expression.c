@@ -198,7 +198,6 @@ bool apply_expression_rule(AnalyzerPtr analyzer, ExpressionStackPtr stack, Token
             expression_stack_pop(stack);
             expression_stack_push(stack, E_END, !(stack->top->type == E_LBRAC));
             gen_stack_push(gen_stack, token_stack->tokens[token_stack->tokens_pos - (bool)(token_stack->top->type != ID)], false);
-            if (EXPR_DEBUG) printf("Done pushing item id: %s\n", item->id);
             return true;
         case E_VALUE:   // Rule E -> VALUE
             expression_stack_pop(stack);

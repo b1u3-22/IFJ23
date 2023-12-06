@@ -424,7 +424,7 @@ void check_typedef(AnalyzerPtr analyzer, TokenStackPtr token_stack_left, GenStac
         data_type = item->type;
     }
 
-    if (data_type == S_DOUBLE || data_type = S_DOUBLEQ) {
+    if (data_type == S_DOUBLE || data_type == S_DOUBLEQ) {
         for(int i = 0; i < token_stack_right->data_pos+1; i++) {
             bool isOperator = token_stack_right->data[i]->op;
             int type = token_stack_right->data[i]->token->type;
