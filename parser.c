@@ -677,7 +677,7 @@ void apply_function(int function, RuleStackPtr rule_stack, TokenPtr token, Token
             check_condition(analyzer, stack_2);
             break;
         case F_G_DEF_VAR:
-            def_var(stack_1->tokens[1]->data, analyzer->depth);
+            def_var(stack_1->tokens[1]->data, analyzer->depth, analyzer->block[analyzer->depth]);
             break;  
         case F_G_SET_VAR:
             if (PARSER_DEBUG) {
