@@ -86,7 +86,7 @@ void expression_get_next_token(TokenStackPtr stack, int end_type, int *type, Tok
         token = token_stack_get(stack); // skip newline characters
     }
 
-    if (EXPR_DEBUG) printf("[EXPR] Token data: %s, Token type: %d\n", token->data, token->type);
+    //if (EXPR_DEBUG) printf("[EXPR] Token data: %s, Token type: %d\n", token->data, token->type);
 
     // Next token is ID and previous is ID or VALUE, we have to decide if we want to continue
     // with expression parsing or not, so we search for = sign which would mark start
@@ -123,7 +123,11 @@ void expression_get_next_token(TokenStackPtr stack, int end_type, int *type, Tok
         }
     }
 
-    if (token->type == ID || token->type == VALUE) token_stack_push(sa_stack, token);
+    if (EXPR_DEBUG) printf("Token type: %d, token data: %s\n", token->type, token->data);
+
+    if (token->type == ID || token->type == VALUE) {
+        token_stack_push(sa_stack, token);
+    }
 
     *type = get_translated_type(token);
 
