@@ -28,34 +28,22 @@ void unget_token(TokenPtr token) {
     }
 }
 
-/* Using the ASCII codes, check whether provided char is a number 0-9.
-    parameters:
-        - char s - the char you want to check
-    return value:
-        - true if s is a number
-        - false if s is not a number
-*/
+void manual_add_newline(TokenPtr token) {
+    token_add_data(token, '\\');
+    token_add_data(token, '0');
+    token_add_data(token, '1');
+    token_add_data(token, '0');
+}
+
+
 static bool is_number(char s) {
     return ((s >= '0') && (s <= '9'));
 }
 
-/* Using the ASCII codes, check whether provided char is a letter A-Z, a-z.
-    parameters:
-        - char s - the char you want to check
-    return value:
-        - true if s is a letter
-        - false if s is not a letter
-*/
 static bool is_letter(char s) {
     return (((s >= 'A') && (s <= 'Z')) || ((s >= 'a') && (s <= 'z')));
 }
 
-/* Check whether provided char is a blank space (space, tab, etc.).
-    parameters:
-        - char s - the char you want to check
-    return value:
-        - true if s is a space
-        - false if s is not a space*/
 static bool is_space(char s) {
     return isspace(s);
 }
@@ -312,10 +300,7 @@ void parse_c_str_nl_e(int c, scanner_states* state, bool* do_not_add, TokenPtr t
         *state = C_STR_E;
         *do_not_add = true;
     } else {
-        token_add_data(token, '\\');
-        token_add_data(token, '0');
-        token_add_data(token, '1');
-        token_add_data(token, '0'); 
+        manual_add_newline(token);
         ungetc(c, stdin);
         *state = C_STR_IN;
         *do_not_add = true;
@@ -386,10 +371,7 @@ void parse_slash_in_str(int c, scanner_states* state, bool* end, bool* do_not_ad
             token_add_data(token, '2');
             break;
         case 'n':
-            token_add_data(token, '\\');
-            token_add_data(token, '0');
-            token_add_data(token, '1');
-            token_add_data(token, '0');
+            manual_add_newline(token);      
             break;
         case 't':
             token_add_data(token, '\\');
@@ -462,6 +444,8 @@ int hex_to_dec(char u, bool second) {
     } 
     return p;
 }
+
+
 
 
 void get_token_type(scanner_states state, char c, TokenPtr token) {
@@ -562,8 +546,6 @@ void get_token_type(scanner_states state, char c, TokenPtr token) {
         }
     }
 }
-
-
 
 
 
@@ -696,20 +678,14 @@ void get_next_token(TokenPtr token) {
             case C_STR_E:
                 parse_c_str_e(c, &state, &do_not_add, &manual_add);
                 if (manual_add) {
-                    token_add_data(token, '\\');
-                    token_add_data(token, '0');
-                    token_add_data(token, '1');
-                    token_add_data(token, '0');
+                    manual_add_newline(token);
                     token_add_data(token, '\"');
                 }
                 break;
             case C_STR_EE:
                 parse_c_str_ee(c, &state, &true_end, &do_not_add, &manual_add);
                 if (manual_add) {
-                    token_add_data(token, '\\');
-                    token_add_data(token, '0');
-                    token_add_data(token, '1');
-                    token_add_data(token, '0');
+                    manual_add_newline(token);
                     token_add_data(token, '\"');
                     token_add_data(token, '\"');
                 }
