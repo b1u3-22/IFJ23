@@ -96,10 +96,12 @@ enum Function {
     F_G_DEF_VAR,    // Generate variable definition
     F_G_SET_VAR,    // Generate variable assigment
     F_G_PUSH,       // Push value into generator stack
+    F_G_IF_N,       // Generate condition for if let ID
     F_G_IF_S,       // Generate start of if
     F_G_IF_EL,      // Generate end of if, start of else
     F_G_IF_E,       // Generate end of else
     F_G_W_S,        // Generate start of while
+    F_G_W_C,        // Generate condition check for while
     F_G_W_E,        // Generate end of while
     F_G_FUN_S,      // Generate start of function definition
     F_G_FUN_P,      // Generate function parameter
