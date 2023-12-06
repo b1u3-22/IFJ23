@@ -108,13 +108,7 @@ void decrease_depth(AnalyzerPtr analyzer);
 */
 int check_is_not_defined(AnalyzerPtr analyzer, TokenStackPtr token_stack);
 
-/** Checks if variables have compatible data types
- *  @param analyzer AnalyzerPtr to work with
- *  @param data_type int defining data type
- *  @param token_stack TokenStackPtr containing variables
- *  @returns int 1 if any variable has not compatible data type 0 otherwise
-*/
-int check_error_7_8(AnalyzerPtr analyzer, int data_type, TokenStackPtr token_stack);
+int check_data_type(AnalyzerPtr analyzer, TokenPtr token, int data_type);
 
 /** Finds closest item to current depth and block
  *  @param analyzer AnalyzerPtr to work with
@@ -128,3 +122,7 @@ SymTableItemPtr get_nearest_item(AnalyzerPtr analyzer, char* id);
  *  @returns int error code if semantic errors 0 otherwise
 */
 int check_undefined_functions(AnalyzerPtr analyzer);
+
+int check_redefinition(AnalyzerPtr analyzer, SymTableItemPtr item);
+
+SymTableItemPtr create_new_variable_item(AnalyzerPtr analyzer, TokenPtr let_var_token, TokenPtr id_token, TokenPtr data_type_token);
